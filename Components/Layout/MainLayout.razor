@@ -1,0 +1,158 @@
+@inherits LayoutComponentBase
+@inject CookieThemeService CookieThemeService
+@inject ThemeService ThemeService
+<RadzenComponents />
+
+<RadzenLayout style="grid-template-areas: 'rz-header rz-header' 'rz-body rz-body';">
+    <RadzenHeader class="rz-px-2">
+        <RadzenRow class="rz-w-100 rz-mx-auto rz-px-6 rz-py-6" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.Center" Gap="0" RowGap="1rem" >
+            <RadzenColumn Size="12">
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" Wrap="Radzen.FlexWrap.Wrap" JustifyContent="Radzen.JustifyContent.SpaceBetween" class="rz-align-items-start rz-align-items-md-center">
+                    <RadzenLink style="height: var(--rz-input-height);" class="rz-display-flex rz-align-items-center">
+                   <div class="logo-container">
+                            <svg width="150" height="50" viewBox="0 0 300 100" xmlns="http://www.w3.org/2000/svg">
+                                <text x="0" y="70" font-family="Special Gothic Expanded One, sans-serif" font-size="64" font-weight="bold">
+                                    <tspan fill="#1B5E20">Kon</tspan>
+                                    <tspan dx="-16" fill="#000000">XPro</tspan>
+                                </text>
+                            </svg>
+                        </div>
+               </RadzenLink>
+
+
+                    <RadzenMenu>
+                        <RadzenMenuItem Text="Home" class="rz-px-2" Path=""></RadzenMenuItem>
+@*                         <RadzenMenuItem Text="Properties" class="rz-px-2">
+                            <RadzenMenuItem Text="Buy" Path="properties"></RadzenMenuItem>
+                            <RadzenMenuItem Text="Rent" Path="properties"></RadzenMenuItem>
+                        </RadzenMenuItem> *@
+                        <RadzenMenuItem Text="Tiers" class="rz-px-2">
+                            <RadzenMenuItem Text="Free" Path="freetier"></RadzenMenuItem>
+                            <RadzenMenuItem Text="Basic" Path="basictier"></RadzenMenuItem>
+                            <RadzenMenuItem Text="Mid" Path="midtier"></RadzenMenuItem>
+                            <RadzenMenuItem Text="High" Path="hightier"></RadzenMenuItem>
+                        </RadzenMenuItem>
+@*                         <RadzenMenuItem Text="Agents" class="rz-px-2" Path="agents"></RadzenMenuItem>
+                        <RadzenMenuItem Text="About us" class="rz-px-2" Path="about-us"></RadzenMenuItem>
+                        <RadzenMenuItem Text="Contact us" class="rz-px-2" Path="contact-us" /> *@
+                    </RadzenMenu>
+                    <div class="rz-display-none rz-display-lg-block">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.End" Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="1rem">
+@*                             <RadzenAppearanceToggle />
+                            Select theme:
+                            <RadzenDropDown Name="ThemeDropDown" TValue="string" Value="@ThemeService.Theme" ValueChanged="@(t => ThemeService.SetTheme(t))" Data="@Themes.All" TextProperty=@nameof(Theme.Text) ValueProperty=@nameof(Theme.Value)>
+                                
+                            </RadzenDropDown> *@
+                            <RadzenButton Icon="login" ButtonStyle="ButtonStyle.Primary" Text="Login" class="rz-p-1 rz-m-1 rz-border-radius-2" Size="Radzen.ButtonSize.Large" Style="width: 116px" Shade="Radzen.Shade.Dark" />
+                        </RadzenStack>
+                    </div>
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenHeader>
+    <RadzenBody class="rz-p-0 rz-m-0 rz-border-radius-0" Style="--rz-layout-body-background-color: transparent;">
+        <RadzenStack Gap="0">
+                @Body
+        </RadzenStack>
+        <RadzenRow class="rz-background-color-primary-dark">
+            <RadzenColumn Size="12">
+                <RadzenRow class="rz-w-100 rz-mx-auto rz-background-color-primary-dark" Style="max-width: 1440px">
+                    <RadzenColumn Size="12" Style="height: fit-content" class="rz-p-8 rz-p-sm-12">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Center" Gap="0" class="rz-my-6 rz-my-sm-12">
+                            <RadzenText Text="Newsletter" TextStyle="Radzen.Blazor.TextStyle.Overline" TextAlign="Radzen.TextAlign.Center" class="rz-color-on-primary-dark" Style="font-size: 1rem" />
+                            <RadzenText Text="Stay in the Loop!" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" TextAlign="Radzen.TextAlign.Center" Style="max-width: 800px" class="rz-color-white" />
+                            <RadzenText Text="Subscribe to our newsletter for the latest updates, exclusive deals, and insider content — delivered straight to your inbox!" TextStyle="Radzen.Blazor.TextStyle.H5" TextAlign="Radzen.TextAlign.Center" TagName="Radzen.Blazor.TagName.P" Style="max-width: 800px; line-height: 1.5" class="rz-color-white rz-display-none rz-display-sm-block" />
+                            <RadzenTemplateForm TItem="dynamic" class="rz-w-100">
+                                <RadzenStack AlignItems="Radzen.AlignItems.Center" class="rz-mt-8" Gap="0.5rem">
+                                    <RadzenCard Style="--rz-card-padding: 0.5rem; border-radius: calc(var(--rz-button-border-radius) + var(--rz-card-padding)); max-width: 500px; border-color: var(--rz-primary); " class="rz-w-100" Variant="Radzen.Variant.Outlined">
+                                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                                            <RadzenTextBox Name="NewsletterEmail" Placeholder="Enter your email" Style=" border-radius: var(--rz-button-border-radius); flex:1; --rz-input-background-color: var(--rz-base-lighter); color: var(--rz-on-base-lighter); --rz-input-placeholder-color: var(--rz-on-base-lighter); " />
+                                            <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Subscribe" Variant="Variant.Flat" />
+                                        </RadzenStack>
+                                    </RadzenCard>
+                                    <RadzenRequiredValidator Component="NewsletterEmail" Text="* Email is required." Style="--rz-form-error-color: var(--rz-white)"/>
+                                    <RadzenEmailValidator Component="NewsletterEmail" Text="* Provide a valid email address." Style="--rz-form-error-color: var(--rz-white)"/>
+                                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0 rz-color-white">
+                                        No spam, just great content. Read our <RadzenLink Text="Privacy Policy" Style="color: var(--rz-info-light);" Path="privacy-policy"></RadzenLink> to learn more.
+                                    </RadzenText>
+                                </RadzenStack>
+                            </RadzenTemplateForm>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+        <section class="rz-background-color-base-darker rz-color-on-base-darker rz-w-100 rz-p-2 rz-py-md-12" Style="min-height: 400px">
+            <RadzenRow RowGap="3rem" Gap="1rem" Style="max-width: 1440px;" class="rz-w-100 rz-mx-auto rz-p-6">
+                <RadzenColumn Size="12" SizeXS="6" SizeLG="4">
+                    <RadzenStack AlignItems="Radzen.AlignItems.Start" class="rz-h-100" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Start">
+                            <svg fill="none" viewBox="0 0 311 37" width="150" xmlns="http://www.w3.org/2000/svg"><g fill="currentColor"><path d="m287.41 32.25v3.75h23.341v-3.75z"/><path d="m287.41 16.6364v3.75h23.341v-3.75z"/><path d="m287.41 1.09094v3.75h23.341v-3.75z"/><path d="m245.105 4.84094v-3.75h26.182v3.75h-10.977v31.15906h-4.227v-31.15906z"/><path d="m210.487 36h-4.432l12.818-34.90906h4.364l12.818 34.90906h-4.432l-10.431-29.38633h-.273z"/><path d="m170.828 4.84094v-3.75h26.181v3.75h-10.977v31.15906h-4.227v-31.15906z"/><path d="m127.605 36v-34.90906h4.228v15.54546h18.613v-15.54546h4.228v34.90906h-4.228v-15.6136h-18.613v15.6136z"/><path d="m106.487 9.81819c-.205-1.72727-1.034-3.06818-2.489-4.02272-1.454-.95455-3.238-1.43182-5.352-1.43182-1.5455 0-2.8977.25-4.0568.75-1.1477.5-2.0455 1.1875-2.6932 2.0625-.6364.875-.9545 1.86931-.9545 2.98295 0 .9318.2215 1.733.6647 2.4034.4546.6591 1.0341 1.2102 1.7387 1.6534.7045.4318 1.4431.7898 2.2159 1.0739.7727.2727 1.4829.4943 2.1307.6648l3.5455.9545c.909.2386 1.92.5682 3.034.9886 1.125.4205 2.199.9944 3.222 1.7216 1.034.7159 1.886 1.6364 2.556 2.7614.671 1.125 1.006 2.5057 1.006 4.142 0 1.8864-.494 3.5909-1.483 5.1137-.977 1.5227-2.409 2.7329-4.295 3.6307-1.875.8977-4.154 1.3465-6.8355 1.3465-2.5 0-4.6648-.4034-6.4944-1.2102-1.8181-.8068-3.25-1.9318-4.2954-3.375-1.0341-1.4432-1.6193-3.1193-1.7557-5.0284h4.3636c.1137 1.3182.5569 2.4091 1.3296 3.2727.7841.8523 1.7727 1.4887 2.9659 1.9091 1.2045.4091 2.5.6137 3.8864.6137 1.6135 0 3.0625-.2614 4.3465-.7841 1.284-.5341 2.301-1.2728 3.051-2.2159.75-.9546 1.125-2.0682 1.125-3.3409 0-1.1591-.324-2.1023-.971-2.8296-.648-.7273-1.5-1.3182-2.557-1.7727-1.057-.4546-2.199-.8523-3.426-1.1932l-4.2958-1.2273c-2.7273-.7841-4.8864-1.9034-6.4773-3.3579-1.5909-1.4546-2.3864-3.358-2.3864-5.7103 0-1.9545.5284-3.65904 1.5853-5.11359 1.0681-1.46591 2.5-2.60227 4.2954-3.40909 1.8068-.81818 3.8239-1.227273 6.0512-1.227273 2.2496 0 4.2496.403413 5.9996 1.210223 1.75.79546 3.137 1.88637 4.159 3.27273 1.035 1.38637 1.58 2.96023 1.637 4.72159z"/><path d="m46.7902 36h-4.4318l12.8182-34.90906h4.3636l12.8182 34.90906h-4.4318l-10.4318-29.38633h-.2728z"/><path d="m.227051 36v-34.90906h4.227269v15.54546h18.61368v-15.54546h4.2272v34.90906h-4.2272v-15.6136h-18.61368v15.6136z"/></g></svg>
+                            <RadzenText Text="It's easier than you think." TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-text-tertiary-color" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.Center" Gap="2rem" Wrap="Radzen.FlexWrap.Wrap">
+                            <RadzenLink Path="http://www.facebook.com" Target="_blank" class="rz-color-on-base-darker">
+                                <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 24px; height: 24px"><clipPath id="a"><path d="m0 0h48v48h-48z"/></clipPath><g clip-path="url(#a)"><path d="m24 0c-13.2547 0-24 10.7453-24 24 0 11.255 7.74912 20.6995 18.2026 23.2934v-15.959h-4.9488v-7.3344h4.9488v-3.1603c0-8.1687 3.6969-11.9549 11.7168-11.9549 1.5206 0 4.1443.29856 5.2176.59616v6.64804c-.5664-.0596-1.5504-.0893-2.7725-.0893-3.9351 0-5.4557 1.4909-5.4557 5.3664v2.5939h7.8394l-1.3469 7.3344h-6.4925v16.4899c11.8838-1.4352 21.0922-11.5536 21.0922-23.8243-.001-13.2547-10.7463-24-24.001-24z" fill="currentColor"/></g></svg>
+                            </RadzenLink>
+                            <RadzenLink Path="http://www.x.com" Target="_blank" class="rz-color-on-base-darker">
+                                <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px"><path d="m36.6526 3.8078h6.7469l-14.7401 16.847 17.3406 22.9249h-13.5775l-10.6344-13.9038-12.16821 13.9038h-6.75103l15.76604-18.0197-16.6349-21.7522h13.9222l9.6126 12.7087zm-2.368 35.7336h3.7386l-24.1324-31.90734h-4.01188z" fill="currentColor"/></svg>
+                            </RadzenLink>
+                            <RadzenLink Path="http://www.youtube.com" Target="_blank" class="rz-color-on-base-darker">
+                                <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg" style="width: 24px; height: 24px"><path d="m47.5219 14.4001s-.4688-3.3094-1.9125-4.7625c-1.8282-1.9125-3.8719-1.92188-4.8094-2.03438-6.7125-.4875-16.7906-.4875-16.7906-.4875h-.0188s-10.0781 0-16.7906.4875c-.9375.1125-2.98125.12188-4.80938 2.03438-1.443745 1.4531-1.90312 4.7625-1.90312 4.7625s-.4875 3.8906-.4875 7.7719v3.6375c0 3.8812.478125 7.7718.478125 7.7718s.46875 3.3094 1.903125 4.7625c1.82812 1.9125 4.22813 1.8469 5.29688 2.0532 3.84377.3656 16.32187.4781 16.32187.4781s10.0875-.0188 16.8-.4969c.9375-.1125 2.9812-.1219 4.8094-2.0344 1.4437-1.4531 1.9125-4.7625 1.9125-4.7625s.4781-3.8812.4781-7.7718v-3.6375c0-3.8813-.4781-7.7719-.4781-7.7719zm-28.4813 15.825v-13.4906l12.9656 6.7687z" fill="currentColor"/></svg>
+                            </RadzenLink>
+                            <RadzenLink Path="http://www.linkedin.com" Target="_blank" class="rz-color-on-base-darker">
+                                <svg fill="none" height="48" viewBox="0 0 48 48" width="48" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 24px; height: 24px"><clipPath id="a"><path d="m0 0h48v48h-48z"/></clipPath><g clip-path="url(#a)"><path d="m44.4469 0h-40.90315c-1.95938 0-3.54375 1.54688-3.54375 3.45938v41.07182c0 1.9125 1.58437 3.4688 3.54375 3.4688h40.90315c1.9593 0 3.5531-1.5562 3.5531-3.4594v-41.08122c0-1.9125-1.5938-3.45938-3.5531-3.45938zm-30.2063 40.9031h-7.12497v-22.9125h7.12497zm-3.5625-26.0343c-2.28748 0-4.13435-1.8469-4.13435-4.1251 0-2.27808 1.84687-4.12495 4.13435-4.12495 2.2782 0 4.125 1.84687 4.125 4.12495 0 2.2688-1.8468 4.1251-4.125 4.1251zm30.225 26.0343h-7.1156v-11.1375c0-2.6531-.0469-6.075-3.7031-6.075-3.7032 0-4.2657 2.8969-4.2657 5.8875v11.325h-7.1062v-22.9125h6.825v3.1313h.0937c.9469-1.8 3.2719-3.7031 6.7313-3.7031 7.2094 0 8.5406 4.7437 8.5406 10.9125z" fill="currentColor"/></g></svg>
+                            </RadzenLink>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeLG="8" SizeXL="6" OffsetXL="2">
+                    <RadzenRow Gap="1rem" RowGap="3rem">
+                        <RadzenColumn Size="12" SizeXS="3">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Start" Gap="1rem">
+                            <RadzenText Text="Quick links" class="rz-color-on-base-darker" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                            <RadzenLink Text="Buy" Path="properties" class="rz-text-tertiary-color" />
+                            <RadzenLink Text="Rent" Path="properties" class="rz-text-tertiary-color" />
+                            <RadzenLink Text="About us" Path="about-us" class="rz-text-tertiary-color" />
+                            <RadzenLink Text="Contact us" Path="contact-us" class="rz-text-tertiary-color" />
+                        </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeXS="3">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Start" Gap="1rem">
+                            <RadzenText Text="Legal" class="rz-color-on-base-darker" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                            <RadzenLink Text="Privacy policy" Path="privacy-policy" class="rz-text-tertiary-color" />
+                            <RadzenLink Text="Terms of use" Path="terms-of-use" class="rz-text-tertiary-color" />
+                        </RadzenStack>
+                        </RadzenColumn>
+                        <RadzenColumn Size="12" SizeXS="6">
+                            <RadzenStack AlignItems="Radzen.AlignItems.Start" Gap="1rem">
+                                <RadzenText Text="Get in touch" class="rz-color-on-base-darker" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                                <RadzenStack Gap="1rem">
+                                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                                    <RadzenIcon Icon="location_on"></RadzenIcon>
+                                    <RadzenText Text="1234 Elm Street, Suite 567, Metropolis, NY 10001" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color rz-m-0" />
+                                    </RadzenStack>
+                                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                                    <RadzenIcon Icon="call"></RadzenIcon>
+                                    <RadzenText Text="+1 (555) 123-4567" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color rz-m-0" />
+                                    </RadzenStack>
+                                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                                    <RadzenIcon Icon="mail"></RadzenIcon>
+                                    <RadzenText Text="ContactAtCompanyName.com" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color rz-m-0" />
+                                    </RadzenStack>
+                                </RadzenStack>
+                            </RadzenStack>
+                        </RadzenColumn>
+                    </RadzenRow>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenRow class="rz-border-top rz-border-color-base-800 rz-w-100 rz-mx-auto rz-mt-12 rz-p-6" Style="max-width: 1440px;">
+                <RadzenColumn Size="12" Style="height: fit-content">
+                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0 rz-text-tertiary-color" >
+                    Copyright &copy; 2030, Company Name Inc. All rights reserved.
+                </RadzenText>
+                </RadzenColumn>
+            </RadzenRow>
+        </section>
+    </RadzenBody>
+</RadzenLayout>

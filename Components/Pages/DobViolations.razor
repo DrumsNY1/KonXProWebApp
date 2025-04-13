@@ -1,0 +1,207 @@
+@page "/dob-violations"
+
+<PageTitle>DobViolations</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="DobViolations" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+                <RadzenButton Icon="add_circle_outline" Text="Add" Click="@AddButtonClick" Variant="Variant.Flat" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=6>
+     <RadzenCard style="height: 100%">
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@(dobViolations)" TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" RowSelect="@EditRow">
+            <Columns>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Id" Title="Id">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="IsnDobBisViol" Title="Isn Dob Bis Viol">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Boro" Title="Boro">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Bin" Title="Bin">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Block" Title="Block">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Lot" Title="Lot">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="IssueDate" Title="Issue Date">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="ViolationTypeCode" Title="Violation Type Code">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="ViolationNumber" Title="Violation Number">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="HouseNumber" Title="House Number">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Street" Title="Street">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Description" Title="Description">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="Number" Title="Number">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="ViolationCategory" Title="Violation Category">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Property="ViolationType" Title="Violation Type">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Filterable="false" Sortable="false" Width="70px" TextAlign="TextAlign.Center">
+                    <Template Context="dobViolation">
+
+                        <RadzenButton ButtonStyle="ButtonStyle.Danger" Icon="delete" Size="ButtonSize.Medium"
+                            Shade="Shade.Lighter" Variant="Variant.Flat"
+                            Click=@(args => GridDeleteButtonClick(args, dobViolation)) @onclick:stopPropagation="true" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+    </RadzenCard>
+
+    </RadzenColumn>
+        <RadzenColumn SizeMD=6>
+        <RadzenCard style="height: 100%;margin-top:0px;">
+            <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save DobViolation</RadzenAlert>
+            <RadzenTemplateForm TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation" Data="@(dobViolation)" Visible="@(dobViolation != null)" Submit="@FormSubmit">
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Isn Dob Bis Viol" Component="IsnDobBisViol" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.IsnDobBisViol)" Name="IsnDobBisViol" />
+                        <RadzenRequiredValidator Component="IsnDobBisViol" Text="IsnDobBisViol is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Boro" Component="Boro" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenNumeric style="display: block; width: 100%" @bind-Value="@(dobViolation.Boro)" Name="Boro" />
+                        <RadzenRequiredValidator Component="Boro" Text="Boro is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Bin" Component="Bin" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.Bin)" Name="Bin" />
+                        <RadzenRequiredValidator Component="Bin" Text="Bin is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Block" Component="Block" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.Block)" Name="Block" />
+                        <RadzenRequiredValidator Component="Block" Text="Block is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Lot" Component="Lot" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.Lot)" Name="Lot" />
+                        <RadzenRequiredValidator Component="Lot" Text="Lot is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Issue Date" Component="IssueDate" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenDatePicker DateFormat="MM/dd/yyyy" style="display: block; width: 100%" @bind-Value="@(dobViolation.IssueDate)" Name="IssueDate" />
+                        <RadzenRequiredValidator Component="IssueDate" Text="IssueDate is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Violation Type Code" Component="ViolationTypeCode" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.ViolationTypeCode)" Name="ViolationTypeCode" />
+                        <RadzenRequiredValidator Component="ViolationTypeCode" Text="ViolationTypeCode is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Violation Number" Component="ViolationNumber" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.ViolationNumber)" Name="ViolationNumber" />
+                        <RadzenRequiredValidator Component="ViolationNumber" Text="ViolationNumber is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="House Number" Component="HouseNumber" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.HouseNumber)" Name="HouseNumber" />
+                        <RadzenRequiredValidator Component="HouseNumber" Text="HouseNumber is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Street" Component="Street" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.Street)" Name="Street" />
+                        <RadzenRequiredValidator Component="Street" Text="Street is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Description" Component="Description" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.Description)" Name="Description" />
+                        <RadzenRequiredValidator Component="Description" Text="Description is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Number" Component="Number" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.Number)" Name="Number" />
+                        <RadzenRequiredValidator Component="Number" Text="Number is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Violation Category" Component="ViolationCategory" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.ViolationCategory)" Name="ViolationCategory" />
+                        <RadzenRequiredValidator Component="ViolationCategory" Text="ViolationCategory is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Violation Type" Component="ViolationType" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobViolation.ViolationType)" Name="ViolationType" />
+                        <RadzenRequiredValidator Component="ViolationType" Text="ViolationType is required" />
+                    </RadzenColumn>
+                </RadzenRow>
+              <RadzenStack  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" Visible=false />
+              </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenCard>
+        </RadzenColumn>  </RadzenRow>
+</RadzenStack>

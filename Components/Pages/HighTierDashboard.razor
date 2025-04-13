@@ -1,0 +1,45 @@
+@page "/HighTierDashboard"  
+
+@inject HttpClient HttpClient  
+
+<PageTitle>High Tier Dashboard</PageTitle>  
+
+<RadzenRow Style="max-width: 1440px" class="rz-mx-auto rz-px-4 rz-py-4">  
+   @if (highTierItems == null)  
+   {  
+       <RadzenProgressBar Mode="Radzen.ProgressBarMode.Indeterminate" class="rz-w-100" />  
+   }  
+   else  
+   {  
+       @foreach (var item in highTierItems)  
+       {  
+           <RadzenColumn Size="12" SizeSM="6" SizeLG="3" class="rz-p-2">  
+               <RadzenCard class="rz-h-100 rz-shadow-md rz-border">  
+                   <RadzenStack Orientation="Radzen.Orientation.Vertical" Gap="0.5rem" class="rz-p-4">  
+                       <RadzenText Text="@item.Title" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0" />  
+                       <RadzenText Text="@item.Description" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />  
+                       <RadzenText Text="Price: @item.Price" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />  
+                       <RadzenText Text="Location: @item.Location" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0 rz-text-tertiary-color" />  
+                   </RadzenStack>  
+               </RadzenCard>  
+           </RadzenColumn>  
+       }  
+   }  
+</RadzenRow>  
+
+@code {  
+   private List<HighTierItem> highTierItems;  
+
+   protected override async Task OnInitializedAsync()  
+   {  
+       highTierItems = await HttpClient.GetFromJsonAsync<List<HighTierItem>>("api/vwHighTierDashboard");  
+   }  
+
+   public class HighTierItem  
+   {  
+       public string Title { get; set; }  
+       public string Description { get; set; }  
+       public decimal Price { get; set; }  
+       public string Location { get; set; }  
+   }  
+}

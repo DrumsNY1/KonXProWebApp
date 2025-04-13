@@ -1,0 +1,107 @@
+@page "/contact-us"
+
+<PageTitle>Contact Us</PageTitle>
+
+<RadzenRow class="rz-w-100 rz-mx-auto rz-my-4 rz-my-md-12" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center">
+    <RadzenColumn Size="12" class="rz-px-8 rz-px-md-6">
+        <RadzenText Text="Contact us" TextStyle="Radzen.Blazor.TextStyle.DisplayH1" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow class="rz-background-color-white rz-color-on-base-lighter rz-my-0 rz-my-md-12 rz-py-0 rz-py-md-12 rz-px-2">
+<RadzenColumn Size="12">
+    <RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px">
+    <RadzenColumn Size="12" SizeSM="6" class="rz-p-6">
+        <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
+            <RadzenText Text="Our contact details" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-mb-4 rz-mb-md-8 rz-color-on-base-lighter" />
+            <RadzenStack Gap="1rem">
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                <RadzenIcon Icon="location_on"></RadzenIcon>
+                <RadzenText Text="1234 Elm Street, Suite 567, Metropolis, NY 10001" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-m-0" />
+                </RadzenStack>
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                <RadzenIcon Icon="call"></RadzenIcon>
+                <RadzenText Text="+1 (555) 123-4567" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-m-0" />
+                </RadzenStack>
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                <RadzenIcon Icon="mail"></RadzenIcon>
+                <RadzenText Text="ContactAtCompanyName.com" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-m-0" />
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenText Text="Visit us" TextStyle="Radzen.Blazor.TextStyle.DisplayH4" Style="max-width: 800px" class="rz-color-on-base-lighter rz-mt-6 rz-mt-md-12 rz-mb-4 rz-mb-md-8" />
+            <RadzenStack Gap="1rem">
+                <RadzenText Text="Our office is open for consultations and property viewings:" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
+                <RadzenText Text="Monday - Friday: 9:00 AM - 6:00 PM" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
+                <RadzenText Text="Saturday: 10:00 AM - 4:00 PM" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
+                <RadzenText Text="Sunday: Closed" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
+                <RadzenText Text="Schedule an appointment to speak with one of our real estate experts!" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" Style="font-style: italic" />
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeSM="6" class="rz-p-6 rz-p-sm-0">
+        <RadzenGoogleMap class="rz-w-100" Style="min-height: 400px"></RadzenGoogleMap>
+    </RadzenColumn>
+    </RadzenRow>
+</RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px;">
+    <RadzenColumn Size="12" SizeMD="6" Offset="0" OffsetMD="3" class="rz-px-8 rz-py-6 rz-px-md-6">
+        <RadzenStack Gap="1rem" JustifyContent="Radzen.JustifyContent.Center" class="rz-mx-auto" Style="max-width: 600px">  
+            <RadzenText Text="Send us a message" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" TextAlign="Radzen.TextAlign.Center" />
+            <RadzenText Text="Fill out the form below, and we’ll get back to you shortly." TextStyle="Radzen.Blazor.TextStyle.H5" Style="max-width: 800px" TextAlign="Radzen.TextAlign.Center" />
+            <RadzenTemplateForm TItem="dynamic">
+                <RadzenStack>
+                <RadzenFormField Text="Name">
+                    <ChildContent>
+                    <RadzenTextBox Name="Name" />
+                    </ChildContent>
+                    <Helper>
+                    <RadzenRequiredValidator Component="Name" Text="Name is required." />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="Email">
+                    <ChildContent>
+                    <RadzenTextBox Name="Email" />
+                    </ChildContent>
+                    <Helper>
+                    <RadzenRequiredValidator Component="Email" Text="Email is required." />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="Message">
+                    <ChildContent>
+                    <RadzenTextArea Name="Message" Rows="10" />
+                    </ChildContent>
+                    <Helper>
+                    <RadzenRequiredValidator Component="Message" Text="Message is required." />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="send" Text="Submit" Variant="Variant.Flat" Size="Radzen.ButtonSize.Large" class="rz-w-100" />
+                </RadzenStack>
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow class="rz-mt-6 rz-my-md-12">
+    <RadzenColumn Size="12" class="rz-mt-6 rz-my-md-12">
+        <RadzenRow class="rz-background-color-white rz-color-on-base-lighter rz-mt-6 rz-my-md-12 rz-px-2">
+            <RadzenColumn Size="12">
+                <RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenColumn Size="12" SizeMD="5" class="rz-p-6">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
+                            <RadzenText Text="We’d love to hear from you!" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-color-on-base-lighter rz-mb-4 rz-mb-md-8" />
+                            <RadzenText Text="Whether you’re looking to buy, sell, rent, or simply have questions about the real estate market, our team is here to help." TextStyle="Radzen.Blazor.TextStyle.H5" TagName="Radzen.Blazor.TagName.P" Style="line-height: 1.5; max-width: 800px" class="rz-color-on-base-lighter" />
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" Wrap="Radzen.FlexWrap.Wrap" class="rz-mt-2 rz-mt-sm-12">
+                                <RadzenLink Text="Call us now!" class="rz-button rz-button-lg rz-variant-flat rz-text-align-center rz-primary rz-shade-default" Style="--rz-link-hover-text-decoration: none" Path="" />
+                            </RadzenStack>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="6" OffsetMD="1" class="rz-display-none rz-display-md-block">
+                        <RadzenImage Path="images/contact-us-pexels-thanhhoa-tran-640546-1488297.jpg" Style="margin-bottom: -3em; margin-top: -3em; border-radius: var(--rz-card-border-radius)" class="rz-w-100"></RadzenImage>
+                    </RadzenColumn>
+                </RadzenRow>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+</RadzenRow>

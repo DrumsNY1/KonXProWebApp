@@ -1,0 +1,185 @@
+@page "/about-us"
+
+<PageTitle>About Us</PageTitle>
+
+
+<RadzenRow class="rz-w-100 rz-mx-auto rz-my-4 rz-my-md-12" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center">
+    <RadzenColumn Size="12" class="rz-px-8 rz-px-md-6">
+        <RadzenText Text="About us" TextStyle="Radzen.Blazor.TextStyle.DisplayH1" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow class="rz-background-color-white rz-color-on-base-lighter rz-my-0 rz-my-md-12 rz-px-2">
+    <RadzenColumn Size="12">
+        <RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="5" class="rz-p-6">
+                <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
+                    <RadzenText Text="Who we are" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-color-on-base-lighter rz-mb-4 rz-mb-md-8" />
+                    <RadzenText Text="With years of experience in the real estate industry, we have helped countless clients buy, sell, and rent properties with ease and confidence. Our team of dedicated professionals is committed to providing personalized service, expert advice, and a seamless real estate experience." TextStyle="Radzen.Blazor.TextStyle.H5" TagName="Radzen.Blazor.TagName.P" Style="line-height: 1.5; max-width: 800px" class="rz-color-on-base-lighter" />
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6" OffsetMD="1" class="rz-display-none rz-display-md-block">
+                <RadzenImage Path="images/about-us-pexels-ono-kosuki-5999874.jpg" Style="margin-bottom: -3em; margin-top: -3em; border-radius: var(--rz-card-border-radius)" class="rz-w-100"></RadzenImage>
+            </RadzenColumn>
+        </RadzenRow>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow Gap="1rem" Style="max-width: 1440px" class="rz-w-100 rz-mx-auto rz-my-6 rz-my-md-12 rz-pt-md-12">
+    <RadzenColumn Size="12" SizeSM="6" class="rz-px-8 rz-py-6 rz-px-md-6">
+        <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
+            <RadzenText Text="Why choose us?" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-mb-4 rz-mb-md-8" />
+            <RadzenStack Gap="1rem">
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="real_estate_agent" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Extensive listings" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="We offer a wide range of properties to suit every need and budget." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="handshake" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Trusted experts" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="Our experienced agents provide top-tier guidance and market insights." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="distance" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Prime locations" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="Access the best real estate opportunities in sought-after areas." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="person_celebrate" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Personalized approach" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="We take the time to understand your unique needs and goals." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeSM="6" class="rz-px-8 rz-py-6 rz-px-md-6">
+        <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
+            <RadzenText Text="Our values" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-mb-4 rz-mb-md-8" />
+            <RadzenStack Gap="1rem">
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="manufacturing" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Integrity" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="We believe in honesty, transparency, and ethical business practices." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="trophy" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Excellence" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="We aim to exceed client expectations through exceptional service." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="family_star" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Customer-centric approach" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="Your satisfaction is at the heart of everything we do." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                <RadzenCard Variant="Radzen.Variant.Outlined">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                        <RadzenIcon Icon="lightbulb" class="rz-background-color-primary-light rz-color-on-primary-light rz-border-radius-10" Style="font-size: 32px; min-height: 56px; min-width: 56px" />
+                        <RadzenStack Gap="0">
+                            <RadzenText Text="Innovation" TextStyle="Radzen.Blazor.TextStyle.H6" TagName="Radzen.Blazor.TagName.H4" class="rz-mb-1" />
+                            <RadzenText Text="We embrace cutting-edge solutions to streamline the real estate process." TagName="Radzen.Blazor.TagName.P" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+
+<RadzenRow Gap="1rem" Style="max-width: 1440px" class="rz-w-100 rz-mx-auto rz-my-6 ">
+    <RadzenColumn Size="12" class="rz-p-6 rz-px-8 rz-px-md-6">
+        <RadzenText Text="Meet the team" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-m-0" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow class="rz-w-100 rz-mx-auto rz-px-8 rz-p-md-6" Gap="0" RowGap="0" Style="max-width: 1440px">
+    <RadzenColumn Size="6" SizeMD="3" class="rz-p-2 rz-p-md-6">
+        <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-overflow-hidden rz-background-color-base-lighter">
+            <RadzenImage Path="images/pexels-linkedin-2182970.jpg" class="rz-w-100"></RadzenImage>
+            <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+            <RadzenText Text="John Carter" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-color-on-base-lighter" />
+            <RadzenText Text="Senior Real Estate Advisor" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-color-on-base-lighter" />
+            <RadzenText Text="With over 15 years of experience in the real estate industry, John specializes in luxury homes and commercial properties. His in-depth market knowledge and negotiation skills ensure clients get the best deals." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-color-on-base-lighter rz-display-none rz-display-md-block" />
+            <RadzenLink Path="agent-details" Text="Learn more ..." />
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+    <RadzenColumn Size="6" SizeMD="3" class="rz-p-2 rz-p-md-6 rz-pt-md-12">
+        <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-mt-md-12 rz-overflow-hidden rz-background-color-base-lighter">
+            <RadzenImage Path="images/pexels-linkedin-3867839.jpg" class="rz-w-100"></RadzenImage>
+            <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+                <RadzenText Text="Emily Dawson" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-color-on-base-lighter" />
+                <RadzenText Text="Residential Property Expert" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-color-on-base-lighter" />
+                <RadzenText Text="Emily is passionate about helping families find their dream homes. Her personalized approach and commitment to customer satisfaction make the buying and selling process stress-free." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-color-on-base-lighter rz-display-none rz-display-md-block" />
+                <RadzenLink Path="agent-details" Text="Learn more ..." />
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+
+<RadzenColumn Size="6" SizeMD="3" class="rz-p-2 rz-p-md-6">
+        <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-overflow-hidden rz-background-color-base-lighter">
+            <RadzenImage Path="images/pexels-linkedin-2182980.jpg" class="rz-w-100"></RadzenImage>
+            <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+            <RadzenText Text="Michael Roberts" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-color-on-base-lighter" />
+            <RadzenText Text="Investment Specialist" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-color-on-base-lighter" />
+            <RadzenText Text="Michael has a strong background in real estate investment and property development. He helps clients identify profitable opportunities and maximize their returns." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-color-on-base-lighter rz-display-none rz-display-md-block" />
+            <RadzenLink Path="agent-details" Text="Learn more ..." />
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+<RadzenColumn Size="6" SizeMD="3" class="rz-p-2 rz-p-md-6 rz-pt-md-12">
+        <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-mt-md-12 rz-overflow-hidden rz-background-color-base-lighter">
+            <RadzenImage Path="images/pexels-linkedin-3867823.jpg" class="rz-w-100"></RadzenImage>
+            <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+            <RadzenText Text="Sophia Mitchell" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-color-on-base-lighter" />
+            <RadzenText Text="Marketing & Sales Coordinator" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-color-on-base-lighter" />
+            <RadzenText Text="Sophia is the creative force behind our property marketing strategies. From digital campaigns to open houses, she ensures every listing gets maximum exposure." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-color-on-base-lighter rz-display-none rz-display-md-block" />
+            <RadzenLink Path="agent-details" Text="Learn more ..." />
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+<RadzenRow RowGap="3rem" Gap="1rem" class="rz-w-100 rz-mx-auto rz-my-6 rz-my-md-12" Style="max-width: 1440px">
+    <RadzenColumn Size="12" Style="height: fit-content" class="rz-p-8 rz-p-sm-12">
+        <RadzenStack Style="max-width: 800px" Gap="3.5rem" class="rz-mx-auto">
+            <RadzenStack Style="margin-top: 60px" Gap="1rem">
+                <RadzenText Text="&ldquo;" TextStyle="Radzen.Blazor.TextStyle.DisplayH1" TagName="Radzen.Blazor.TagName.P" Style="line-height: 8px; font-weight: 700; font-family: Georgia, serif" class="rz-m-0 rz-text-disabled-color" />
+                <RadzenText Text="They made the home-buying process so easy! Their team was professional, knowledgeable, and always available to answer our questions." TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.P" Style="font-weight: 500" />
+                <RadzenStack Gap="0">
+                    <RadzenText Text=" – Sarah & James T." Style="font-weight: 600" TextStyle="Radzen.Blazor.TextStyle.H4" class="rz-m-0 rz-text-tertiary-color" />
+                    <RadzenText Text="Metropolis, NY" class="rz-m-0 rz-text-disabled-color" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>

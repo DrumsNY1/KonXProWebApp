@@ -1,0 +1,321 @@
+@page "/property-details"
+
+<PageTitle>Property Details</PageTitle>
+<RadzenStack class="rz-w-100 rz-px-2">
+<RadzenRow class="rz-w-100 rz-mx-auto" RowGap="0" Style="max-width: 1440px">
+    <RadzenColumn Size="12" class="rz-px-6 rz-pt-3 rz-pb-1 rz-pt-sm-6">
+        <RadzenBreadCrumb>
+        <RadzenBreadCrumbItem Text="Home" Path="/" />
+        <RadzenBreadCrumbItem Text="For Sale" Path="properties" />
+        <RadzenBreadCrumbItem Text="Houses" />
+        </RadzenBreadCrumb>
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="8" class="rz-px-6 rz-pb-6">
+        <RadzenText Text="New home for sale" TextStyle="Radzen.Blazor.TextStyle.H2" TextAlign="Radzen.TextAlign.Left" Style="max-width: 800px" TagName="Radzen.Blazor.TagName.H1" class="rz-m-0" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="4" class="rz-px-6 rz-pb-6 rz-text-align-start rz-text-align-md-end">
+        <RadzenText Text="$250,000" TextStyle="Radzen.Blazor.TextStyle.H2" TextAlign="Radzen.TextAlign.Left" Style="max-width: 800px; font-weight: 600" TagName="Radzen.Blazor.TagName.H1" class="rz-m-0" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow class="rz-w-100 rz-px-6 rz-mx-auto rz-mb-6 rz-mb-md-12" Style="max-width: 1440px;" Gap="2rem">
+    <RadzenColumn Size="12" SizeMD="8" SizeLG="9">
+        <RadzenStack Gap="1rem">
+            <RadzenCarousel AllowPaging="true" Auto="true" PagerOverlay="true" Interval="6000" ButtonVariant="Radzen.Variant.Flat">
+                <Items>
+                    <RadzenCarouselItem>
+                        <RadzenImage Path="images/property-pexels-fotoaibe-10758464.jpg" class="rz-w-100"></RadzenImage>
+                    </RadzenCarouselItem>
+                    <RadzenCarouselItem>
+                        <RadzenImage Path="images/property-pexels-fotoaibe-10758466.jpg" class="rz-w-100"></RadzenImage>
+                    </RadzenCarouselItem>
+                    <RadzenCarouselItem>
+                        <RadzenImage Path="images/property-pexels-fotoaibe-1743231.jpg" class="rz-w-100"></RadzenImage>
+                    </RadzenCarouselItem>
+                    <RadzenCarouselItem>
+                        <RadzenImage Path="images/property-pexels-fotoaibe-1571450.jpg" class="rz-w-100"></RadzenImage>
+                    </RadzenCarouselItem>
+                </Items>
+            </RadzenCarousel>
+            <RadzenCard class="rz-p-4 rz-p-md-8">
+                <RadzenText Text="Overview" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-pb-2 rz-border-bottom" />
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0" AlignItems="Radzen.AlignItems.Stretch" JustifyContent="Radzen.JustifyContent.SpaceEvenly" Wrap="Radzen.FlexWrap.Wrap" class="rz-border-bottom">
+                    <RadzenStack Gap="0" class="rz-py-4 rz-px-2">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                            <RadzenText Text="3" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="bed" /> 
+                        </RadzenStack>
+                        <RadzenText Text="Bedrooms" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                    <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                    <RadzenStack Gap="0" class="rz-py-4 rz-px-2">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                            <RadzenText Text="3" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="shower" /> 
+                        </RadzenStack>
+                        <RadzenText Text="Bathrooms" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                    <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                    <RadzenStack Gap="0" class="rz-py-4 rz-px-2">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                            <RadzenText Text="1" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="directions_car" /> 
+                        </RadzenStack>
+                        <RadzenText Text="Garage" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                    <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                    <RadzenStack Gap="0" class="rz-py-4 rz-px-2">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                            <RadzenText Text="325" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="square_foot" /> 
+                        </RadzenStack>
+                        <RadzenText Text="Sq m" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                    <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                    <RadzenStack Gap="0" class="rz-py-4 rz-px-2">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                            <RadzenText Text="2005" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="event" /> 
+                        </RadzenStack>
+                        <RadzenText Text="Year built" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                </RadzenStack>
+                <RadzenText Text="This stunning 3-bedroom apartment offers breathtaking ocean views, a spacious open-concept living area, and modern finishes throughout. Located in the heart of the city, it provides easy access to shopping centers, schools, and public transportation." TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0 rz-mt-4" />
+            </RadzenCard>
+            <RadzenRow>
+                <RadzenColumn Size="12" SizeMD="6">
+                <RadzenCard class="rz-p-4 rz-p-md-8 rz-h-100">
+                    <RadzenText Text="Key features" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-pb-2 rz-border-bottom" />
+                    <RadzenStack class="rz-py-4" Gap="1rem">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="check" IconStyle="Radzen.IconStyle.Primary"></RadzenIcon>
+                            <RadzenText Text="Spacious living and dining area" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="check" IconStyle="Radzen.IconStyle.Primary"></RadzenIcon>
+                            <RadzenText Text="Modern kitchen with high-end appliances" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="check" IconStyle="Radzen.IconStyle.Primary"></RadzenIcon>
+                            <RadzenText Text="Master bedroom with en-suite bathroom" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="check" IconStyle="Radzen.IconStyle.Primary"></RadzenIcon>
+                            <RadzenText Text="Private balcony with panoramic views" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="check" IconStyle="Radzen.IconStyle.Primary"></RadzenIcon>
+                            <RadzenText Text="24/7 security and concierge services" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="check" IconStyle="Radzen.IconStyle.Primary"></RadzenIcon>
+                            <RadzenText Text="Swimming pool, gym, and parking" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="6">
+                <RadzenCard class="rz-p-4 rz-p-md-8 rz-h-100">
+                    <RadzenText Text="Nearby attractions & amenities" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-pb-2 rz-border-bottom" />
+                    <RadzenStack class="rz-py-4" Gap="1rem">
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="school"></RadzenIcon>
+                            <RadzenText Text="School" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="local_hospital"></RadzenIcon>
+                            <RadzenText Text="Hospital" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="local_mall"></RadzenIcon>
+                            <RadzenText Text="Shopping center" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="directions_subway"></RadzenIcon>
+                            <RadzenText Text="Public transport" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                            <RadzenIcon Icon="nature_people"></RadzenIcon>
+                            <RadzenText Text="Park" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenCard class="rz-p-4 rz-p-md-8">
+                <RadzenText Text="Location" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-pb-2 rz-border-bottom" />
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem" class="rz-my-4">
+                    <RadzenIcon Icon="distance"></RadzenIcon>
+                    <RadzenText Text="128 NE 1st Ave, Miami, FL 33132, USA" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0" />
+                </RadzenStack>
+                <RadzenGoogleMap class="rz-w-100" Style="height: 400px"></RadzenGoogleMap>
+            </RadzenCard>
+<RadzenText Text="Similar properties" TextStyle="Radzen.Blazor.TextStyle.H4" TextAlign="Radzen.TextAlign.Left" Style="max-width: 800px" TagName="Radzen.Blazor.TagName.H2" class="rz-m-0 rz-mt-6" />
+<RadzenRow Style="max-width: 1440px; --rz-carousel-border-radius: var(--rz-card-border-radius) var(--rz-card-border-radius) 0 0;" Gap="2rem" RowGap="2rem">
+<RadzenColumn Size="12" SizeSM="6">
+        <RadzenCard class="rz-p-0 rz-h-100">
+            <RadzenCarousel AllowPaging="false" Auto="false" Style="rz-h-100">
+                <Items>
+                    <RadzenCarouselItem>
+                        <RadzenLink Path="property-details"><RadzenImage Path="images/property1-pexels-fotoaibe-813692.jpg" class="rz-w-100" /></RadzenLink>
+                    </RadzenCarouselItem>
+                    <RadzenCarouselItem>
+                        <RadzenLink Path="property-details"><RadzenImage Path="images/property1-pexels-fotoaibe-813691.jpg" class="rz-w-100" /></RadzenLink>
+                    </RadzenCarouselItem>
+                </Items>
+            </RadzenCarousel>
+            <RadzenRow>
+                <RadzenColumn Size="7">
+                    <RadzenStack class="rz-p-4" Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0">
+                            <RadzenLink Path="property-details" Text="New home for sale" />
+                        </RadzenText>
+                        <RadzenText Text="128 NE 1st Ave, Miami, FL 33132, USA" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <RadzenStack class="rz-p-4" Gap="0.25rem">
+                        <RadzenText Text="$125,000" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" TextAlign="Radzen.TextAlign.End" />
+                        <RadzenText Text="$1,500/sq.m." TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" TextAlign="Radzen.TextAlign.End" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Stretch" JustifyContent="Radzen.JustifyContent.SpaceEvenly">
+                <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenText Text="3" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="bed" /> 
+                    </RadzenStack>
+                    <RadzenText Text="Bedroom" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                </RadzenStack>
+                <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenText Text="3" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="shower" /> 
+                    </RadzenStack>
+                    <RadzenText Text="Bathroom" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                </RadzenStack>
+                <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenText Text="325" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="square_foot" /> 
+                    </RadzenStack>
+                    <RadzenText Text="Sq m" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+<RadzenColumn Size="12" SizeSM="6">
+        <RadzenCard class="rz-p-0 rz-h-100">
+            <RadzenCarousel AllowPaging="false" Auto="false" Style="rz-h-100">
+                <Items>
+                    <RadzenCarouselItem>
+                        <RadzenLink Path="property-details"><RadzenImage Path="images/property2-pexels-fotoaibe-1571453.jpg" class="rz-w-100" /></RadzenLink>
+                    </RadzenCarouselItem>
+                    <RadzenCarouselItem>
+                        <RadzenLink Path="property-details"><RadzenImage Path="images/property2-pexels-fotoaibe-1571452.jpg" class="rz-w-100" /></RadzenLink>
+                    </RadzenCarouselItem>
+                </Items>
+            </RadzenCarousel>
+            <RadzenRow>
+                <RadzenColumn Size="7">
+                    <RadzenStack class="rz-p-4" Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0">
+                            <RadzenLink Path="property-details" Text="New home for sale" />
+                        </RadzenText>
+                        <RadzenText Text="128 NE 1st Ave, Miami, FL 33132, USA" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="5">
+                    <RadzenStack class="rz-p-4" Gap="0.25rem">
+                        <RadzenText Text="$125,000" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" TextAlign="Radzen.TextAlign.End" />
+                        <RadzenText Text="$1,500/sq.m." TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" TextAlign="Radzen.TextAlign.End" />
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Stretch" JustifyContent="Radzen.JustifyContent.SpaceEvenly">
+                <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenText Text="3" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="bed" /> 
+                    </RadzenStack>
+                    <RadzenText Text="Bedroom" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                </RadzenStack>
+                <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenText Text="3" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="shower" /> 
+                    </RadzenStack>
+                    <RadzenText Text="Bathroom" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                </RadzenStack>
+                <RadzenStack Gap="0" class="rz-border-end" Style="width: 0px"></RadzenStack>
+                <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.25rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenText Text="325" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" /> <RadzenIcon Icon="square_foot" /> 
+                    </RadzenStack>
+                    <RadzenText Text="Sq m" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                </RadzenStack>
+            </RadzenStack>
+        </RadzenCard>
+    </RadzenColumn>
+</RadzenRow>
+            </RadzenStack>
+
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="4" SizeLG="3">
+        <RadzenStack Gap="1rem" Style="position: sticky; top: 1rem">
+        <RadzenCard class="rz-p-6">
+        <RadzenText Text="Your agent" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-pb-2 rz-border-bottom rz-mb-4" />
+            <RadzenStack AlignItems="Radzen.AlignItems.Center" class="rz-my-4" Gap="1rem" Orientation="Radzen.Orientation.Horizontal">
+                <RadzenLink Path="agent-details"><RadzenImage Style="border-radius: 50%; width: 4rem; height: 4rem" Path="images/agent-thumbnail-pexels-linkedin-3867839.jpg"></RadzenImage></RadzenLink>
+                <RadzenStack Gap="0.25rem">
+                    <RadzenText Style="font-weight: 600" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" TagName="Radzen.Blazor.TagName.P">
+                        <RadzenLink  Text="Emily Dawson" Path="agent-details" /> 
+                    </RadzenText>
+                    <RadzenText Text="Residential Property Expert" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" />
+                </RadzenStack>
+            </RadzenStack>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" class="rz-py-2" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                <RadzenText Text="Office" Style="font-weight: 600" TextStyle="Radzen.Blazor.TextStyle.Subtitle2" class="rz-m-0" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Start" />
+                <RadzenText Text="+1 (555) 123-4567" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" TextAlign="Radzen.TextAlign.End" />
+            </RadzenStack>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" class="rz-py-2 rz-border-top" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                <RadzenText Text="Mobile" Style="font-weight: 600" TextStyle="Radzen.Blazor.TextStyle.Subtitle2" class="rz-m-0" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Start" />
+                <RadzenText Text="+1 (555) 123-4567" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" TextAlign="Radzen.TextAlign.End" />
+            </RadzenStack>
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" class="rz-py-2 rz-border-top" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                <RadzenText Text="Email" Style="font-weight: 600" TextStyle="Radzen.Blazor.TextStyle.Subtitle2" class="rz-m-0" TagName="Radzen.Blazor.TagName.P" TextAlign="Radzen.TextAlign.Start" />
+                <RadzenText Text="emily.dawson at ....com" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-m-0" TextAlign="Radzen.TextAlign.End" />
+            </RadzenStack>
+        </RadzenCard>
+        <RadzenCard class="rz-p-6">
+        <RadzenText Text="Request info" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0 rz-pb-2 rz-border-bottom rz-mb-4" />
+        <RadzenTemplateForm TItem="dynamic">
+                <RadzenStack Gap="1rem">
+                <RadzenFormField Text="Name">
+                    <ChildContent>
+                    <RadzenTextBox Name="Name" />
+                    </ChildContent>
+                    <Helper>
+                    <RadzenRequiredValidator Component="Name" Text="Name is required." />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="Email">
+                    <ChildContent>
+                    <RadzenTextBox Name="Email" />
+                    </ChildContent>
+                    <Helper>
+                    <RadzenRequiredValidator Component="Email" Text="Email is required." />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenFormField Text="Message">
+                    <ChildContent>
+                    <RadzenTextArea Name="Message" Rows="5" />
+                    </ChildContent>
+                    <Helper>
+                    <RadzenRequiredValidator Component="Message" Text="Message is required." />
+                    </Helper>
+                </RadzenFormField>
+                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Send message" Variant="Variant.Flat" Size="Radzen.ButtonSize.Large" class="rz-w-100" />
+                </RadzenStack>
+                </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenCard>
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+</RadzenStack>

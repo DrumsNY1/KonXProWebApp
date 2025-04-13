@@ -1,0 +1,72 @@
+@page "/vw-demo-displays"
+
+<PageTitle>VwDemoDisplays</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="VwDemoDisplays" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=6>
+     <RadzenCard style="height: 100%">
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@(vwDemoDisplays)" TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay">
+            <Columns>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay" Property="Content" Title="Content">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay" Property="Summary" Title="Summary">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay" Property="CompletionDate" Title="Completion Date">
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+    </RadzenCard>
+
+    </RadzenColumn>
+        <RadzenColumn SizeMD=6>
+        <RadzenCard style="height: 100%;margin-top:0px;">
+            <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save VwDemoDisplay</RadzenAlert>
+            <RadzenTemplateForm TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay" Data="@(vwDemoDisplay)" Visible="@(vwDemoDisplay != null)" Submit="@FormSubmit">
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Content" Component="Content" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwDemoDisplay.Content)" Name="Content" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Summary" Component="Summary" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwDemoDisplay.Summary)" Name="Summary" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Completion Date" Component="CompletionDate" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenDatePicker DateFormat="MM/dd/yyyy" style="display: block; width: 100%" @bind-Value="@(vwDemoDisplay.CompletionDate)" Name="CompletionDate" />
+                    </RadzenColumn>
+                </RadzenRow>
+              <RadzenStack  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" Visible=false />
+              </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenCard>
+        </RadzenColumn>  </RadzenRow>
+</RadzenStack>

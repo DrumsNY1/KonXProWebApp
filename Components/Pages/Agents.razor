@@ -1,0 +1,98 @@
+@page "/agents"
+
+<PageTitle>Agents</PageTitle>
+
+<RadzenRow Style="max-width: 1440px" class="rz-mx-auto">
+    <RadzenColumn Size="12" Visible="@IsFilterVisible" Order="1" SizeMD="3" OrderMD="2">
+            <RadzenTemplateForm TItem="dynamic" class="rz-w-100">
+                <RadzenStack Gap="1rem" Wrap="Radzen.FlexWrap.Wrap" class="rz-px-8 rz-px-md-6 rz-pt-3 rz-mt-md-10">
+                <RadzenRow Gap="0.5rem" AlignItems="Radzen.AlignItems.Center">
+                    <RadzenColumn Size="12">
+                        <RadzenTextBox Placeholder="Agent Name" class="rz-w-100"></RadzenTextBox>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12">
+                        <RadzenDropDown TValue="dynamic" Placeholder="Categories" class="rz-w-100"></RadzenDropDown>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12">
+                        <RadzenDropDown TValue="dynamic" Placeholder="Cities" class="rz-w-100"></RadzenDropDown>
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenStack>
+                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Text="Apply Filters" Variant="Variant.Flat" class="rz-w-100" />
+                </RadzenStack>
+                </RadzenStack>
+            </RadzenTemplateForm>
+    </RadzenColumn>
+    <RadzenColumn class="@(IsFilterVisible ? "rz-col-12 rz-col-md-9" : "rz-col-12")" Order="1">
+        <RadzenRow class="rz-w-100 rz-mx-auto" RowGap="0" Style="max-width: 1440px">
+            <RadzenColumn Size="12" class="rz-px-8 rz-px-md-6 rz-pt-3 rz-pb-1 rz-pt-sm-6">
+                <RadzenBreadCrumb>
+                <RadzenBreadCrumbItem Text="Home" Path="/" />
+                <RadzenBreadCrumbItem Text="Agents" />
+                </RadzenBreadCrumb>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="8" class="rz-px-8 rz-px-md-6 rz-pb-6">
+                <RadzenText Text="Agents" TextStyle="Radzen.Blazor.TextStyle.H2" TextAlign="Radzen.TextAlign.Left" Style="max-width: 800px" TagName="Radzen.Blazor.TagName.H1" class="rz-m-0" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4" class="rz-px-6 rz-pb-6 rz-text-align-start rz-text-align-md-end">
+                <RadzenToggleButton ButtonStyle="Radzen.ButtonStyle.Primary" Variant="Variant.Flat" Icon="filter_alt" Text="@(IsFilterVisible ? "Hide Filters" : "Show Filters")" @bind-Value="@IsFilterVisible" class="rz-w-100 rz-w-md-fit-content" />
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-w-100 rz-mx-auto rz-px-8 rz-px-md-6" Style="--rz-carousel-border-radius: var(--rz-card-border-radius) var(--rz-card-border-radius) 0 0;" Gap="2rem" RowGap="2rem">
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-overflow-hidden">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenLink Path="agent-details"><RadzenImage Path="images/pexels-linkedin-2182970.jpg" Style="height: 300px"></RadzenImage></RadzenLink>
+                        <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+                            <RadzenText Text="John Carter" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0" />
+                            <RadzenText Text="Senior Real Estate Advisor" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                            <RadzenText Text="With over 15 years of experience in the real estate industry, John specializes in luxury homes and commercial properties. His in-depth market knowledge and negotiation skills ensure clients get the best deals." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-display-none rz-display-xs-block" />
+                            <RadzenLink Path="agent-details" Text="Learn more ..." />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-overflow-hidden">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenLink Path="agent-details"><RadzenImage Path="images/pexels-linkedin-3867839.jpg" Style="height: 300px"></RadzenImage></RadzenLink>
+                        <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+                            <RadzenText Text="Emily Dawson" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0" />
+                            <RadzenText Text="Residential Property Expert" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                            <RadzenText Text="Emily is passionate about helping families find their dream homes. Her personalized approach and commitment to customer satisfaction make the buying and selling process stress-free." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-display-none rz-display-xs-block" />
+                            <RadzenLink Path="agent-details" Text="Learn more ..." />
+                        </RadzenStack>
+                        </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-overflow-hidden">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenLink Path="agent-details"><RadzenImage Path="images/pexels-linkedin-2182980.jpg" Style="height: 300px;"></RadzenImage></RadzenLink>
+                        <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+                            <RadzenText Text="Michael Roberts" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0" />
+                            <RadzenText Text="Investment Specialist" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                            <RadzenText Text="Michael has a strong background in real estate investment and property development. He helps clients identify profitable opportunities and maximize their returns." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-display-none rz-display-xs-block" />
+                            <RadzenLink Path="agent-details" Text="Learn more ..." />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenCard class="rz-w-100 rz-h-100 rz-h-md-auto rz-p-0 rz-overflow-hidden">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+                        <RadzenLink Path="agent-details"><RadzenImage Path="images/pexels-linkedin-3867823.jpg" Style="height: 300px;"></RadzenImage></RadzenLink>
+                        <RadzenStack Gap="0.5rem" class="rz-p-4 rz-p-sm-6">
+                            <RadzenText Text="Sophia Mitchell" TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0" />
+                            <RadzenText Text="Marketing & Sales Coordinator" TextStyle="Radzen.Blazor.TextStyle.H6" />
+                            <RadzenText Text="Sophia is the creative force behind our property marketing strategies. From digital campaigns to open houses, she ensures every listing gets maximum exposure." TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-display-none rz-display-xs-block" />
+                            <RadzenLink Path="agent-details" Text="Learn more ..." />
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenCard>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenPager Count="20" Style="max-width: 1440px; --rz-pager-background-color: transparent;" class="rz-w-100 rz-my-6 rz-mx-auto" HorizontalAlign="Radzen.HorizontalAlign.Center" ShowPagingSummary="false"></RadzenPager>
+    </RadzenColumn>
+</RadzenRow>
+

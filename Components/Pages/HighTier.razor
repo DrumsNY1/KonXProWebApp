@@ -1,0 +1,50 @@
+@page "/highTier"
+
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+
+
+
+<PageTitle>Tiers</PageTitle>
+
+<RadzenRow class="rz-w-100 rz-mx-auto rz-px-8 rz-px-md-6" Style="--rz-carousel-border-radius: var(--rz-card-border-radius) var(--rz-card-border-radius) 0 0;" Gap="2rem" RowGap="2rem">
+   @foreach (var tier in dvwHighTierDashboards)
+   {
+       <RadzenColumn Size="12" SizeSM="6" SizeLG="4">
+           <RadzenCard class="rz-p-0 rz-h-100">
+               <RadzenRow>
+                   <RadzenColumn Size="7">
+                       <RadzenStack class="rz-p-4" Gap="0.25rem">
+                           <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0">
+                                   <RadzenLink Path=@($"view-dobjob-filing/?jobnum={tier.JobNum}") Text="@tier.Borough" />
+                           </RadzenText>
+                            <RadzenText Text="@tier.Neighborhood" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" />
+                       </RadzenStack>
+                   </RadzenColumn>
+                   <RadzenColumn Size="5">
+                       <RadzenStack class="rz-p-4" Gap="0.25rem">
+                           <RadzenText Text="@tier.Street" TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0" TextAlign="Radzen.TextAlign.End" />
+                           <RadzenText Text="@tier.ProjectType" TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-m-0 rz-text-tertiary-color" TextAlign="Radzen.TextAlign.End" />
+                       </RadzenStack>
+                   </RadzenColumn>
+               </RadzenRow>
+               <RadzenStack Orientation="Radzen.Orientation.Horizontal" class="rz-p-4" Gap="0.25rem" AlignItems="Radzen.AlignItems.Stretch" JustifyContent="Radzen.JustifyContent.SpaceEvenly">
+                  <RadzenButton ButtonStyle="Radzen.ButtonStyle.Secondary" class="rz-w-100 rz-m-0" Text="View Details" Size="Radzen.ButtonSize.ExtraSmall" Icon="info" IconSize="1.25rem" Click="@(() => NavigateTo($"view-dobjob-filing/?jobnum={tier.JobNum}"))" />
+
+                   <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
+                  </RadzenStack>
+               </RadzenStack>
+           </RadzenCard>
+       </RadzenColumn>
+   }
+</RadzenRow>
+
+@*<RadzenPager Count="@dvwHighTierDashboards.Count" Style="max-width: 1440px; --rz-pager-background-color: transparent;" class="rz-w-100 rz-my-6 rz-mx-auto" HorizontalAlign="Radzen.HorizontalAlign.Center" ShowPagingSummary="false"></RadzenPager>
+
+ @code {
+   private List<vwBasicTierDashboard> vwBasicTierDashboards;
+
+   protected override async Task OnInitializedAsync()
+   {
+       vwBasicTierDashboards = await DbContext.vwBasicTierDashboards.ToListAsync();
+   }
+} *@

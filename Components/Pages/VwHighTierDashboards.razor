@@ -1,0 +1,132 @@
+@page "/vw-high-tier-dashboards"
+
+<PageTitle>VwHighTierDashboards</PageTitle>
+<RadzenStack>
+    <RadzenRow AlignItems="AlignItems.Center">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenText Text="VwHighTierDashboards" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick" Variant="Variant.Flat" Shade="Shade.Lighter">
+                    <RadzenSplitButtonItem Text="Excel" Value="xlsx" />
+                    <RadzenSplitButtonItem Text="CSV" Value="csv" />
+                </RadzenSplitButton>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+    <RadzenTextBox Placeholder="Search ..." style="display: block; width: 100%" @oninput="@Search" aria-label="Search by all string columns" />
+    <RadzenRow>
+      <RadzenColumn SizeMD=6>
+     <RadzenCard style="height: 100%">
+        <RadzenDataGrid @ref="grid0" ColumnWidth="200px"   AllowFiltering="true" FilterMode="FilterMode.Advanced" AllowPaging="true" AllowSorting="true" ShowPagingSummary="true" PageSizeOptions=@(new int[]{5, 10, 20, 30})
+            Data="@(vwHighTierDashboards)" TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard">
+            <Columns>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="JobNum" Title="Job Num">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="Borough" Title="Borough">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="HouseNum" Title="House Num">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="Street" Title="Street">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="LatestActionDate" Title="Latest Action Date">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="ProjectType" Title="Project Type">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="EstimatedCost" Title="Estimated Cost">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="JobDescription" Title="Job Description">
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Property="Neighborhood" Title="Neighborhood">
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+    </RadzenCard>
+
+    </RadzenColumn>
+        <RadzenColumn SizeMD=6>
+        <RadzenCard style="height: 100%;margin-top:0px;">
+            <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save VwHighTierDashboard</RadzenAlert>
+            <RadzenTemplateForm TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard" Data="@(vwHighTierDashboard)" Visible="@(vwHighTierDashboard != null)" Submit="@FormSubmit">
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Job Num" Component="JobNum" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenNumeric style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.JobNum)" Name="JobNum" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Borough" Component="Borough" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.Borough)" Name="Borough" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="House Num" Component="HouseNum" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.HouseNum)" Name="HouseNum" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Street" Component="Street" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.Street)" Name="Street" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Latest Action Date" Component="LatestActionDate" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenDatePicker DateFormat="MM/dd/yyyy" style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.LatestActionDate)" Name="LatestActionDate" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Project Type" Component="ProjectType" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.ProjectType)" Name="ProjectType" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Estimated Cost" Component="EstimatedCost" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenNumeric style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.EstimatedCost)" Name="EstimatedCost" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Job Description" Component="JobDescription" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.JobDescription)" Name="JobDescription" />
+                    </RadzenColumn>
+                </RadzenRow>
+                <RadzenRow style="margin-bottom: 1rem">
+                    <RadzenColumn SizeMD="3">
+                        <RadzenLabel Text="Neighborhood" Component="Neighborhood" style="width: 100%" />
+                    </RadzenColumn>
+                    <RadzenColumn SizeMD="9">
+                        <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(vwHighTierDashboard.Neighborhood)" Name="Neighborhood" />
+                    </RadzenColumn>
+                </RadzenRow>
+              <RadzenStack  Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
+                        <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="save" Text="Save" Variant="Variant.Flat" />
+                        <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Variant="Variant.Flat" Click="@CancelButtonClick" Visible=false />
+              </RadzenStack>
+            </RadzenTemplateForm>
+        </RadzenCard>
+        </RadzenColumn>  </RadzenRow>
+</RadzenStack>
