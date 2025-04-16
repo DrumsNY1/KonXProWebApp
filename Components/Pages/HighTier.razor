@@ -1,4 +1,5 @@
 @page "/highTier"
+@* @attribute [Authorize] *@
 
 @using KonXProWebApp.Models.db_9f8bee_konxdev
 
@@ -29,7 +30,6 @@
                </RadzenRow>
                <RadzenStack Orientation="Radzen.Orientation.Horizontal" class="rz-p-4" Gap="0.25rem" AlignItems="Radzen.AlignItems.Stretch" JustifyContent="Radzen.JustifyContent.SpaceEvenly">
                   <RadzenButton ButtonStyle="Radzen.ButtonStyle.Secondary" class="rz-w-100 rz-m-0" Text="View Details" Size="Radzen.ButtonSize.ExtraSmall" Icon="info" IconSize="1.25rem" Click="@(() => NavigateTo($"view-dobjob-filing/?jobnum={tier.JobNum}"))" />
-
                    <RadzenStack Gap="0" class="rz-p-4" AlignItems="Radzen.AlignItems.Center">
                   </RadzenStack>
                </RadzenStack>

@@ -118,6 +118,9 @@ namespace KonXProWebApp.Components.Pages
         protected bool errorVisible;
         protected KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation dobViolation;
 
+        [Inject]
+        protected SecurityService Security { get; set; }
+
         protected async Task FormSubmit()
         {
             try

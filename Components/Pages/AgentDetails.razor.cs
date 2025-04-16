@@ -102,5 +102,8 @@ namespace KonXProWebApp.Components.Pages
                 Deals = 14
             },
         };
+
+        [Inject]
+        protected SecurityService Security { get; set; }
     }
 }

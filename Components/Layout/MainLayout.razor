@@ -43,7 +43,7 @@
                             <RadzenDropDown Name="ThemeDropDown" TValue="string" Value="@ThemeService.Theme" ValueChanged="@(t => ThemeService.SetTheme(t))" Data="@Themes.All" TextProperty=@nameof(Theme.Text) ValueProperty=@nameof(Theme.Value)>
                                 
                             </RadzenDropDown> *@
-                            <RadzenButton Icon="login" ButtonStyle="ButtonStyle.Primary" Text="Login" class="rz-p-1 rz-m-1 rz-border-radius-2" Size="Radzen.ButtonSize.Large" Style="width: 116px" Shade="Radzen.Shade.Dark" />
+                            <RadzenButton Icon="login" ButtonStyle="ButtonStyle.Primary" Text="Login" class="rz-p-1 rz-m-1 rz-border-radius-2" Size="Radzen.ButtonSize.Large" Style="width: 116px" Shade="Radzen.Shade.Dark" Click="NavigateToLogin" />
                         </RadzenStack>
                     </div>
                 </RadzenStack>

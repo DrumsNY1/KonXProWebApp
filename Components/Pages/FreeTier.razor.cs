@@ -36,6 +36,12 @@ namespace KonXProWebApp.Components.Pages
 
         protected string search = "";
 
+
+        private void NavigateTo(string url)
+        {
+            NavigationManager.NavigateTo(url);
+        }
+
         protected async Task Search(ChangeEventArgs args)
         {
             search = $"{args.Value}";
@@ -95,6 +101,9 @@ namespace KonXProWebApp.Components.Pages
 
 
         private bool IsFilterVisible = false;
+
+        [Inject]
+        protected SecurityService Security { get; set; }
     }
 
 

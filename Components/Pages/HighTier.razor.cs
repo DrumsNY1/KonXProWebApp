@@ -75,6 +75,9 @@ namespace KonXProWebApp.Components.Pages
 
 
         private bool IsFilterVisible = false;
+
+        [Inject]
+        protected SecurityService Security { get; set; }
     }
 
 

@@ -33,5 +33,8 @@ namespace KonXProWebApp.Components.Pages
         protected NotificationService NotificationService { get; set; }
 
         private bool IsFilterVisible = false;
+
+        [Inject]
+        protected SecurityService Security { get; set; }
     }
 }
