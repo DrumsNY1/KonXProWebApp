@@ -67,6 +67,19 @@ namespace KonXProWebApp.Components.Pages
         protected SecurityService Security { get; set; }
 
 
+        //protected async Task FormSubmit()
+        //{
+        //    try
+        //    {
+        //        await db_9f8bee_konxdevService.UpdateDobjobFiling(Id, dobjobFiling);
+        //        DialogService.Close(dobjobFiling);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        errorVisible = true;
+        //    }
+        //}
+
         protected async Task CancelButtonClick(MouseEventArgs args)
         {
             DialogService.Close(null);

@@ -1,0 +1,244 @@
+@page "/view-dobjob-filing"
+
+@* //@attribute [Authorize] *@
+
+<PageTitle>ClaudeDobFilings</PageTitle>
+<RadzenRow>
+    <RadzenColumn Size="12">
+        <RadzenText Text="ClaudeDobFilings" TextStyle="TextStyle.H3" TagName="TagName.H1" />
+    </RadzenColumn>
+</RadzenRow>
+@* 
+@page "/dob-job-filings"  *@
+
+@using System.Collections.Generic 
+
+@using System.Threading.Tasks 
+
+@inject HttpClient Http 
+
+
+
+@page "/claude-dob-filings"  
+
+@attribute [Authorize]  
+
+<PageTitle>ClaudeDobFilings</PageTitle>  
+<RadzenRow>  
+   <RadzenColumn Size="12">  
+       <RadzenText Text="ClaudeDobFilings" TextStyle="TextStyle.H3" TagName="TagName.H1" />  
+   </RadzenColumn>  
+</RadzenRow>  
+
+@using System.Collections.Generic  
+@using System.Threading.Tasks  
+@inject HttpClient Http  
+
+<h1>NYC DOB Job Application Filings</h1>  
+
+<RadzenTabs>  
+   <Tabs>  
+       <RadzenTabsItem Text="Project Identification">  
+           <div class="container mt-4">  
+               <h3>Project Identification</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Job Number:</strong> @selectedJob.JobNumber</p>  
+                           <p><strong>Job Type:</strong> @selectedJob.JobType</p>  
+                           <p><strong>Filing Status:</strong> @selectedJob.FilingStatus</p>  
+                           <p><strong>Latest Action Date:</strong> @selectedJob.LatestActionDate?.ToString("MM/dd/yyyy")</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Pre-Filing Date:</strong> @selectedJob.PreFilingDate?.ToString("MM/dd/yyyy")</p>  
+                           <p><strong>Approved Date:</strong> @selectedJob.ApprovedDate?.ToString("MM/dd/yyyy")</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Location Details">  
+           <div class="container mt-4">  
+               <h3>Location Details</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Borough:</strong> @selectedJob.Borough</p>  
+                           <p><strong>House Number:</strong> @selectedJob.HouseNumber</p>  
+                           <p><strong>Street Name:</strong> @selectedJob.StreetName</p>  
+                           <p><strong>Block:</strong> @selectedJob.Block</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Lot:</strong> @selectedJob.Lot</p>  
+                           <p><strong>Community Board:</strong> @selectedJob.CommunityBoard</p>  
+                           <p><strong>Zip Code:</strong> @selectedJob.ZipCode</p>  
+                           <p><strong>BIN:</strong> @selectedJob.BIN</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Project Scope">  
+           <div class="container mt-4">  
+               <h3>Project Scope</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Work Type:</strong> @selectedJob.WorkType</p>  
+                           <p><strong>Permit Status:</strong> @selectedJob.PermitStatus</p>  
+                           <p><strong>Job Description:</strong> @selectedJob.JobDescription</p>  
+                           <p><strong>Total Est. Cost:</strong> @selectedJob.TotalEstCost.ToString("C")</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Filing Representative:</strong> @selectedJob.FilingRepresentative</p>  
+                           <p><strong>Initial Cost:</strong> @selectedJob.InitialCost.ToString("C")</p>  
+                           <p><strong>Total Construction Floor Area:</strong> @selectedJob.TotalConstructionFloorArea.ToString("N0")</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Building Information">  
+           <div class="container mt-4">  
+               <h3>Building Information</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Existing Height:</strong> @selectedJob.ExistingHeight</p>  
+                           <p><strong>Proposed Height:</strong> @selectedJob.ProposedHeight</p>  
+                           <p><strong>Existing Stories:</strong> @selectedJob.ExistingStories</p>  
+                           <p><strong>Proposed Stories:</strong> @selectedJob.ProposedStories</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Existing Dwelling Units:</strong> @selectedJob.ExistingDwellingUnits</p>  
+                           <p><strong>Proposed Dwelling Units:</strong> @selectedJob.ProposedDwellingUnits</p>  
+                           <p><strong>Existing Occupancy:</strong> @selectedJob.ExistingOccupancy</p>  
+                           <p><strong>Proposed Occupancy:</strong> @selectedJob.ProposedOccupancy</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Zoning Information">  
+           <div class="container mt-4">  
+               <h3>Zoning Information</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Zoning District:</strong> @selectedJob.ZoningDistrict</p>  
+                           <p><strong>Landmark Status:</strong> @selectedJob.LandmarkStatus</p>  
+                           <p><strong>Special District:</strong> @selectedJob.SpecialDistrict</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Adult Establishment:</strong> @selectedJob.AdultEstablishment</p>  
+                           <p><strong>Loft Board:</strong> @selectedJob.LoftBoard</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Professional Information">  
+           <div class="container mt-4">  
+               <h3>Professional Information</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Owner's Business:</strong> @selectedJob.OwnersBusiness</p>  
+                           <p><strong>Owner's Name:</strong> @selectedJob.OwnersName</p>  
+                           <p><strong>Owner's Address:</strong> @selectedJob.OwnersAddress</p>  
+                           <p><strong>Owner's Phone:</strong> @selectedJob.OwnersPhone</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Applicant's Business:</strong> @selectedJob.ApplicantsBusiness</p>  
+                           <p><strong>Applicant's Name:</strong> @selectedJob.ApplicantsName</p>  
+                           <p><strong>License Type:</strong> @selectedJob.ApplicantsLicenseType</p>  
+                           <p><strong>License Number:</strong> @selectedJob.ApplicantsLicenseNumber</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Permit Information">  
+           <div class="container mt-4">  
+               <h3>Permit Information</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Permit Type:</strong> @selectedJob.PermitType</p>  
+                           <p><strong>Permit Sequence Number:</strong> @selectedJob.PermitSequenceNumber</p>  
+                           <p><strong>Permit Issuance Date:</strong> @selectedJob.PermitIssuanceDate?.ToString("MM/dd/yyyy")</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Permit Expiration Date:</strong> @selectedJob.PermitExpirationDate?.ToString("MM/dd/yyyy")</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+
+       <RadzenTabsItem Text="Administrative Details">  
+           <div class="container mt-4">  
+               <h3>Administrative Details</h3>  
+               @if (selectedJob != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Job Document Number:</strong> @selectedJob.JobDocumentNumber</p>  
+                           <p><strong>Doc Type:</strong> @selectedJob.DocType</p>  
+                           <p><strong>Other Considerations:</strong> @selectedJob.OtherConsiderations</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Comments:</strong> @selectedJob.Comments</p>  
+                           <p><strong>Paid:</strong> @selectedJob.Paid</p>  
+                           <p><strong>Fully Paid:</strong> @selectedJob.FullyPaid</p>  
+                           <p><strong>Assigned To:</strong> @selectedJob.AssignedTo</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+   </Tabs>  
+</RadzenTabs>  
+
+@code {  
+   private List<DOBJobFiling> jobData;  
+   private DOBJobFiling selectedJob;  
+
+   protected override async Task OnInitializedAsync()  
+   {  
+       await LoadData();  
+       selectedJob = jobData.FirstOrDefault(); // Select the first job as default  
+   }  
+
+   private async Task LoadData()  
+   {  
+       try  
+       {  
+           jobData = new List<DOBJobFiling>  
+           {  
+               // Sample data as in the original file  
+           };  
+       }  
+       catch (Exception ex)  
+       {  
+           Console.WriteLine($"Error loading data: {ex.Message}");  
+       }  
+   }  
+}
+
+
+
+

@@ -13,6 +13,118 @@
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
                 <RadzenTabs>
                     <Tabs>
+                        <!----Job Locationn Tab Begin ---->
+                        <RadzenTabsItem Text="Location Details">
+                            <div class="container mt-4">
+                                <h3>Location Details</h3>
+                                @if (dobjobFiling != null)
+                                {
+                                    <RadzenRow>
+                                        <RadzenColumn Size="6">
+                                            <p><strong>Borough:</strong> @dobjobFiling.Borough</p>
+                                            <p><strong>House Number:</strong> @dobjobFiling.HouseNum @dobjobFiling.StreetName</p>          
+                                            <p><strong>Block:</strong> @dobjobFiling.Block</p>
+                                            <p><strong>Lot:</strong> @dobjobFiling.Lot</p>
+                                            <p><strong>Community Board:</strong> @dobjobFiling.CommunityBoard</p>
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="6">
+                                            <p><strong>Existing Stories:</strong> @dobjobFiling.ExistingNoofStories</p>
+                                            <p><strong>Proposed Stories:</strong> @dobjobFiling.ProposedNoofStories</p>
+                                            <p><strong>Existing Height:</strong> @dobjobFiling.ExistingHeight</p>
+                                            <p><strong>Proposed Height:</strong> @dobjobFiling.ProposedHeight</p>
+                                            <p><strong>Existing Dwelling Units:</strong> @dobjobFiling.ExistingDwellingUnits</p>
+                                            <p><strong>Proposed Dwelling Units:</strong> @dobjobFiling.ProposedDwellingUnits</p>
+                                            <p><strong>Existing Occupancy:</strong> @dobjobFiling.ExistingOccupancy</p>
+                                            <p><strong>Proposed Occupancy:</strong> @dobjobFiling.ProposedOccupancy</p>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                }
+                            </div>
+
+                        </RadzenTabsItem>    
+                        <!----Job Location Tab End ---->
+
+
+                        <!----Zoning Information Tab Begining ---->
+                        <RadzenTabsItem Text="Zoning Information">
+                            <div class="container mt-4">
+                                <h3>Zoning Information</h3>
+                                @if (dobjobFiling != null)
+                                {
+                                    <RadzenRow>
+                                        <RadzenColumn Size="6">
+                                            <p><strong>Zoning District1:</strong> @dobjobFiling.ZoningDist1</p>
+                                            <p><strong>Zoning District2:</strong> @dobjobFiling.ZoningDist2</p>
+                                            <p><strong>Zoning District3:</strong> @dobjobFiling.ZoningDist3</p>
+                                            <p><strong>Landmark Status:</strong> @dobjobFiling.Landmarked</p>
+                                            <p><strong>Special District:</strong> @dobjobFiling.SpecialDistrict1</p>
+                                            <p><strong>Special District:</strong> @dobjobFiling.SpecialDistrict2</p>
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="6">
+                                            <p><strong>Adult Establishment:</strong> @dobjobFiling.AdultEstab</p>
+                                            <p><strong>Loft Board:</strong> @dobjobFiling.LoftBoard</p>
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                }
+                            </div>
+                        </RadzenTabsItem>
+                        <!----Zoning Information Tab End ---->
+                        <!----Zoning Information Tab Begining ---->
+
+                        <!----Professional Information Tab Begining ---->
+       <RadzenTabsItem Text="Professional Information">  
+           <div class="container mt-4">  
+               <h3>Professional Information</h3>  
+               @if (dobjobFiling != null)  
+               {  
+                   <RadzenRow>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Owner's Business:</strong> @dobjobFiling.OwnersBusinessName</p>  
+                           <p><strong>Owner's Name:</strong> @dobjobFiling.OwnersFirstName @dobjobFiling.OwnersLastName </p>
+                           <p><strong>Owner's Address:</strong> @dobjobFiling.OwnersHouseNumber @dobjobFiling.OwnersHouseStreetName </p>
+                           <p><strong>Owner's Phone:</strong> @dobjobFiling.OwnersPhone</p>  
+                       </RadzenColumn>  
+                       <RadzenColumn Size="6">  
+                           <p><strong>Applicant's Business:</strong> @dobjobFiling.ApplicantLicenseNum</p>
+                           <p><strong>Applicant's Name:</strong> @dobjobFiling.ApplicantsFirstName @dobjobFiling.ApplicantsLastName</p>
+                           <p><strong>License Type:</strong> @dobjobFiling.ApplicantProfessionalTitle</p>  
+                           <p><strong>License Number:</strong> @dobjobFiling.ApplicantLicenseNum</p>  
+                       </RadzenColumn>  
+                   </RadzenRow>  
+               }  
+           </div>  
+       </RadzenTabsItem>  
+                        <!----Professional Information Tab End ---->
+
+                        <!----Proect Identification Tab Begining ---->
+                        <RadzenTabsItem Text="Project Identification">
+                            <div class="container mt-4">
+                                <h3>Project Identification</h3>
+                                @if (dobjobFiling != null)
+                                {
+                                    <RadzenRow>
+                                        <RadzenColumn Size="6">
+                                            <p><strong>Job Number:</strong> @dobjobFiling.JobNum</p>
+                                            <p><strong>Job Type:</strong> @dobjobFiling.JobType</p>
+@*                                             <p><strong>Filing Status:</strong> @dobjobFiling.F</p> *@
+                                            <p><strong>Latest Action Date:</strong> @dobjobFiling.LatestActionDate?.ToString("MM/dd/yyyy")</p>
+                                            <p><strong>Pre-Filing Date:</strong> @dobjobFiling.PreFilingDate?.ToString("MM/dd/yyyy")</p>
+                                            <p><strong>Approved Date:</strong> @dobjobFiling.Approved?.ToString("MM/dd/yyyy")</p>
+                                        </RadzenColumn>
+                                        <RadzenColumn Size="6">
+                                            @* <p><strong>Work Type:</strong> @dobjobFiling.WorkType</p> *@
+                    @*                         <p><strong>Permit Status:</strong> @dobjobFiling.PermitStatus</p>
+                                            <p><strong>Job Description:</strong> @dobjobFiling.JobDescription</p>
+                                            <p><strong>Total Est. Cost:</strong> @dobjobFiling.InitialCost .ToString("C")</p>
+                                            <p><strong>Filing Representative:</strong> @dobjobFiling.FilingRepresentative</p>
+                                            <p><strong>Initial Cost:</strong> @dobjobFiling.InitialCost.ToString("C")</p>
+                                            <p><strong>Total Construction Floor Area:</strong> @dobjobFiling.Totalconstructionfloorarea.ToString("N0")</p> *@
+                                        </RadzenColumn>
+                                    </RadzenRow>
+                                }
+                            </div>
+                        </RadzenTabsItem>
+                        <!----Proect Identification Tab End ---->
                         <!----Job Address Tab Begin ---->
                         <RadzenTabsItem Text="Job Address">
                             <RadzenRow style="margin-bottom: .1rem">
