@@ -221,5 +221,8 @@ namespace KonXProWebApp.Models.db_9f8bee_konxdev
 
         [Column("GISBIN")]
         public string Gisbin { get; set; }
+
+        [Column("LeadScore")]
+        public int? LeadScore { get; set; }
     }
 }

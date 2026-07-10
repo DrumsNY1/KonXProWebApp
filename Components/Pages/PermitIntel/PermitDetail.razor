@@ -1,0 +1,188 @@
+@page "/permit-intel/detail/{Id:int}"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+
+<PageTitle>Permit Detail — NYC Permit Intel</PageTitle>
+
+@if (filing == null)
+{
+    <RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+        <RadzenColumn Size="12">
+            <RadzenProgressBarCircular ShowValue="true" Mode="ProgressBarMode.Indeterminate" Size="ProgressBarCircularSize.Large" />
+        </RadzenColumn>
+    </RadzenRow>
+}
+else
+{
+    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" AlignItems="Radzen.AlignItems.Center">
+        <RadzenColumn Size="8">
+            <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
+                @filing.HouseNum @filing.StreetName, @filing.Borough
+            </RadzenText>
+            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Subtitle1" class="rz-text-tertiary-color">
+                Job #@filing.JobNum · @filing.JobStatusDescrp
+            </RadzenText>
+        </RadzenColumn>
+        <RadzenColumn Size="4" Style="text-align: right;">
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="Radzen.JustifyContent.End" Gap="0.5rem">
+                <RadzenButton Text="@(isLeadSaved ? "Saved ★" : "Save Lead")" Icon="@(isLeadSaved ? "star" : "star_border")"
+                              ButtonStyle="@(isLeadSaved ? Radzen.ButtonStyle.Warning : Radzen.ButtonStyle.Light)"
+                              Click="@ToggleSaveLead" />
+                <RadzenButton Text="Back" Icon="arrow_back" ButtonStyle="Radzen.ButtonStyle.Light"
+                              Click="@(() => NavigationManager.NavigateTo("/permit-intel/search"))" />
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* Lead Score *@
+    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
+        <RadzenColumn Size="12">
+            <RadzenCard>
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="2rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Lead Score</RadzenText>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0">
+                            @for (int i = 0; i < (filing.LeadScore ?? 1); i++)
+                            {
+                                <RadzenIcon Icon="star" Style="color: #FFB400; font-size: 20px;" />
+                            }
+                            @for (int i = (filing.LeadScore ?? 1); i < 5; i++)
+                            {
+                                <RadzenIcon Icon="star_border" Style="color: #ccc; font-size: 20px;" />
+                            }
+                        </RadzenStack>
+                    </RadzenStack>
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Estimated Cost</RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">@(filing.InitialCost?.ToString("C0") ?? "N/A")</RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Job Type</RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">@filing.JobType</RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Building Type</RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">@(filing.BuildingType ?? "N/A")</RadzenText>
+                    </RadzenStack>
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Latest Action</RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">@(filing.LatestActionDate?.ToString("MM/dd/yyyy") ?? "N/A")</RadzenText>
+                    </RadzenStack>
+                </RadzenStack>
+            </RadzenCard>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* Property Details *@
+    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenFieldset Text="Property Information">
+                <RadzenStack Gap="0.5rem">
+                    @DetailRow("Address", $"{filing.HouseNum} {filing.StreetName}")
+                    @DetailRow("Borough", filing.Borough)
+                    @DetailRow("Block", filing.Block)
+                    @DetailRow("Lot", filing.Lot)
+                    @DetailRow("BIN", filing.Bin)
+                    @DetailRow("Community Board", filing.CommunityBoard)
+                    @DetailRow("Neighborhood", filing.Gisntaname)
+                    @DetailRow("Zoning", filing.ZoningDist1)
+                    @DetailRow("Building Class", filing.Buildingclass)
+                    @DetailRow("Existing Stories", filing.ExistingNoofStories)
+                    @DetailRow("Proposed Stories", filing.ProposedNoofStories)
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenFieldset Text="Job Information">
+                <RadzenStack Gap="0.5rem">
+                    @DetailRow("Job Number", filing.JobNum?.ToString())
+                    @DetailRow("Doc Number", filing.DocNum)
+                    @DetailRow("Job Type", filing.JobType)
+                    @DetailRow("Status", filing.JobStatusDescrp)
+                    @DetailRow("Initial Cost", filing.InitialCost?.ToString("C"))
+                    @DetailRow("Total Est. Fee", filing.TotalEstFee?.ToString("C"))
+                    @DetailRow("Fee Status", filing.FeeStatus)
+                    @DetailRow("Pre-Filing Date", filing.PreFilingDate?.ToString("MM/dd/yyyy"))
+                    @DetailRow("Approved", filing.Approved?.ToString("MM/dd/yyyy"))
+                    @DetailRow("Fully Permitted", filing.FullyPermitted?.ToString("MM/dd/yyyy"))
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenFieldset Text="Applicant">
+                <RadzenStack Gap="0.5rem">
+                    @DetailRow("Name", $"{filing.ApplicantsFirstName} {filing.ApplicantsLastName}")
+                    @DetailRow("Title", filing.ApplicantProfessionalTitle)
+                    @DetailRow("License #", filing.ApplicantLicenseNum)
+                    @DetailRow("Professional Cert", filing.ProfessionalCert)
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenColumn>
+        <RadzenColumn Size="12" SizeMD="6">
+            <RadzenFieldset Text="Owner">
+                <RadzenStack Gap="0.5rem">
+                    @DetailRow("Name", $"{filing.OwnersFirstName} {filing.OwnersLastName}")
+                    @DetailRow("Business", filing.OwnersBusinessName)
+                    @DetailRow("Type", filing.OwnerType)
+                    @DetailRow("Phone", filing.OwnersPhone)
+                    @DetailRow("Address", $"{filing.OwnersHouseNumber} {filing.OwnersHouseStreetName}")
+                    @DetailRow("City/State/Zip", $"{filing.City}, {filing.State} {filing.Zip}")
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* Job Description *@
+    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
+        <RadzenColumn Size="12">
+            <RadzenFieldset Text="Job Description">
+                <RadzenText>@(filing.JobDescription ?? "No description available.")</RadzenText>
+            </RadzenFieldset>
+        </RadzenColumn>
+    </RadzenRow>
+
+    @* Trade Flags *@
+    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
+        <RadzenColumn Size="12">
+            <RadzenFieldset Text="Trades">
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                    @TradeBadge("Plumbing", filing.Plumbing == "X")
+                    @TradeBadge("Mechanical", filing.Mechanical == "X")
+                    @TradeBadge("Boiler", filing.Boiler == "X")
+                    @TradeBadge("Sprinkler", filing.Sprinkler == "X")
+                    @TradeBadge("Fire Alarm", filing.FireAlarm == "X")
+                    @TradeBadge("Standpipe", filing.Standpipe == "X")
+                    @TradeBadge("Equipment", filing.Equipment == "X")
+                    @TradeBadge("Fire Suppression", filing.FireSuppression == "X")
+                    @TradeBadge("Curb Cut", filing.CurbCut == "X")
+                    @TradeBadge("Fuel Burning", filing.FuelBurning == "X")
+                    @TradeBadge("Fuel Storage", filing.FuelStorage == "X")
+                </RadzenStack>
+            </RadzenFieldset>
+        </RadzenColumn>
+    </RadzenRow>
+}
+
+@code {
+    private RenderFragment DetailRow(string label, string value) => __builder =>
+    {
+        <RadzenRow AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="4">
+                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color rz-m-0">@label</RadzenText>
+            </RadzenColumn>
+            <RadzenColumn Size="8">
+                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-m-0">@(value ?? "\u2014")</RadzenText>
+            </RadzenColumn>
+        </RadzenRow>
+    };
+
+    private RenderFragment TradeBadge(string label, bool active) => __builder =>
+    {
+        <RadzenBadge Text="@label" BadgeStyle="@(active ? Radzen.BadgeStyle.Success : Radzen.BadgeStyle.Light)"
+                     Style="@(active ? "" : "opacity: 0.4;")" />
+    };
+}
+

@@ -1,0 +1,139 @@
+@page "/permit-intel/search"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>Permit Search — NYC Permit Intel</PageTitle>
+
+<RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1" class="rz-mb-4">
+            <RadzenIcon Icon="search" class="rz-mr-2" /> NYC Permit Search
+        </RadzenText>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Filter Panel *@
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenLabel Text="Borough" Component="ddBorough" />
+        <RadzenDropDown @bind-Value="selectedBoroughs" Data="boroughOptions" Multiple="true"
+                        Placeholder="All Boroughs" Style="width: 100%;" Name="ddBorough"
+                        Change="@(args => OnFilterChanged())" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenLabel Text="Job Type" Component="ddJobType" />
+        <RadzenDropDown @bind-Value="selectedJobTypes" Data="jobTypeOptions" Multiple="true"
+                        Placeholder="All Types" Style="width: 100%;" Name="ddJobType"
+                        TextProperty="Text" ValueProperty="Value"
+                        Change="@(args => OnFilterChanged())" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenLabel Text="Date From" Component="dpFrom" />
+        <RadzenDatePicker @bind-Value="dateFrom" Style="width: 100%;" Name="dpFrom"
+                          DateFormat="MM/dd/yyyy" Change="@(args => OnFilterChanged())" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenLabel Text="Date To" Component="dpTo" />
+        <RadzenDatePicker @bind-Value="dateTo" Style="width: 100%;" Name="dpTo"
+                          DateFormat="MM/dd/yyyy" Change="@(args => OnFilterChanged())" />
+    </RadzenColumn>
+</RadzenRow>
+
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenLabel Text="Min Cost ($)" Component="numMin" />
+        <RadzenNumeric @bind-Value="minCost" Style="width: 100%;" Name="numMin"
+                       Placeholder="0" Format="N0" Change="@((decimal? args) => OnFilterChanged())" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenLabel Text="Max Cost ($)" Component="numMax" />
+        <RadzenNumeric @bind-Value="maxCost" Style="width: 100%;" Name="numMax"
+                       Placeholder="No limit" Format="N0" Change="@((decimal? args) => OnFilterChanged())" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="4">
+        <RadzenLabel Text="Search" Component="txtSearch" />
+        <RadzenTextBox @bind-Value="searchText" Style="width: 100%;" Name="txtSearch"
+                       Placeholder="Address, description, block, lot..."
+                       @oninput="@(args => { searchText = args.Value?.ToString(); })" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="2" Style="display: flex; align-items: flex-end;">
+        <RadzenButton Text="Search" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary"
+                      Style="width: 100%;" Click="@SearchPermits" />
+    </RadzenColumn>
+</RadzenRow>
+
+@* Trade Filters *@
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <RadzenLabel Text="Trades" class="rz-mb-1" />
+        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+            @foreach (var trade in tradeOptions)
+            {
+                <RadzenToggleButton @bind-Value="trade.Selected" Text="@trade.Name"
+                                     ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                     ToggleButtonStyle="Radzen.ButtonStyle.Light"
+                                     Change="@(args => OnFilterChanged())" />
+            }
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Results Summary & Export *@
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-2" Style="max-width: 1440px;" AlignItems="Radzen.AlignItems.Center">
+    <RadzenColumn Size="6">
+        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
+            @($"{totalCount:N0} permits found")
+        </RadzenText>
+    </RadzenColumn>
+    <RadzenColumn Size="6" Style="text-align: right;">
+        <RadzenSplitButton Icon="get_app" Text="Export" Click="@ExportClick"
+                           ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small">
+            <ChildContent>
+                <RadzenSplitButtonItem Text="CSV" Value="csv" Icon="description" />
+                <RadzenSplitButtonItem Text="Excel" Value="xlsx" Icon="table_chart" />
+            </ChildContent>
+        </RadzenSplitButton>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Results Grid *@
+<RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <RadzenDataGrid @ref="grid0" Data="@permits" TItem="DobjobFiling"
+                        AllowSorting="true" AllowPaging="true" PageSize="25"
+                        ShowPagingSummary="true" PagerHorizontalAlign="Radzen.HorizontalAlign.Center"
+                        AllowColumnResize="true" ColumnWidth="180px"
+                        Style="min-height: 400px;">
+            <Columns>
+                <RadzenDataGridColumn TItem="DobjobFiling" Title="Score" Width="80px" Sortable="false">
+                    <Template Context="filing">
+                        @for (int i = 0; i < (filing.LeadScore ?? 1); i++)
+                        {
+                            <RadzenIcon Icon="star" Style="color: #FFB400; font-size: 14px;" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="120px" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Title="Address" Width="220px">
+                    <Template Context="filing">
+                        @($"{filing.HouseNum} {filing.StreetName}")
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobType" Title="Type" Width="80px" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="180px" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="InitialCost" Title="Est. Cost" Width="120px" FormatString="{0:C0}" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Latest Action" Width="130px" FormatString="{0:MM/dd/yyyy}" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="BuildingType" Title="Building" Width="140px" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Title="Actions" Width="180px" Sortable="false" Filterable="false">
+                    <Template Context="filing">
+                        <RadzenButton Icon="visibility" ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                      Click="@(() => ViewDetail(filing))" class="rz-mr-1" />
+                        <RadzenButton Icon="star_border" ButtonStyle="Radzen.ButtonStyle.Warning" Size="Radzen.ButtonSize.Small"
+                                      Click="@(() => SaveAsLead(filing))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenColumn>
+</RadzenRow>

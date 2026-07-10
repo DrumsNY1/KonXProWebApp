@@ -20,6 +20,9 @@ builder.Services.AddRadzenCookieThemeService(options =>
 });
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<KonXProWebApp.db_9f8bee_konxdevService>();
+builder.Services.AddScoped<KonXProWebApp.Services.PermitIntelService>();
+builder.Services.AddScoped<KonXProWebApp.Services.StripeService>();
+builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, KonXProWebApp.Authorization.SubscriptionAuthorizationHandler>();
 builder.Services.AddDbContext<KonXProWebApp.Data.db_9f8bee_konxdevContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("db_9f8bee_konxdevConnection"));
@@ -27,7 +30,13 @@ builder.Services.AddDbContext<KonXProWebApp.Data.db_9f8bee_konxdevContext>(optio
 builder.Services.AddHttpClient("KonXProWebApp").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false }).AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequiresStarter", policy => policy.Requirements.Add(new KonXProWebApp.Authorization.SubscriptionRequirement("Starter")));
+    options.AddPolicy("RequiresPro", policy => policy.Requirements.Add(new KonXProWebApp.Authorization.SubscriptionRequirement("Pro")));
+    options.AddPolicy("RequiresBusiness", policy => policy.Requirements.Add(new KonXProWebApp.Authorization.SubscriptionRequirement("Business")));
+    options.AddPolicy("RequiresAgency", policy => policy.Requirements.Add(new KonXProWebApp.Authorization.SubscriptionRequirement("Agency")));
+});
 builder.Services.AddScoped<KonXProWebApp.SecurityService>();
 builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
 {
