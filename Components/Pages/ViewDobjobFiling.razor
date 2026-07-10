@@ -1,14 +1,16 @@
 @page "/view-dobjob-filing"
 
+@attribute [Authorize]
+
 @* @attribute [Authorize] *@
 
 
 <PageTitle>View DobjobFiling</PageTitle>
 
 <RadzenColumn SizeMD=12>
-    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">Cannot save DobjobFiling</RadzenAlert>
+    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible"></RadzenAlert>
 
-    <RadzenTemplateForm TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobjobFiling" Data="@(dobjobFiling)" Visible="@(dobjobFiling != null)">
+    <RadzenTemplateForm TItem="KonXProWebApp.Models.db_9f8bee_konxdev.DobjobFiling" Data="@(dobjobFiling)" >
         <RadzenRow>
             <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" Gap="0.5rem">
                 <RadzenTabs>
@@ -22,7 +24,8 @@
                                     <RadzenRow>
                                         <RadzenColumn Size="6">
                                             <p><strong>Borough:</strong> @dobjobFiling.Borough</p>
-                                            <p><strong>House Number:</strong> @dobjobFiling.HouseNum @dobjobFiling.StreetName</p>          
+                                            <p><strong>Address:</strong> @dobjobFiling.HouseNum @dobjobFiling.StreetName</p>
+                                            <p><strong>Neighborhood:</strong> @dobjobFiling.Gisntaname</p>
                                             <p><strong>Block:</strong> @dobjobFiling.Block</p>
                                             <p><strong>Lot:</strong> @dobjobFiling.Lot</p>
                                             <p><strong>Community Board:</strong> @dobjobFiling.CommunityBoard</p>
@@ -79,13 +82,14 @@
                {  
                    <RadzenRow>  
                        <RadzenColumn Size="6">  
-                           <p><strong>Owner's Business:</strong> @dobjobFiling.OwnersBusinessName</p>  
+                           <p><strong>Owner's Business Name:</strong> @dobjobFiling.OwnersBusinessName</p>
+                           <p><strong>Owner's Business Type:</strong> @dobjobFiling.OwnerType</p>
                            <p><strong>Owner's Name:</strong> @dobjobFiling.OwnersFirstName @dobjobFiling.OwnersLastName </p>
                            <p><strong>Owner's Address:</strong> @dobjobFiling.OwnersHouseNumber @dobjobFiling.OwnersHouseStreetName </p>
                            <p><strong>Owner's Phone:</strong> @dobjobFiling.OwnersPhone</p>  
                        </RadzenColumn>  
                        <RadzenColumn Size="6">  
-                           <p><strong>Applicant's Business:</strong> @dobjobFiling.ApplicantLicenseNum</p>
+                           <p><strong>Applicant's Business:</strong> @dobjobFiling.ProfessionalCert </p>
                            <p><strong>Applicant's Name:</strong> @dobjobFiling.ApplicantsFirstName @dobjobFiling.ApplicantsLastName</p>
                            <p><strong>License Type:</strong> @dobjobFiling.ApplicantProfessionalTitle</p>  
                            <p><strong>License Number:</strong> @dobjobFiling.ApplicantLicenseNum</p>  
@@ -106,7 +110,8 @@
                                         <RadzenColumn Size="6">
                                             <p><strong>Job Number:</strong> @dobjobFiling.JobNum</p>
                                             <p><strong>Job Type:</strong> @dobjobFiling.JobType</p>
-@*                                             <p><strong>Filing Status:</strong> @dobjobFiling.F</p> *@
+                                            <p><strong>Total Est. Cost:</strong> @dobjobFiling.InitialCost?.ToString("C") </p>
+                                            <p><strong>Job Description:</strong> @dobjobFiling.JobDescription</p> 
                                             <p><strong>Latest Action Date:</strong> @dobjobFiling.LatestActionDate?.ToString("MM/dd/yyyy")</p>
                                             <p><strong>Pre-Filing Date:</strong> @dobjobFiling.PreFilingDate?.ToString("MM/dd/yyyy")</p>
                                             <p><strong>Approved Date:</strong> @dobjobFiling.Approved?.ToString("MM/dd/yyyy")</p>
@@ -115,7 +120,7 @@
                                             @* <p><strong>Work Type:</strong> @dobjobFiling.WorkType</p> *@
                     @*                         <p><strong>Permit Status:</strong> @dobjobFiling.PermitStatus</p>
                                             <p><strong>Job Description:</strong> @dobjobFiling.JobDescription</p>
-                                            <p><strong>Total Est. Cost:</strong> @dobjobFiling.InitialCost .ToString("C")</p>
+                                            
                                             <p><strong>Filing Representative:</strong> @dobjobFiling.FilingRepresentative</p>
                                             <p><strong>Initial Cost:</strong> @dobjobFiling.InitialCost.ToString("C")</p>
                                             <p><strong>Total Construction Floor Area:</strong> @dobjobFiling.Totalconstructionfloorarea.ToString("N0")</p> *@
@@ -125,41 +130,6 @@
                             </div>
                         </RadzenTabsItem>
                         <!----Proect Identification Tab End ---->
-                        <!----Job Address Tab Begin ---->
-                        <RadzenTabsItem Text="Job Address">
-                            <RadzenRow style="margin-bottom: .1rem">
-                                <RadzenColumn SizeMD="3">
-                                    <RadzenLabel Text="Address" style="text-align: right; width: 100%; " />
-                                </RadzenColumn>
-                                <RadzenColumn SizeMD="9">
-                                    <span style="display: block; width: 100%; font-weight: bold; text-align: left;">@dobjobFiling.HouseNum @dobjobFiling.StreetName</span>
-                                </RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow style="margin-bottom: .1rem">
-                                <RadzenColumn SizeMD="3">
-                                </RadzenColumn>
-                                <RadzenColumn SizeMD="9">
-                                    <span style="display: block; width: 100%; font-weight: bold;">@dobjobFiling.Borough NY</span>
-                                </RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow style="margin-bottom: .1rem">
-                                <RadzenColumn SizeMD="3">
-                                    <RadzenLabel Text="Block" Component="Block" style="width: 100%" />
-                                </RadzenColumn>
-                                <RadzenColumn SizeMD="9">
-                                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobjobFiling.Block)" Name="Block" />
-                                </RadzenColumn>
-                            </RadzenRow>
-                            <RadzenRow style="margin-bottom: 1rem">
-                                <RadzenColumn SizeMD="3">
-                                    <RadzenLabel Text="Lot" Component="Lot" style="width: 100%" />
-                                </RadzenColumn>
-                                <RadzenColumn SizeMD="9">
-                                    <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(dobjobFiling.Lot)" Name="Lot" />
-                                </RadzenColumn>
-                            </RadzenRow>
-                        </RadzenTabsItem>
-                        <!----Job Address Tab End ---->
 
                         <!----Owners Address Info --->
                         <RadzenTabsItem Text="Owners Info">

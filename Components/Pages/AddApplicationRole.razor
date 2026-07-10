@@ -7,7 +7,7 @@
             <RadzenAlert Title="Cannot create role" Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
 
             <RadzenStack style="margin-bottom: 1rem;">
-                <RadzenFormField Text="Name" Variant="Variant.Outlined">
+                <RadzenFormField Text="Name" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenTextBox style="width: 100%" @bind-Value="@(role.Name)" Name="Name" />
                     </ChildContent>

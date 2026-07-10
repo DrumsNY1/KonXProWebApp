@@ -18,7 +18,7 @@
                 </RadzenAlert>
 
                 <RadzenStack style="margin-bottom: 1rem;">
-                    <RadzenFormField Text="Old Password" Variant="Variant.Outlined">
+                    <RadzenFormField Text="Old Password" Variant="Variant.Filled">
                         <ChildContent>
                             <RadzenPassword @bind-Value="@oldPassword" style="display: block; width: 100%" Name="OldPassword" />
                         </ChildContent>
@@ -26,7 +26,7 @@
                             <RadzenRequiredValidator Component="OldPassword" Text="Enter your current password" />
                         </Helper>
                     </RadzenFormField>
-                    <RadzenFormField Text="New Password" Variant="Variant.Outlined">
+                    <RadzenFormField Text="New Password" Variant="Variant.Filled">
                         <ChildContent>
                             <RadzenPassword @bind-Value="@newPassword" style="display: block; width: 100%" Name="NewPassword" />
                         </ChildContent>
@@ -34,7 +34,7 @@
                             <RadzenRequiredValidator Component="NewPassword" Text="Enter your new password" />
                         </Helper>
                     </RadzenFormField>
-                    <RadzenFormField Text="Confirm Password" Variant="Variant.Outlined">
+                    <RadzenFormField Text="Confirm Password" Variant="Variant.Filled">
                         <ChildContent>
                             <RadzenPassword @bind-Value="@confirmPassword" style="display: block; width: 100%" Name="ConfirmPassword" />
                         </ChildContent>

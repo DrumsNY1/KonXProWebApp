@@ -1,0 +1,44 @@
+@page "/permit-intel/map"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>Permit Map — NYC Permit Intel</PageTitle>
+
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
+            <RadzenIcon Icon="map" class="rz-mr-2" /> Permit Map
+        </RadzenText>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Filter Bar *@
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
+                        Placeholder="All Boroughs" Style="width: 100%;"
+                        Change="@(args => LoadMapData())" AllowClear="true" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="3">
+        <RadzenDropDown @bind-Value="selectedJobType" Data="jobTypeOptions"
+                        Placeholder="All Job Types" Style="width: 100%;"
+                        Change="@(args => LoadMapData())" AllowClear="true" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="2">
+        <RadzenButton Text="Refresh Map" Icon="refresh" ButtonStyle="Radzen.ButtonStyle.Primary"
+                      Style="width: 100%;" Click="@LoadMapData" />
+    </RadzenColumn>
+    <RadzenColumn Size="12" SizeMD="4" Style="text-align: right;">
+        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
+            @($"{mapPermitCount:N0} permits on map")
+        </RadzenText>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Map Container *@
+<RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <div id="permit-map" style="height: 600px; width: 100%; border-radius: 8px; border: 1px solid var(--rz-border-color);"></div>
+    </RadzenColumn>
+</RadzenRow>

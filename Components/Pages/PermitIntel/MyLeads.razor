@@ -1,0 +1,91 @@
+@page "/permit-intel/leads"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>My Leads — NYC Permit Intel</PageTitle>
+
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" AlignItems="Radzen.AlignItems.Center">
+    <RadzenColumn Size="6">
+        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
+            <RadzenIcon Icon="star" class="rz-mr-2" /> My Leads
+        </RadzenText>
+    </RadzenColumn>
+    <RadzenColumn Size="6" Style="text-align: right;">
+        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
+            @($"{leads?.Count() ?? 0} saved leads")
+        </RadzenText>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Status Filter Tabs *@
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem" Wrap="Radzen.FlexWrap.Wrap">
+            @foreach (var status in statusOptions)
+            {
+                <RadzenButton Text="@($"{status} ({GetStatusCount(status)})")"
+                              ButtonStyle="@(selectedStatus == status ? Radzen.ButtonStyle.Primary : Radzen.ButtonStyle.Light)"
+                              Size="Radzen.ButtonSize.Small"
+                              Click="@(() => FilterByStatus(status))" />
+            }
+        </RadzenStack>
+    </RadzenColumn>
+</RadzenRow>
+
+@* Leads Grid *@
+<RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+    <RadzenColumn Size="12">
+        <RadzenDataGrid @ref="grid0" Data="@filteredLeads" TItem="SavedLead"
+                        AllowSorting="true" AllowPaging="true" PageSize="20"
+                        ShowPagingSummary="true" ColumnWidth="160px">
+            <Columns>
+                <RadzenDataGridColumn TItem="SavedLead" Title="Score" Width="80px" Sortable="false">
+                    <Template Context="lead">
+                        @if (lead.DobjobFiling != null)
+                        {
+                            @for (int i = 0; i < (lead.DobjobFiling.LeadScore ?? 1); i++)
+                            {
+                                <RadzenIcon Icon="star" Style="color: #FFB400; font-size: 14px;" />
+                            }
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SavedLead" Title="Address" Width="240px">
+                    <Template Context="lead">
+                        @if (lead.DobjobFiling != null)
+                        {
+                            <RadzenLink Path="@($"/permit-intel/detail/{lead.DobjobFilingId}")"
+                                        Text="@($"{lead.DobjobFiling.HouseNum} {lead.DobjobFiling.StreetName}")" />
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SavedLead" Title="Borough" Width="120px">
+                    <Template Context="lead">@(lead.DobjobFiling?.Borough ?? "—")</Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SavedLead" Title="Est. Cost" Width="120px">
+                    <Template Context="lead">@(lead.DobjobFiling?.InitialCost?.ToString("C0") ?? "—")</Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SavedLead" Title="Status" Width="140px">
+                    <Template Context="lead">
+                        <RadzenDropDown @bind-Value="lead.Status" Data="leadStatusOptions"
+                                        Style="width: 100%;" Change="@(args => UpdateStatus(lead))" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SavedLead" Title="Notes" Width="250px">
+                    <Template Context="lead">
+                        <RadzenTextBox @bind-Value="lead.Notes" Style="width: 100%;" Placeholder="Add notes..."
+                                       Change="@(args => UpdateNotes(lead))" />
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="SavedLead" Property="SavedAt" Title="Saved" Width="120px" FormatString="{0:MM/dd/yyyy}" />
+                <RadzenDataGridColumn TItem="SavedLead" Title="" Width="60px" Sortable="false">
+                    <Template Context="lead">
+                        <RadzenButton Icon="delete" ButtonStyle="Radzen.ButtonStyle.Danger" Size="Radzen.ButtonSize.Small"
+                                      Variant="Radzen.Variant.Text" Click="@(() => RemoveLead(lead))" />
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </RadzenColumn>
+</RadzenRow>

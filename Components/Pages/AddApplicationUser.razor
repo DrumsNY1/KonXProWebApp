@@ -7,7 +7,7 @@
             <RadzenAlert Title="Cannot create user" Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
 
             <RadzenStack style="margin-bottom: 1rem;">
-                <RadzenFormField Text="Email" Variant="Variant.Outlined">
+                <RadzenFormField Text="Email" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenTextBox style="width: 100%" @bind-Value="@(user.Email)" Name="Email" />
                     </ChildContent>
@@ -15,12 +15,12 @@
                         <RadzenRequiredValidator Component="Email" Text="Email is required" />
                     </Helper>
                 </RadzenFormField>
-                <RadzenFormField Text="Roles" Variant="Variant.Outlined">
+                <RadzenFormField Text="Roles" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenDropDown Data="@roles" Multiple="true" style="width: 100%" TextProperty="Name" @bind-Value="@(userRoles)" ValueProperty="Id" Name="Roles" />
                     </ChildContent>
                 </RadzenFormField>
-                <RadzenFormField Text="Password" Variant="Variant.Outlined">
+                <RadzenFormField Text="Password" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenPassword @bind-Value="@(user.Password)" style="display: block; width: 100%" Name="Password" />
                     </ChildContent>
@@ -28,7 +28,7 @@
                         <RadzenRequiredValidator Component="Password" Text="Password is required" />
                     </Helper>
                 </RadzenFormField>
-                <RadzenFormField Text="Confirm Password" Variant="Variant.Outlined">
+                <RadzenFormField Text="Confirm Password" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenPassword style="display: block; width: 100%" @bind-Value="@(user.ConfirmPassword)" Name="ConfirmPassword" />
                     </ChildContent>

@@ -8,6 +8,14 @@
   <ItemGroup>
     <Compile Remove="Components\Pages\ClaudeDobFilings.razor.cs" />
     <Compile Remove="Components\Pages\EditDobjobFiling.razor.cs" />
+    <Compile Remove="KonXProWebApp.Functions\**" />
+    <Content Remove="KonXProWebApp.Functions\**" />
+    <EmbeddedResource Remove="KonXProWebApp.Functions\**" />
+    <None Remove="KonXProWebApp.Functions\**" />
+    <Compile Remove="KonXProWebApp.Tests\**" />
+    <Content Remove="KonXProWebApp.Tests\**" />
+    <EmbeddedResource Remove="KonXProWebApp.Tests\**" />
+    <None Remove="KonXProWebApp.Tests\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Components\Pages\ClaudeDobFilings.razor" />
@@ -23,5 +31,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.*-*" />
     <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="9.*-*" />
     <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.*-*" />
+    <PackageReference Include="Stripe.net" Version="52.1.0" />
   </ItemGroup>
 </Project>

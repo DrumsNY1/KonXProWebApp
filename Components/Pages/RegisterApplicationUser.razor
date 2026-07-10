@@ -1,6 +1,6 @@
-@page "/register-application-user"
-@attribute [Authorize]
+@page "/register-application-user"
 
+@attribute [Authorize]
 <PageTitle>Register Application User</PageTitle>
 <RadzenRow>
     <RadzenColumn SizeMD="12">
@@ -9,7 +9,7 @@
             <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
 
             <RadzenStack style="margin-bottom: 1rem;">
-                <RadzenFormField Text="Email" Variant="Variant.Outlined">
+                <RadzenFormField Text="Email" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenTextBox style="display: block; width: 100%" @bind-Value="@(user.Email)" Name="UserName" />
                     </ChildContent>
@@ -17,7 +17,7 @@
                         <RadzenRequiredValidator Component="UserName" Text="Email is required" />
                     </Helper>
                 </RadzenFormField>
-                <RadzenFormField Text="Password" Variant="Variant.Outlined">
+                <RadzenFormField Text="Password" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenPassword @bind-Value="@(user.Password)" style="display: block; width: 100%" Name="Password" />
                     </ChildContent>
@@ -25,7 +25,7 @@
                         <RadzenRequiredValidator Component="Password" Text="Password is required" />
                     </Helper>
                 </RadzenFormField>
-                <RadzenFormField Text="Confirm Password" Variant="Variant.Outlined">
+                <RadzenFormField Text="Confirm Password" Variant="Variant.Filled">
                     <ChildContent>
                         <RadzenPassword style="display: block; width: 100%" @bind-Value="@(user.ConfirmPassword)" Name="ConfirmPassword" />
                     </ChildContent>
