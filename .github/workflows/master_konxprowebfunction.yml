@@ -4,12 +4,6 @@
 name: Build and deploy dotnet core project to Azure Function App - KonXProWebFunction
 
 on:
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
-name: Build and deploy dotnet core project to Azure Function App - KonXProWebFunction
-
-on:
   push:
     branches:
       - master
@@ -25,13 +19,6 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
-
-    steps:
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@v4
-
-      - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v1
 
     steps:
       - name: 'Checkout GitHub Action'
@@ -63,4 +50,3 @@ jobs:
           app-name: 'KonXProWebFunction'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
-          
