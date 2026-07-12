@@ -1,0 +1,25 @@
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
+
+<div class="landing-layout">
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">
+      <div class="nav-logo-icon">K</div>
+      <span class="nav-logo-text">Kon<span>X</span>Pro</span>
+    </a>
+    <div class="nav-links rz-display-none rz-display-md-flex">
+      <a href="/#how">How It Works</a>
+      <a href="/#features">Features</a>
+      <a href="/#pricing">Pricing</a>
+    </div>
+    <div class="nav-actions">
+      <button class="btn-ghost" @onclick='() => NavigationManager.NavigateTo("Account/Login", true)'>Sign In</button>
+      <button class="btn-primary" @onclick='() => NavigationManager.NavigateTo("Account/Register", true)'>Start Free Trial</button>
+    </div>
+  </nav>
+
+  <main>
+      @Body
+  </main>
+</div>

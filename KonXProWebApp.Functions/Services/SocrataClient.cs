@@ -36,9 +36,20 @@ public class SocrataClient
 
     public IAsyncEnumerable<SocrataHpdViolationRecord> GetHpdViolationsSince(DateTime? since)
     {
-        // Inspection Date for HPD Violations
-        // Filter only open violations
-        return GetRecordsSince<SocrataHpdViolationRecord>("csn4-vhvf.json", "inspectiondate", since, "violationstatus='Open'");
+        return GetRecordsSince<SocrataHpdViolationRecord>("csn4-vhvf.json", "inspectiondate", since, null);
+    }
+
+    public IAsyncEnumerable<SocrataServiceRequest311> GetBuilding311ComplaintsSince(DateTime? since)
+    {
+        // Only get complaints that have a BBL (Building) and are relevant to building distress
+        string extraWhere = "bbl IS NOT NULL AND complaint_type IN ('HEAT/HOT WATER', 'PLUMBING', 'WATER LEAK', 'General Construction/Plumbing')";
+        return GetRecordsSince<SocrataServiceRequest311>("erm2-nwe9.json", "created_date", since, extraWhere);
+    }
+
+    public IAsyncEnumerable<SocrataContractorRecord> GetContractorsSince(DateTime? since)
+    {
+        string extraWhere = "business_category='Home Improvement Contractor'";
+        return GetRecordsSince<SocrataContractorRecord>("w7w3-xahh.json", "license_creation_date", since, extraWhere);
     }
 
     private async IAsyncEnumerable<T> GetRecordsSince<T>(string resourceId, string dateColumn, DateTime? since, string extraWhere)

@@ -5,40 +5,29 @@
 
 <PageTitle>Permit Map — NYC Permit Intel</PageTitle>
 
-<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
-    <RadzenColumn Size="12">
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
-            <RadzenIcon Icon="map" class="rz-mr-2" /> Permit Map
-        </RadzenText>
-    </RadzenColumn>
-</RadzenRow>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>Permit Map</h1>
+    <p>Visualize active permits across NYC.</p>
+</div>
 
-@* Filter Bar *@
-<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
-    <RadzenColumn Size="12" SizeMD="3">
-        <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
-                        Placeholder="All Boroughs" Style="width: 100%;"
-                        Change="@(args => LoadMapData())" AllowClear="true" />
-    </RadzenColumn>
-    <RadzenColumn Size="12" SizeMD="3">
-        <RadzenDropDown @bind-Value="selectedJobType" Data="jobTypeOptions"
-                        Placeholder="All Job Types" Style="width: 100%;"
-                        Change="@(args => LoadMapData())" AllowClear="true" />
-    </RadzenColumn>
-    <RadzenColumn Size="12" SizeMD="2">
-        <RadzenButton Text="Refresh Map" Icon="refresh" ButtonStyle="Radzen.ButtonStyle.Primary"
-                      Style="width: 100%;" Click="@LoadMapData" />
-    </RadzenColumn>
-    <RadzenColumn Size="12" SizeMD="4" Style="text-align: right;">
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-            @($"{mapPermitCount:N0} permits on map")
-        </RadzenText>
-    </RadzenColumn>
-</RadzenRow>
-
-@* Map Container *@
-<RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
-    <RadzenColumn Size="12">
-        <div id="permit-map" style="height: 600px; width: 100%; border-radius: 8px; border: 1px solid var(--rz-border-color);"></div>
-    </RadzenColumn>
-</RadzenRow>
+<div class="card rz-mb-4">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Interactive Map</div>
+            <div class="card-subtitle">@($"{mapPermitCount:N0} permits currently shown")</div>
+        </div>
+        <div class="card-actions">
+            <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
+                            Placeholder="All Boroughs" Style="width: 200px;"
+                            Change="@(args => LoadMapData())" AllowClear="true" />
+            <RadzenDropDown @bind-Value="selectedJobType" Data="jobTypeOptions"
+                            Placeholder="All Job Types" Style="width: 200px;"
+                            Change="@(args => LoadMapData())" AllowClear="true" />
+            <RadzenButton Text="Refresh Map" Icon="refresh" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@LoadMapData" />
+        </div>
+    </div>
+    
+    @* Map Container *@
+    <div id="permit-map" style="height: 600px; width: 100%; border-radius: 0 0 var(--radius) var(--radius); border-top: 1px solid var(--border);"></div>
+</div>

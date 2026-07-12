@@ -23,6 +23,17 @@ public class DobViolationIngestionFunction
     [Function("DobViolationIngestionFunction")]
     public async Task Run([TimerTrigger("0 15 10 * * *")] TimerInfo timerInfo)
     {
+        await RunInternal();
+    }
+
+    [Function("DobViolationIngestionHttp")]
+    public async Task RunHttp([HttpTrigger(AuthorizationLevel.Function, "get", "post")] Microsoft.AspNetCore.Http.HttpRequest req)
+    {
+        await RunInternal();
+    }
+
+    private async Task RunInternal()
+    {
         _logger.LogInformation("DobViolationIngestionFunction started at {Time}", DateTime.UtcNow);
 
         int totalInserted = 0, totalUpdated = 0, totalSkipped = 0;

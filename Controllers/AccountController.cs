@@ -63,7 +63,7 @@ namespace KonXProWebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string userName, string password, string redirectUrl)
         {
-            redirectUrl = string.IsNullOrEmpty(redirectUrl) ? "~/" : redirectUrl.StartsWith("/") ? redirectUrl : $"~/{redirectUrl}";
+            redirectUrl = string.IsNullOrEmpty(redirectUrl) ? "~/permit-intel/search" : redirectUrl.StartsWith("/") ? redirectUrl : $"~/{redirectUrl}";
 
             if (env.EnvironmentName == "Development" && userName == "admin" && password == "admin")
             {

@@ -4,118 +4,120 @@
 
 <PageTitle>Alert Settings — NYC Permit Intel</PageTitle>
 
-<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
-    <RadzenColumn Size="12">
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
-            <RadzenIcon Icon="notifications_active" class="rz-mr-2" /> Alert Settings
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color">
-            Configure alerts to get notified when new permits match your criteria.
-        </RadzenText>
-    </RadzenColumn>
-</RadzenRow>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>Alert Settings</h1>
+    <p>Configure alerts to get notified when new permits match your criteria.</p>
+</div>
 
 @if (preference != null)
 {
     <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
         <RadzenColumn Size="12" SizeMD="8">
-            <RadzenCard>
-                <RadzenStack Gap="1.5rem">
-                    @* Active Toggle *@
-                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
-                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5">Enable Alerts</RadzenText>
-                        <RadzenSwitch @bind-Value="preference.IsActive" />
-                    </RadzenStack>
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Alert Configuration</div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenStack Gap="1.5rem">
+                        @* Active Toggle *@
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0">Enable Alerts</RadzenText>
+                            <RadzenSwitch @bind-Value="preference.IsActive" />
+                        </RadzenStack>
 
-                    @* Borough Filter *@
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Boroughs" Component="ddAlertBoroughs" />
-                        <RadzenDropDown @bind-Value="selectedBoroughs" Data="boroughOptions" Multiple="true"
-                                        Placeholder="All Boroughs (no filter)" Style="width: 100%;" Name="ddAlertBoroughs" />
-                    </RadzenStack>
+                        @* Borough Filter *@
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenLabel Text="Boroughs" Component="ddAlertBoroughs" class="rz-text-tertiary-color" />
+                            <RadzenDropDown @bind-Value="selectedBoroughs" Data="boroughOptions" Multiple="true"
+                                            Placeholder="All Boroughs (no filter)" Style="width: 100%;" Name="ddAlertBoroughs" />
+                        </RadzenStack>
 
-                    @* Job Type Filter *@
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Job Types" Component="ddAlertJobTypes" />
-                        <RadzenDropDown @bind-Value="selectedJobTypes" Data="jobTypeOptions" Multiple="true"
-                                        Placeholder="All Job Types" Style="width: 100%;" Name="ddAlertJobTypes"
-                                        TextProperty="Text" ValueProperty="Value" />
-                    </RadzenStack>
+                        @* Job Type Filter *@
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenLabel Text="Job Types" Component="ddAlertJobTypes" class="rz-text-tertiary-color" />
+                            <RadzenDropDown @bind-Value="selectedJobTypes" Data="jobTypeOptions" Multiple="true"
+                                            Placeholder="All Job Types" Style="width: 100%;" Name="ddAlertJobTypes"
+                                            TextProperty="Text" ValueProperty="Value" />
+                        </RadzenStack>
 
-                    @* Trade Filter *@
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Trades" Component="ddAlertTrades" />
-                        <RadzenDropDown @bind-Value="selectedTrades" Data="tradeOptions" Multiple="true"
-                                        Placeholder="All Trades" Style="width: 100%;" Name="ddAlertTrades" />
-                    </RadzenStack>
+                        @* Trade Filter *@
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenLabel Text="Trades" Component="ddAlertTrades" class="rz-text-tertiary-color" />
+                            <RadzenDropDown @bind-Value="selectedTrades" Data="tradeOptions" Multiple="true"
+                                            Placeholder="All Trades" Style="width: 100%;" Name="ddAlertTrades" />
+                        </RadzenStack>
 
-                    @* Cost Range *@
-                    <RadzenRow Gap="1rem">
-                        <RadzenColumn Size="6">
-                            <RadzenLabel Text="Min Cost ($)" Component="numAlertMin" />
-                            <RadzenNumeric @bind-Value="preference.MinCost" Style="width: 100%;" Name="numAlertMin"
-                                           Placeholder="0" Format="N0" />
-                        </RadzenColumn>
-                        <RadzenColumn Size="6">
-                            <RadzenLabel Text="Max Cost ($)" Component="numAlertMax" />
-                            <RadzenNumeric @bind-Value="preference.MaxCost" Style="width: 100%;" Name="numAlertMax"
-                                           Placeholder="No limit" Format="N0" />
-                        </RadzenColumn>
-                    </RadzenRow>
+                        @* Cost Range *@
+                        <RadzenRow Gap="1rem">
+                            <RadzenColumn Size="6">
+                                <RadzenLabel Text="Min Cost ($)" Component="numAlertMin" class="rz-text-tertiary-color" />
+                                <RadzenNumeric @bind-Value="preference.MinCost" Style="width: 100%;" Name="numAlertMin"
+                                               Placeholder="0" Format="N0" />
+                            </RadzenColumn>
+                            <RadzenColumn Size="6">
+                                <RadzenLabel Text="Max Cost ($)" Component="numAlertMax" class="rz-text-tertiary-color" />
+                                <RadzenNumeric @bind-Value="preference.MaxCost" Style="width: 100%;" Name="numAlertMax"
+                                               Placeholder="No limit" Format="N0" />
+                            </RadzenColumn>
+                        </RadzenRow>
 
-                    @* Notification Channel *@
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Notification Channel" />
-                        <RadzenRadioButtonList @bind-Value="preference.AlertChannel" TValue="string" Orientation="Radzen.Orientation.Horizontal">
-                            <Items>
-                                <RadzenRadioButtonListItem Text="Email" Value="@("Email")" />
-                                <RadzenRadioButtonListItem Text="SMS" Value="@("SMS")" />
-                                <RadzenRadioButtonListItem Text="Both" Value="@("Both")" />
-                            </Items>
-                        </RadzenRadioButtonList>
-                    </RadzenStack>
+                        @* Notification Channel *@
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenLabel Text="Notification Channel" class="rz-text-tertiary-color" />
+                            <RadzenRadioButtonList @bind-Value="preference.AlertChannel" TValue="string" Orientation="Radzen.Orientation.Horizontal">
+                                <Items>
+                                    <RadzenRadioButtonListItem Text="Email" Value="@("Email")" />
+                                    <RadzenRadioButtonListItem Text="SMS" Value="@("SMS")" />
+                                    <RadzenRadioButtonListItem Text="Both" Value="@("Both")" />
+                                </Items>
+                            </RadzenRadioButtonList>
+                        </RadzenStack>
 
-                    @* Frequency *@
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenLabel Text="Alert Frequency" />
-                        <RadzenRadioButtonList @bind-Value="preference.AlertFrequency" TValue="string" Orientation="Radzen.Orientation.Horizontal">
-                            <Items>
-                                <RadzenRadioButtonListItem Text="Daily Digest" Value="@("Daily")" />
-                                <RadzenRadioButtonListItem Text="Instant" Value="@("Instant")" />
-                            </Items>
-                        </RadzenRadioButtonList>
-                    </RadzenStack>
+                        @* Frequency *@
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenLabel Text="Alert Frequency" class="rz-text-tertiary-color" />
+                            <RadzenRadioButtonList @bind-Value="preference.AlertFrequency" TValue="string" Orientation="Radzen.Orientation.Horizontal">
+                                <Items>
+                                    <RadzenRadioButtonListItem Text="Daily Digest" Value="@("Daily")" />
+                                    <RadzenRadioButtonListItem Text="Instant" Value="@("Instant")" />
+                                </Items>
+                            </RadzenRadioButtonList>
+                        </RadzenStack>
 
-                    @* Save Button *@
-                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="Radzen.JustifyContent.End" Gap="0.5rem">
-                        <RadzenButton Text="Save Settings" Icon="save" ButtonStyle="Radzen.ButtonStyle.Primary"
-                                      Click="@SaveSettings" IsBusy="@isSaving" />
+                        @* Save Button *@
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" JustifyContent="Radzen.JustifyContent.End" Gap="0.5rem" class="rz-mt-4">
+                            <RadzenButton Text="Save Settings" Icon="save" ButtonStyle="Radzen.ButtonStyle.Primary"
+                                          Click="@SaveSettings" IsBusy="@isSaving" />
+                        </RadzenStack>
                     </RadzenStack>
-                </RadzenStack>
-            </RadzenCard>
+                </div>
+            </div>
         </RadzenColumn>
 
         @* Info Sidebar *@
         <RadzenColumn Size="12" SizeMD="4">
-            <RadzenCard>
-                <RadzenStack Gap="1rem">
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6">
-                        <RadzenIcon Icon="info" class="rz-mr-1" /> How Alerts Work
-                    </RadzenText>
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
-                        When new permits are ingested from NYC Open Data, we match them against your filter criteria.
-                    </RadzenText>
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
-                        <strong>Daily Digest:</strong> A summary email is sent at 7 AM ET with all matching permits from the previous day.
-                    </RadzenText>
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
-                        <strong>Instant:</strong> Notifications are sent within minutes of new permit data becoming available.
-                    </RadzenText>
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-                        SMS alerts are available for Pro and higher tiers.
-                    </RadzenText>
-                </RadzenStack>
-            </RadzenCard>
+            <div class="card" style="background-color: var(--navy); border: 1px solid var(--border);">
+                <div class="card-header">
+                    <div class="card-title">How Alerts Work</div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenStack Gap="1rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
+                            When new permits are ingested from NYC Open Data, we match them against your filter criteria.
+                        </RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
+                            <strong>Daily Digest:</strong> A summary email is sent at 7 AM ET with all matching permits from the previous day.
+                        </RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
+                            <strong>Instant:</strong> Notifications are sent within minutes of new permit data becoming available.
+                        </RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
+                            SMS alerts are available for Pro and higher tiers.
+                        </RadzenText>
+                    </RadzenStack>
+                </div>
+            </div>
         </RadzenColumn>
     </RadzenRow>
 }

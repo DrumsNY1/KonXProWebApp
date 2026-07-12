@@ -39,6 +39,9 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         protected DobjobFiling filing;
         protected bool isLeadSaved = false;
+        protected IEnumerable<HpdViolation> hpdViolations = Enumerable.Empty<HpdViolation>();
+        protected IEnumerable<DobViolation> dobViolations = Enumerable.Empty<DobViolation>();
+        protected IEnumerable<ServiceRequest311> complaints311 = Enumerable.Empty<ServiceRequest311>();
 
         protected override async Task OnInitializedAsync()
         {
@@ -46,6 +49,24 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
             if (filing != null)
             {
+                if (!string.IsNullOrEmpty(filing.Bin))
+                {
+                    hpdViolations = await PermitIntelService.GetHpdViolationsByBin(filing.Bin);
+                    dobViolations = await PermitIntelService.GetDobViolationsByBin(filing.Bin);
+                }
+                
+                var bbl = KonXProWebApp.Services.PermitIntelService.GetBblFromFiling(filing);
+                if (!string.IsNullOrEmpty(bbl))
+                {
+                    complaints311 = await PermitIntelService.Get311ComplaintsByBbl(bbl);
+                    // Also update LeadScore for display if not stored in DB
+                    filing.LeadScore = KonXProWebApp.Services.PermitIntelService.ScorePermit(filing, await PermitIntelService.Get311ComplaintVelocity(bbl));
+                }
+                else
+                {
+                    filing.LeadScore = KonXProWebApp.Services.PermitIntelService.ScorePermit(filing);
+                }
+
                 var userId = Security.User?.Id;
                 if (!string.IsNullOrEmpty(userId))
                 {

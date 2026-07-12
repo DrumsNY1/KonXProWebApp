@@ -498,6 +498,76 @@ public class IngestionService
         return (inserted, updated, skipped);
     }
 
+    public async Task<(int Inserted, int Updated, int Skipped)> UpsertContractors(IReadOnlyList<SocrataContractorRecord> records)
+    {
+        int inserted = 0, updated = 0, skipped = 0;
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        foreach (var record in records)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(record.LicenseNumber) || string.IsNullOrEmpty(record.BusinessUniqueId)) { skipped++; continue; }
+
+                const string mergeSql = @"
+                    MERGE HomeImprovementContractors AS target
+                    USING (SELECT @LicenseNumber AS LicenseNumber, @BusinessUniqueId AS BusinessUniqueId) AS source
+                    ON target.LicenseNumber = source.LicenseNumber AND target.BusinessUniqueId = source.BusinessUniqueId
+                    WHEN MATCHED THEN UPDATE SET
+                        BusinessName = @BusinessName,
+                        DbaTradeName = @DbaTradeName,
+                        LicenseStatus = @LicenseStatus,
+                        LicenseExpirationDate = @LicenseExpirationDate,
+                        ContactPhoneNumber = @ContactPhoneNumber,
+                        AddressBuilding = @AddressBuilding,
+                        AddressStreetName = @AddressStreetName,
+                        AddressCity = @AddressCity,
+                        AddressState = @AddressState,
+                        AddressZip = @AddressZip,
+                        Borough = @Borough,
+                        IngestedAt = @IngestedAt
+                    WHEN NOT MATCHED THEN INSERT (
+                        LicenseNumber, BusinessName, DbaTradeName, BusinessUniqueId, LicenseStatus,
+                        LicenseIssueDate, LicenseExpirationDate, ContactPhoneNumber, AddressBuilding,
+                        AddressStreetName, AddressCity, AddressState, AddressZip, Borough, IngestedAt
+                    ) VALUES (
+                        @LicenseNumber, @BusinessName, @DbaTradeName, @BusinessUniqueId, @LicenseStatus,
+                        @LicenseIssueDate, @LicenseExpirationDate, @ContactPhoneNumber, @AddressBuilding,
+                        @AddressStreetName, @AddressCity, @AddressState, @AddressZip, @Borough, @IngestedAt
+                    ) OUTPUT $action;";
+
+                await using var cmd = new SqlCommand(mergeSql, connection);
+                cmd.Parameters.AddWithValue("@LicenseNumber", record.LicenseNumber);
+                cmd.Parameters.AddWithValue("@BusinessName", (object)record.BusinessName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@DbaTradeName", (object)record.DbaTradeName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@BusinessUniqueId", record.BusinessUniqueId);
+                cmd.Parameters.AddWithValue("@LicenseStatus", (object)record.LicenseStatus ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@LicenseIssueDate", (object)ParseDate(record.LicenseIssueDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@LicenseExpirationDate", (object)ParseDate(record.LicenseExpirationDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ContactPhoneNumber", (object)record.ContactPhone ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressBuilding", (object)record.AddressBuilding ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressStreetName", (object)record.AddressStreetName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressCity", (object)record.AddressCity ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressState", (object)record.AddressState ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressZip", (object)record.AddressZip ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Borough", (object)record.AddressBorough ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IngestedAt", DateTime.UtcNow);
+
+                var action = (string)await cmd.ExecuteScalarAsync();
+                if (action == "INSERT") inserted++;
+                else if (action == "UPDATE") updated++;
+                else skipped++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upsert Contractor {LicenseNumber}", record.LicenseNumber);
+                skipped++;
+            }
+        }
+        return (inserted, updated, skipped);
+    }
+
     // ── Parsing Helpers ──
 
     private static int? ParseInt(string value)

@@ -48,5 +48,12 @@ public partial class db_9f8bee_konxdevContext
             entity.Property(p => p.RunDate).HasColumnType("datetime2");
             entity.Property(p => p.LastSocrataTimestamp).HasColumnType("datetime2");
         });
+
+        builder.Entity<ServiceRequest311>(entity =>
+        {
+            entity.Property(p => p.CreatedDate).HasColumnType("datetime2");
+            entity.Property(p => p.ClosedDate).HasColumnType("datetime2");
+            entity.HasIndex(e => e.Bbl);
+        });
     }
 }

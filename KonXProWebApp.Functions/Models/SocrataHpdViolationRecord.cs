@@ -49,7 +49,7 @@ public class SocrataHpdViolationRecord
     [JsonPropertyName("originalcorrectbydate")]
     public string OriginalCorrectByDate { get; set; }
 
-    [JsonPropertyName("violationstatus")]
+    [JsonPropertyName("currentstatus")]
     public string ViolationStatus { get; set; }
 
     [JsonPropertyName("novdescription")]

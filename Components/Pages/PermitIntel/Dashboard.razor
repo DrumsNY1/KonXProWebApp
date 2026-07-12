@@ -4,158 +4,131 @@
 
 <PageTitle>Dashboard — NYC Permit Intel</PageTitle>
 
-<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;">
-    <RadzenColumn Size="12">
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
-            <RadzenIcon Icon="dashboard" class="rz-mr-2" /> Dashboard
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color">
-            Your permit intelligence at a glance.
-        </RadzenText>
-    </RadzenColumn>
-</RadzenRow>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Your permit intelligence at a glance.</p>
+</div>
 
 @if (stats != null)
 {
-    @* KPI Cards *@
-    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
-        <RadzenColumn Size="12" SizeSM="6" SizeLG="3">
-            <RadzenCard Style="text-align: center;">
-                <RadzenIcon Icon="description" Style="font-size: 2rem; color: var(--rz-primary);" />
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH4" class="rz-m-0 rz-mt-2">
-                    @stats.TotalPermitsLast30Days.ToString("N0")
-                </RadzenText>
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-                    Permits (Last 30 Days)
-                </RadzenText>
-            </RadzenCard>
-        </RadzenColumn>
-        <RadzenColumn Size="12" SizeSM="6" SizeLG="3">
-            <RadzenCard Style="text-align: center;">
-                <RadzenIcon Icon="bookmark" Style="font-size: 2rem; color: var(--rz-info);" />
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH4" class="rz-m-0 rz-mt-2">
-                    @stats.SavedLeadsCount
-                </RadzenText>
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-                    Saved Leads
-                </RadzenText>
-            </RadzenCard>
-        </RadzenColumn>
-        <RadzenColumn Size="12" SizeSM="6" SizeLG="3">
-            <RadzenCard Style="text-align: center;">
-                <RadzenIcon Icon="emoji_events" Style="font-size: 2rem; color: var(--rz-success);" />
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH4" class="rz-m-0 rz-mt-2">
-                    @stats.WonLeadsCount
-                </RadzenText>
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-                    Won Leads
-                </RadzenText>
-            </RadzenCard>
-        </RadzenColumn>
-        <RadzenColumn Size="12" SizeSM="6" SizeLG="3">
-            <RadzenCard Style="text-align: center;">
-                <RadzenIcon Icon="trending_up" Style="font-size: 2rem; color: var(--rz-warning);" />
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.DisplayH4" class="rz-m-0 rz-mt-2">
-                    @winRate%
-                </RadzenText>
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-                    Win Rate
-                </RadzenText>
-            </RadzenCard>
-        </RadzenColumn>
-    </RadzenRow>
+    <!-- STATS CARDS -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label-sm">📋 Permits (30 Days)</div>
+            <div class="stat-value">@stats.TotalPermitsLast30Days.ToString("N0")</div>
+            <div class="stat-change up">↑ active tracking</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label-sm">🔖 Saved Leads</div>
+            <div class="stat-value">@stats.SavedLeadsCount</div>
+            <div class="stat-change neutral">in pipeline</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label-sm">🏆 Won Leads</div>
+            <div class="stat-value">@stats.WonLeadsCount</div>
+            <div class="stat-change up">↑ successful deals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label-sm">📈 Win Rate</div>
+            <div class="stat-value">@winRate%</div>
+            <div class="stat-change neutral">conversion rate</div>
+        </div>
+    </div>
 
     @* Charts Row *@
-    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+    <RadzenRow class="rz-mx-auto rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
         @* Borough Distribution *@
         <RadzenColumn Size="12" SizeMD="6">
-            <RadzenCard>
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-mb-4">
-                    <RadzenIcon Icon="bar_chart" class="rz-mr-1" /> Permits by Borough
-                </RadzenText>
-                <RadzenChart Style="height: 300px;">
-                    <RadzenColumnSeries Data="@boroughData" CategoryProperty="Borough" ValueProperty="Count"
-                                        Title="Permits" Fill="var(--rz-primary)" />
-                    <RadzenCategoryAxis />
-                    <RadzenValueAxis>
-                        <RadzenGridLines Visible="true" />
-                    </RadzenValueAxis>
-                </RadzenChart>
-            </RadzenCard>
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div class="card-title">Permits by Borough</div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenChart Style="height: 300px;">
+                        <RadzenColumnSeries Data="@boroughData" CategoryProperty="Borough" ValueProperty="Count"
+                                            Title="Permits" Fill="var(--rz-primary)" />
+                        <RadzenCategoryAxis />
+                        <RadzenValueAxis>
+                            <RadzenGridLines Visible="true" />
+                        </RadzenValueAxis>
+                    </RadzenChart>
+                </div>
+            </div>
         </RadzenColumn>
 
         @* Subscription Info *@
         <RadzenColumn Size="12" SizeMD="6">
-            <RadzenCard Style="height: 100%;">
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-mb-4">
-                    <RadzenIcon Icon="credit_card" class="rz-mr-1" /> Subscription
-                </RadzenText>
-                @if (currentSubscription != null)
-                {
-                    <RadzenStack Gap="1rem">
-                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
-                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Plan</RadzenText>
-                            <RadzenBadge Text="@currentSubscription.Tier" BadgeStyle="Radzen.BadgeStyle.Primary" />
-                        </RadzenStack>
-                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
-                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Status</RadzenText>
-                            <RadzenBadge Text="@currentSubscription.Status"
-                                         BadgeStyle="@(currentSubscription.Status == "Active" ? Radzen.BadgeStyle.Success : currentSubscription.Status == "Trialing" ? Radzen.BadgeStyle.Info : Radzen.BadgeStyle.Warning)" />
-                        </RadzenStack>
-                        @if (currentSubscription.TrialEndDate.HasValue && currentSubscription.Status == "Trialing")
-                        {
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div class="card-title">Subscription</div>
+                </div>
+                <div class="rz-p-4">
+                    @if (currentSubscription != null)
+                    {
+                        <RadzenStack Gap="1rem">
                             <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
-                                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Trial Ends</RadzenText>
+                                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Plan</RadzenText>
+                                <RadzenBadge Text="@currentSubscription.Tier" BadgeStyle="Radzen.BadgeStyle.Primary" />
+                            </RadzenStack>
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Status</RadzenText>
+                                <RadzenBadge Text="@currentSubscription.Status"
+                                             BadgeStyle="@(currentSubscription.Status == "Active" ? Radzen.BadgeStyle.Success : currentSubscription.Status == "Trialing" ? Radzen.BadgeStyle.Info : Radzen.BadgeStyle.Warning)" />
+                            </RadzenStack>
+                            @if (currentSubscription.TrialEndDate.HasValue && currentSubscription.Status == "Trialing")
+                            {
+                                <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Trial Ends</RadzenText>
+                                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color">
+                                        @currentSubscription.TrialEndDate.Value.ToString("MMM dd, yyyy")
+                                    </RadzenText>
+                                </RadzenStack>
+                            }
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                                <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Member Since</RadzenText>
                                 <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color">
-                                    @currentSubscription.TrialEndDate.Value.ToString("MMM dd, yyyy")
+                                    @currentSubscription.StartDate.ToString("MMM dd, yyyy")
                                 </RadzenText>
                             </RadzenStack>
-                        }
-                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
-                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1">Member Since</RadzenText>
-                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color">
-                                @currentSubscription.StartDate.ToString("MMM dd, yyyy")
-                            </RadzenText>
+                            <RadzenButton Text="Manage Billing" Icon="settings" ButtonStyle="Radzen.ButtonStyle.Light"
+                                          Style="width: 100%;" class="rz-mt-2" Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
                         </RadzenStack>
-                        <RadzenButton Text="Manage Billing" Icon="settings" ButtonStyle="Radzen.ButtonStyle.Light"
-                                      Style="width: 100%;" Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
-                    </RadzenStack>
-                }
-                else
-                {
-                    <RadzenStack AlignItems="Radzen.AlignItems.Center" Gap="1rem" Style="padding: 2rem 0;">
-                        <RadzenIcon Icon="rocket_launch" Style="font-size: 3rem; color: var(--rz-text-tertiary-color);" />
-                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color" Style="text-align: center;">
-                            Start your 14-day free trial to unlock all features.
-                        </RadzenText>
-                        <RadzenButton Text="Subscribe Now" Icon="star" ButtonStyle="Radzen.ButtonStyle.Primary"
-                                      Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
-                    </RadzenStack>
-                }
-            </RadzenCard>
+                    }
+                    else
+                    {
+                        <RadzenStack AlignItems="Radzen.AlignItems.Center" Gap="1rem" Style="padding: 2rem 0;">
+                            <RadzenIcon Icon="rocket_launch" Style="font-size: 3rem; color: var(--rz-text-tertiary-color);" />
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color" Style="text-align: center;">
+                                Start your 14-day free trial to unlock all features.
+                            </RadzenText>
+                            <RadzenButton Text="Subscribe Now" Icon="star" ButtonStyle="Radzen.ButtonStyle.Primary"
+                                          Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
+                        </RadzenStack>
+                    }
+                </div>
+            </div>
         </RadzenColumn>
     </RadzenRow>
 
     @* Quick Actions *@
-    <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
-        <RadzenColumn Size="12">
-            <RadzenCard>
-                <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-mb-4">
-                    <RadzenIcon Icon="bolt" class="rz-mr-1" /> Quick Actions
-                </RadzenText>
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
-                    <RadzenButton Text="Search Permits" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary"
-                                  Click="@(() => NavigationManager.NavigateTo("/permit-intel/search"))" />
-                    <RadzenButton Text="View Map" Icon="map" ButtonStyle="Radzen.ButtonStyle.Secondary"
-                                  Click="@(() => NavigationManager.NavigateTo("/permit-intel/map"))" />
-                    <RadzenButton Text="My Leads" Icon="bookmark" ButtonStyle="Radzen.ButtonStyle.Info"
-                                  Click="@(() => NavigationManager.NavigateTo("/permit-intel/leads"))" />
-                    <RadzenButton Text="Alert Settings" Icon="notifications" ButtonStyle="Radzen.ButtonStyle.Warning"
-                                  Click="@(() => NavigationManager.NavigateTo("/permit-intel/alerts"))" />
-                </RadzenStack>
-            </RadzenCard>
-        </RadzenColumn>
-    </RadzenRow>
+    <div class="card rz-mb-4">
+        <div class="card-header">
+            <div class="card-title">Quick Actions</div>
+        </div>
+        <div class="rz-p-4">
+            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                <RadzenButton Text="Search Permits" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary"
+                              Click="@(() => NavigationManager.NavigateTo("/permit-intel/search"))" />
+                <RadzenButton Text="View Map" Icon="map" ButtonStyle="Radzen.ButtonStyle.Secondary"
+                              Click="@(() => NavigationManager.NavigateTo("/permit-intel/map"))" />
+                <RadzenButton Text="My Leads" Icon="bookmark" ButtonStyle="Radzen.ButtonStyle.Info"
+                              Click="@(() => NavigationManager.NavigateTo("/permit-intel/leads"))" />
+                <RadzenButton Text="Alert Settings" Icon="notifications" ButtonStyle="Radzen.ButtonStyle.Warning"
+                              Click="@(() => NavigationManager.NavigateTo("/permit-intel/alerts"))" />
+            </RadzenStack>
+        </div>
+    </div>
 }
 else
 {

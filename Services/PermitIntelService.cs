@@ -119,6 +119,13 @@ public partial class PermitIntelService
             .Take(query.Take)
             .ToListAsync();
 
+        foreach (var r in results)
+        {
+            var bbl = GetBblFromFiling(r);
+            var velocity = await Get311ComplaintVelocity(bbl);
+            r.LeadScore = ScorePermit(r, velocity);
+        }
+
         return (results, totalCount);
     }
 
@@ -143,7 +150,7 @@ public partial class PermitIntelService
     {
         if (string.IsNullOrWhiteSpace(bin)) return Enumerable.Empty<HpdViolation>();
         return await context.HpdViolations
-            .Where(v => v.Bin == bin && v.ViolationStatus == "Open")
+            .Where(v => v.Bin == bin)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -326,7 +333,48 @@ public partial class PermitIntelService
 
     // ── Lead Scoring ──
 
-    public static int ScorePermit(DobjobFiling filing)
+    public static string GetBblFromFiling(DobjobFiling filing)
+    {
+        if (string.IsNullOrWhiteSpace(filing.Borough) || string.IsNullOrWhiteSpace(filing.Block) || string.IsNullOrWhiteSpace(filing.Lot))
+            return null;
+
+        int boroDigit = filing.Borough.ToUpper() switch
+        {
+            "MANHATTAN" => 1,
+            "BRONX" => 2,
+            "BROOKLYN" => 3,
+            "QUEENS" => 4,
+            "STATEN ISLAND" => 5,
+            _ => 0
+        };
+
+        if (boroDigit == 0) return null;
+
+        // Block is 5 digits, Lot is 4 digits
+        return $"{boroDigit}{filing.Block.PadLeft(5, '0')}{filing.Lot.PadLeft(4, '0')}";
+    }
+
+    public async Task<int> Get311ComplaintVelocity(string bbl, int days = 90)
+    {
+        if (string.IsNullOrWhiteSpace(bbl)) return 0;
+        
+        var cutoff = DateTime.UtcNow.AddDays(-days);
+        return await context.ServiceRequests311
+            .CountAsync(s => s.Bbl == bbl && s.CreatedDate >= cutoff);
+    }
+
+    public async Task<List<ServiceRequest311>> Get311ComplaintsByBbl(string bbl)
+    {
+        if (string.IsNullOrWhiteSpace(bbl)) return new List<ServiceRequest311>();
+
+        return await context.ServiceRequests311
+            .Where(s => s.Bbl == bbl)
+            .OrderByDescending(s => s.CreatedDate)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public static int ScorePermit(DobjobFiling filing, int complaintVelocity = 0)
     {
         int score = 0;
 
@@ -353,6 +401,12 @@ public partial class PermitIntelService
         if (filing.Equipment == "X") tradeCount++;
         if (filing.Standpipe == "X") tradeCount++;
         if (tradeCount >= 2) score++;
+
+        // Predictive Intel Boost
+        if (complaintVelocity >= 3)
+            score += 2;
+        else if (complaintVelocity > 0)
+            score += 1;
 
         // +1 for expansion (more units proposed than existing)
         if (int.TryParse(filing.ProposedDwellingUnits, out var proposed) &&

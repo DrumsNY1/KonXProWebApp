@@ -107,6 +107,9 @@ namespace KonXProWebApp.Data
         public DbSet<KonXProWebApp.Models.db_9f8bee_konxdev.DobjobFiling> DobjobFilings { get; set; }
 
         public DbSet<KonXProWebApp.Models.db_9f8bee_konxdev.EcbViolation> EcbViolations { get; set; }
+        public DbSet<KonXProWebApp.Models.db_9f8bee_konxdev.ServiceRequest311> ServiceRequests311 { get; set; }
+
+        public DbSet<KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor> HomeImprovementContractors { get; set; }
 
         public DbSet<KonXProWebApp.Models.db_9f8bee_konxdev.VwBasicTierDashboard> VwBasicTierDashboards { get; set; }
 

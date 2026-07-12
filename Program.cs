@@ -83,35 +83,35 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().Database.Migrate();
 app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().SeedTenantsAdmin().Wait();
 
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<KonXProWebApp.Data.db_9f8bee_konxdevContext>();
-    var views = new[]
-    {
-        @"CREATE OR ALTER VIEW dbo.vwFreeTierDashboard AS
-          SELECT JobNum, Borough, ISNULL(HouseNum, '') + ' ' + ISNULL(StreetName, '') AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-          FROM dbo.DOBJobFilings;",
+//using (var scope = app.Services.CreateScope())
+//{
+//    var context = scope.ServiceProvider.GetRequiredService<KonXProWebApp.Data.db_9f8bee_konxdevContext>();
+//    var views = new[]
+//    {
+//        @"CREATE OR ALTER VIEW dbo.vwFreeTierDashboard AS
+//          SELECT JobNum, Borough, ISNULL(HouseNum, '') + ' ' + ISNULL(StreetName, '') AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
+//          FROM dbo.DOBJobFilings;",
           
-        @"CREATE OR ALTER VIEW dbo.vwBasicTierDashboard AS
-          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-          FROM dbo.DOBJobFilings;",
+//        @"CREATE OR ALTER VIEW dbo.vwBasicTierDashboard AS
+//          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
+//          FROM dbo.DOBJobFilings;",
           
-        @"CREATE OR ALTER VIEW dbo.vwMidTierDashboard AS
-          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-          FROM dbo.DOBJobFilings;",
+//        @"CREATE OR ALTER VIEW dbo.vwMidTierDashboard AS
+//          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
+//          FROM dbo.DOBJobFilings;",
           
-        @"CREATE OR ALTER VIEW dbo.vwHighTierDashboard AS
-          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-          FROM dbo.DOBJobFilings;",
+//        @"CREATE OR ALTER VIEW dbo.vwHighTierDashboard AS
+//          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
+//          FROM dbo.DOBJobFilings;",
           
-        @"CREATE OR ALTER VIEW dbo.vwDemoDisplay AS
-          SELECT 'Sample Content' AS Content, 'Sample Summary' AS Summary, CAST(GETDATE() AS datetime2) AS CompletionDate;"
-    };
+//        @"CREATE OR ALTER VIEW dbo.vwDemoDisplay AS
+//          SELECT 'Sample Content' AS Content, 'Sample Summary' AS Summary, CAST(GETDATE() AS datetime2) AS CompletionDate;"
+//    };
 
-    foreach (var viewSql in views)
-    {
-        context.Database.ExecuteSqlRaw(viewSql);
-    }
-}
+//    foreach (var viewSql in views)
+//    {
+//        context.Database.ExecuteSqlRaw(viewSql);
+//    }
+//}
 
 app.Run();

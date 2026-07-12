@@ -23,6 +23,17 @@ public class HpdViolationIngestionFunction
     [Function("HpdViolationIngestionFunction")]
     public async Task Run([TimerTrigger("0 30 10 * * *")] TimerInfo timerInfo)
     {
+        await RunInternal();
+    }
+
+    [Function("HpdViolationIngestionHttp")]
+    public async Task RunHttp([HttpTrigger(AuthorizationLevel.Function, "get", "post")] Microsoft.AspNetCore.Http.HttpRequest req)
+    {
+        await RunInternal();
+    }
+
+    private async Task RunInternal()
+    {
         _logger.LogInformation("HpdViolationIngestionFunction started at {Time}", DateTime.UtcNow);
 
         int totalInserted = 0, totalUpdated = 0, totalSkipped = 0;

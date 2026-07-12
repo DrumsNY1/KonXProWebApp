@@ -40,6 +40,8 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         // Data
         protected IEnumerable<DobjobFiling> permits;
         protected RadzenDataGrid<DobjobFiling> grid0;
+        protected RadzenDropDown<IEnumerable<string>> boroughDropDown;
+        protected RadzenDropDown<IEnumerable<string>> jobTypeDropDown;
         protected int totalCount = 0;
 
         // Filter state
@@ -78,7 +80,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         protected override async Task OnInitializedAsync()
         {
-            dateFrom = DateTime.Today.AddDays(-30);
+            // dateFrom = DateTime.Today.AddDays(-30); // Commented out to allow older test data to load
             await SearchPermits();
         }
 

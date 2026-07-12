@@ -3,29 +3,24 @@
 
 <PageTitle>Subscribe — NYC Permit Intel</PageTitle>
 
-<RadzenRow class="rz-mx-auto rz-px-4 rz-mt-4 rz-mb-2" Style="max-width: 1440px;">
-    <RadzenColumn Size="12" Style="text-align: center;">
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H3" TagName="Radzen.Blazor.TagName.H1">
-            Choose Your Plan
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color">
-            Start with a 14-day free trial. Cancel anytime.
-        </RadzenText>
-    </RadzenColumn>
-</RadzenRow>
+<!-- PAGE HEADER -->
+<div class="page-header" style="text-align: center; margin-top: 2rem;">
+    <h1>Choose Your Plan</h1>
+    <p>Start with a 14-day free trial. Cancel anytime.</p>
+</div>
 
 <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-6" Style="max-width: 1440px;" Gap="1rem" JustifyContent="Radzen.JustifyContent.Center">
     @foreach (var tier in tiers)
     {
         <RadzenColumn Size="12" SizeSM="6" SizeLG="3">
-            <RadzenCard Style="@($"height: 100%; position: relative; {(tier.IsPopular ? "border: 2px solid var(--rz-primary);" : "")}")">
+            <div class="card" style="@($"height: 100%; position: relative; {(tier.IsPopular ? "border: 2px solid var(--rz-primary);" : "")}")">
                 @if (tier.IsPopular)
                 {
                     <RadzenBadge Text="Most Popular" BadgeStyle="Radzen.BadgeStyle.Primary"
                                  Style="position: absolute; top: -12px; right: 16px; font-size: 11px;" />
                 }
-                <RadzenStack Gap="1rem" Style="height: 100%;">
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" Style="text-align: center;">@tier.Name</RadzenText>
+                <div class="rz-p-4" style="height: 100%; display: flex; flex-direction: column; gap: 1rem;">
+                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" Style="text-align: center;" class="rz-m-0">@tier.Name</RadzenText>
                     <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color" Style="text-align: center;">
                         @tier.Description
                     </RadzenText>
@@ -34,7 +29,7 @@
                         <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color" Style="margin-bottom: 4px;">/mo</RadzenText>
                     </RadzenStack>
 
-                    <hr style="margin: 0.5rem 0; border-color: var(--rz-base-300);" />
+                    <hr style="margin: 0.5rem 0; border-color: var(--border);" />
 
                     <RadzenStack Gap="0.5rem" Style="flex-grow: 1;">
                         @foreach (var feature in tier.Features)
@@ -49,8 +44,8 @@
                     <RadzenButton Text="@GetButtonText(tier.Name)" ButtonStyle="@GetButtonStyle(tier.ButtonStyle)"
                                   Style="width: 100%;" Click="@(() => StartCheckout(tier.Name))"
                                   IsBusy="@(processingTier == tier.Name)" Disabled="@IsCurrentTier(tier.Name)" />
-                </RadzenStack>
-            </RadzenCard>
+                </div>
+            </div>
         </RadzenColumn>
     }
 </RadzenRow>
@@ -60,22 +55,24 @@
 {
     <RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 800px;">
         <RadzenColumn Size="12">
-            <RadzenCard>
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
-                    <RadzenStack Gap="0.25rem">
-                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6">Current Plan: @currentSubscription.Tier</RadzenText>
-                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
-                            Status: @currentSubscription.Status
-                            @if (currentSubscription.TrialEndDate.HasValue && currentSubscription.Status == "Trialing")
-                            {
-                                <text> — Trial ends @currentSubscription.TrialEndDate.Value.ToString("MMM dd, yyyy")</text>
-                            }
-                        </RadzenText>
+            <div class="card">
+                <div class="rz-p-4">
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" JustifyContent="Radzen.JustifyContent.SpaceBetween">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6" class="rz-m-0">Current Plan: @currentSubscription.Tier</RadzenText>
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-text-tertiary-color">
+                                Status: @currentSubscription.Status
+                                @if (currentSubscription.TrialEndDate.HasValue && currentSubscription.Status == "Trialing")
+                                {
+                                    <text> — Trial ends @currentSubscription.TrialEndDate.Value.ToString("MMM dd, yyyy")</text>
+                                }
+                            </RadzenText>
+                        </RadzenStack>
+                        <RadzenButton Text="Manage Billing" Icon="credit_card" ButtonStyle="Radzen.ButtonStyle.Light"
+                                      Click="@OpenBillingPortal" />
                     </RadzenStack>
-                    <RadzenButton Text="Manage Billing" Icon="credit_card" ButtonStyle="Radzen.ButtonStyle.Light"
-                                  Click="@OpenBillingPortal" />
-                </RadzenStack>
-            </RadzenCard>
+                </div>
+            </div>
         </RadzenColumn>
     </RadzenRow>
 }
