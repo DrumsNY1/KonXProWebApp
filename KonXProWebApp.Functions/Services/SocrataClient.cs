@@ -23,22 +23,35 @@ public class SocrataClient
         _logger = logger;
     }
 
-    /// <summary>
-    /// Fetches all permit records updated after the given timestamp.
-    /// Uses dobrundate for reliable delta loads.
-    /// Paginates through results in pages of 5000.
-    /// </summary>
-    public async IAsyncEnumerable<SocrataPermitRecord> GetPermitsSince(DateTime? since)
+    public IAsyncEnumerable<SocrataPermitRecord> GetPermitsSince(DateTime? since)
+    {
+        return GetRecordsSince<SocrataPermitRecord>("ic3t-wcy2.json", "dobrundate", since, null);
+    }
+
+    public IAsyncEnumerable<SocrataDobViolationRecord> GetDobViolationsSince(DateTime? since)
+    {
+        // Issue Date for DOB Violations
+        return GetRecordsSince<SocrataDobViolationRecord>("cepu-5g8r.json", "issue_date", since, null);
+    }
+
+    public IAsyncEnumerable<SocrataHpdViolationRecord> GetHpdViolationsSince(DateTime? since)
+    {
+        // Inspection Date for HPD Violations
+        // Filter only open violations
+        return GetRecordsSince<SocrataHpdViolationRecord>("csn4-vhvf.json", "inspectiondate", since, "violationstatus='Open'");
+    }
+
+    private async IAsyncEnumerable<T> GetRecordsSince<T>(string resourceId, string dateColumn, DateTime? since, string extraWhere)
     {
         int offset = 0;
         bool hasMore = true;
 
         while (hasMore)
         {
-            var query = BuildQuery(since, offset);
+            var query = BuildQuery(resourceId, dateColumn, since, offset, extraWhere);
             _logger.LogInformation("Fetching Socrata page at offset {Offset}: {Query}", offset, query);
 
-            List<SocrataPermitRecord> page = null;
+            List<T> page = null;
 
             for (int retry = 0; retry < MaxRetries; retry++)
             {
@@ -55,7 +68,7 @@ public class SocrataClient
                     }
 
                     response.EnsureSuccessStatusCode();
-                    page = await response.Content.ReadFromJsonAsync<List<SocrataPermitRecord>>();
+                    page = await response.Content.ReadFromJsonAsync<List<T>>();
                     break;
                 }
                 catch (HttpRequestException ex) when (retry < MaxRetries - 1)
@@ -90,46 +103,33 @@ public class SocrataClient
         }
     }
 
-    /// <summary>
-    /// Gets total count of records matching the since filter.
-    /// </summary>
-    public async Task<int> GetRecordCount(DateTime? since)
-    {
-        var whereClause = since.HasValue
-            ? $"dobrundate>'{since.Value:yyyy-MM-ddTHH:mm:ss.000}'"
-            : null;
-
-        var queryString = whereClause != null
-            ? $"?$select=count(*)+as+total&$where={HttpUtility.UrlEncode(whereClause)}"
-            : "?$select=count(*)+as+total";
-
-        var response = await _httpClient.GetAsync(queryString);
-        response.EnsureSuccessStatusCode();
-
-        var result = await response.Content.ReadFromJsonAsync<List<Dictionary<string, string>>>();
-        if (result?.Count > 0 && result[0].TryGetValue("total", out var totalStr))
-        {
-            return int.TryParse(totalStr, out var total) ? total : 0;
-        }
-
-        return 0;
-    }
-
-    private string BuildQuery(DateTime? since, int offset)
+    private string BuildQuery(string resourceId, string dateColumn, DateTime? since, int offset, string extraWhere)
     {
         var queryParams = new List<string>
         {
             $"$limit={PageSize}",
             $"$offset={offset}",
-            "$order=dobrundate ASC"
+            $"$order={dateColumn} ASC"
         };
+
+        var whereClauses = new List<string>();
 
         if (since.HasValue)
         {
-            var whereClause = $"dobrundate>'{since.Value:yyyy-MM-ddTHH:mm:ss.000}'";
-            queryParams.Add($"$where={HttpUtility.UrlEncode(whereClause)}");
+            whereClauses.Add($"{dateColumn}>'{since.Value:yyyy-MM-ddTHH:mm:ss.000}'");
         }
 
-        return "?" + string.Join("&", queryParams);
+        if (!string.IsNullOrEmpty(extraWhere))
+        {
+            whereClauses.Add(extraWhere);
+        }
+
+        if (whereClauses.Count > 0)
+        {
+            var combinedWhere = string.Join(" AND ", whereClauses);
+            queryParams.Add($"$where={HttpUtility.UrlEncode(combinedWhere)}");
+        }
+
+        return resourceId + "?" + string.Join("&", queryParams);
     }
 }

@@ -34,7 +34,9 @@ public class StripeService
             ["Starter"] = _configuration["Stripe:Prices:Starter"] ?? "",
             ["Pro"] = _configuration["Stripe:Prices:Pro"] ?? "",
             ["Business"] = _configuration["Stripe:Prices:Business"] ?? "",
-            ["Agency"] = _configuration["Stripe:Prices:Agency"] ?? ""
+            ["Agency"] = _configuration["Stripe:Prices:Agency"] ?? "",
+            ["ComplianceAlerts"] = _configuration["Stripe:Prices:ComplianceAlerts"] ?? "",
+            ["LandlordCompliance"] = _configuration["Stripe:Prices:LandlordCompliance"] ?? ""
         };
     }
 
@@ -204,6 +206,16 @@ public class StripeService
         if (stripeSubscription.Status == "canceled")
             localSub.EndDate = DateTime.UtcNow;
 
+        var priceId = stripeSubscription.Items?.Data?.FirstOrDefault()?.Price?.Id;
+        if (priceId != null)
+        {
+            var tier = _tierPriceIds.FirstOrDefault(x => x.Value == priceId && !string.IsNullOrEmpty(x.Value)).Key;
+            if (tier != null)
+            {
+                localSub.Tier = tier;
+            }
+        }
+
         localSub.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
@@ -284,6 +296,34 @@ public class StripeService
                     "14-day free trial"
                 },
                 ButtonStyle = "Info",
+                IsPopular = false
+            },
+            new()
+            {
+                Name = "ComplianceAlerts",
+                Price = 39,
+                Description = "DOB Violation Tracking",
+                Features = new List<string>
+                {
+                    "Everything in Starter",
+                    "Active DOB Violations",
+                    "Contractor Leads"
+                },
+                ButtonStyle = "Warning",
+                IsPopular = false
+            },
+            new()
+            {
+                Name = "LandlordCompliance",
+                Price = 199,
+                Description = "HPD Violation Tracking",
+                Features = new List<string>
+                {
+                    "Everything in Pro",
+                    "Open HPD Violations",
+                    "Property Manager Leads"
+                },
+                ButtonStyle = "Danger",
                 IsPopular = false
             }
         };

@@ -54,6 +54,20 @@ namespace KonXProWebApp.Components.Pages
                 {
                     throw new Exception($"No record found for Job Number: {jobNum}");
                 }
+
+                // Retrieve subscription and load violations if applicable
+                var userId = Security.User.Id;
+                ActiveSubscription = await PermitIntelService.GetActiveSubscription(userId);
+
+                if (HasDobAccess)
+                {
+                    DobViolations = await PermitIntelService.GetDobViolationsByBin(dobjobFiling.Bin);
+                }
+
+                if (HasHpdAccess)
+                {
+                    HpdViolations = await PermitIntelService.GetHpdViolationsByBin(dobjobFiling.Bin);
+                }
             }
             catch (Exception ex)
             {
@@ -62,6 +76,16 @@ namespace KonXProWebApp.Components.Pages
         }
         protected bool errorVisible;
         protected KonXProWebApp.Models.db_9f8bee_konxdev.DobjobFiling dobjobFiling;
+        
+        [Inject]
+        protected KonXProWebApp.Services.PermitIntelService PermitIntelService { get; set; }
+
+        protected KonXProWebApp.Models.PermitIntel.Subscription ActiveSubscription;
+        protected IEnumerable<KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation> DobViolations;
+        protected IEnumerable<KonXProWebApp.Models.db_9f8bee_konxdev.HpdViolation> HpdViolations;
+
+        protected bool HasDobAccess => ActiveSubscription?.Tier == "ComplianceAlerts" || ActiveSubscription?.Tier == "LandlordCompliance";
+        protected bool HasHpdAccess => ActiveSubscription?.Tier == "LandlordCompliance";
 
         [Inject]
         protected SecurityService Security { get; set; }

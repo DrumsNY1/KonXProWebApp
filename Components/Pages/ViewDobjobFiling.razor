@@ -819,7 +819,64 @@
                                 </RadzenColumn>
                             </RadzenRow>
                         </RadzenTabsItem>
-                        <!---- Zoning Info End-->
+                        <!---- Zoning Info End-->                        <!---- Active Violations Start -->
+                        <RadzenTabsItem Text="Active Violations">
+                            <div class="container mt-4">
+                                <h3>Active Violations</h3>
+                                
+                                @if (HasDobAccess)
+                                {
+                                    <RadzenCard class="mb-4">
+                                        <RadzenText TextStyle="TextStyle.H5">DOB Violations</RadzenText>
+                                        @if (DobViolations != null && DobViolations.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var v in DobViolations)
+                                                {
+                                                    <li><strong>@v.ViolationNumber</strong>: @v.Description (@v.IssueDate.ToString("MM/dd/yyyy"))</li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <p>No active DOB violations found.</p>
+                                        }
+                                    </RadzenCard>
+                                }
+                                else
+                                {
+                                    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Warning">
+                                        DOB Violations require the Compliance Alerts tier or higher. <a href="/subscription">Upgrade now</a>.
+                                    </RadzenAlert>
+                                }
+
+                                @if (HasHpdAccess)
+                                {
+                                    <RadzenCard class="mb-4">
+                                        <RadzenText TextStyle="TextStyle.H5">HPD Violations</RadzenText>
+                                        @if (HpdViolations != null && HpdViolations.Any())
+                                        {
+                                            <ul>
+                                                @foreach (var v in HpdViolations)
+                                                {
+                                                    <li><strong>Class @v.Class</strong>: @v.NovDescription (@v.InspectionDate?.ToString("MM/dd/yyyy"))</li>
+                                                }
+                                            </ul>
+                                        }
+                                        else
+                                        {
+                                            <p>No active HPD violations found.</p>
+                                        }
+                                    </RadzenCard>
+                                }
+                                else
+                                {
+                                    <RadzenAlert Shade="Shade.Lighter" Variant="Variant.Flat" Size="AlertSize.Small" AlertStyle="AlertStyle.Warning">
+                                        HPD Violations require the Landlord Compliance tier. <a href="/subscription">Upgrade now</a>.
+                                    </RadzenAlert>
+                                }
+                            </div>
+                        </RadzenTabsItem>
                     </Tabs>
                 </RadzenTabs>
             </RadzenStack>

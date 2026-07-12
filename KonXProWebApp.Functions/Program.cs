@@ -11,7 +11,7 @@ var host = new HostBuilder()
         {
             client.BaseAddress = new Uri(
                 context.Configuration["SocrataBaseUrl"] 
-                ?? "https://data.cityofnewyork.us/resource/ic3t-wcy2.json");
+                ?? "https://data.cityofnewyork.us/resource/");
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             var appToken = context.Configuration["SocrataAppToken"];

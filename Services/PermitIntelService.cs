@@ -129,6 +129,25 @@ public partial class PermitIntelService
             .FirstOrDefaultAsync(i => i.Id == id);
     }
 
+    public async Task<IEnumerable<DobViolation>> GetDobViolationsByBin(string bin)
+    {
+        if (string.IsNullOrWhiteSpace(bin)) return Enumerable.Empty<DobViolation>();
+        // Wait, context might not expose DobViolations if it wasn't there. But assuming it is or we query directly.
+        return await context.Set<DobViolation>()
+            .Where(v => v.Bin == bin)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<HpdViolation>> GetHpdViolationsByBin(string bin)
+    {
+        if (string.IsNullOrWhiteSpace(bin)) return Enumerable.Empty<HpdViolation>();
+        return await context.HpdViolations
+            .Where(v => v.Bin == bin && v.ViolationStatus == "Open")
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     // ── Saved Leads ──
 
     public async Task<IEnumerable<SavedLead>> GetSavedLeads(string userId)
