@@ -402,19 +402,19 @@ public class IngestionService
 
                 await using var cmd = new SqlCommand(mergeSql, connection);
                 cmd.Parameters.AddWithValue("@IsnDobBisViol", record.IsnDobBisViol);
-                cmd.Parameters.AddWithValue("@Boro", ParseInt(record.Boro) ?? (object)DBNull.Value);
-                cmd.Parameters.AddWithValue("@Bin", (object)record.Bin ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Block", (object)record.Block ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Lot", (object)record.Lot ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@IssueDate", (object)ParseIsoDate(record.IssueDate) ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@ViolationTypeCode", (object)record.ViolationTypeCode ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@ViolationNumber", (object)record.ViolationNumber ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@HouseNumber", (object)record.HouseNumber ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Street", (object)record.Street ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Description", (object)record.Description ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Number", (object)record.Number ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@ViolationCategory", (object)record.ViolationCategory ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@ViolationType", (object)record.ViolationType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Boro", ParseInt(record.Boro) ?? 0);
+                cmd.Parameters.AddWithValue("@Bin", (object)record.Bin ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Block", (object)record.Block ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Lot", (object)record.Lot ?? string.Empty);
+                cmd.Parameters.AddWithValue("@IssueDate", ParseDobDate(record.IssueDate) ?? new DateTime(1900, 1, 1));
+                cmd.Parameters.AddWithValue("@ViolationTypeCode", (object)record.ViolationTypeCode ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ViolationNumber", (object)record.ViolationNumber ?? string.Empty);
+                cmd.Parameters.AddWithValue("@HouseNumber", (object)record.HouseNumber ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Street", (object)record.Street ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Description", (object)record.Description ?? string.Empty);
+                cmd.Parameters.AddWithValue("@Number", (object)record.Number ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ViolationCategory", (object)record.ViolationCategory ?? string.Empty);
+                cmd.Parameters.AddWithValue("@ViolationType", (object)record.ViolationType ?? string.Empty);
 
                 var action = (string)await cmd.ExecuteScalarAsync();
                 if (action == "INSERT") inserted++;
@@ -526,6 +526,16 @@ public class IngestionService
         // Socrata returns ISO 8601: "2022-02-24T00:00:00.000"
         if (DateTime.TryParse(value, CultureInfo.InvariantCulture,
                 DateTimeStyles.RoundtripKind, out var result))
+            return result;
+        return null;
+    }
+
+    private static DateTime? ParseDobDate(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return null;
+        if (DateTime.TryParseExact(value, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
+            return result;
+        if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out result))
             return result;
         return null;
     }
