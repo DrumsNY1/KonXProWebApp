@@ -1,4 +1,5 @@
 using KonXProWebApp.Models.PermitIntel;
+using KonXProWebApp.Models.db_9f8bee_konxdev;
 using Microsoft.EntityFrameworkCore;
 
 namespace KonXProWebApp.Data;
@@ -12,6 +13,8 @@ public partial class db_9f8bee_konxdevContext
     public DbSet<AlertPreference> AlertPreferences { get; set; }
 
     public DbSet<IngestionLog> IngestionLogs { get; set; }
+
+    public DbSet<HpdViolation> HpdViolations { get; set; }
 
     partial void OnModelBuilding(ModelBuilder builder)
     {

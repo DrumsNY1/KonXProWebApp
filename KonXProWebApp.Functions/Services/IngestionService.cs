@@ -371,6 +371,133 @@ public class IngestionService
         return result as DateTime?;
     }
 
+    public async Task<(int Inserted, int Updated, int Skipped)> UpsertDobViolations(IReadOnlyList<SocrataDobViolationRecord> records)
+    {
+        int inserted = 0, updated = 0, skipped = 0;
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        foreach (var record in records)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(record.IsnDobBisViol)) { skipped++; continue; }
+
+                const string mergeSql = @"
+                    MERGE DOB_Violations AS target
+                    USING (SELECT @IsnDobBisViol AS isn_dob_bis_viol) AS source
+                    ON target.isn_dob_bis_viol = source.isn_dob_bis_viol
+                    WHEN MATCHED THEN UPDATE SET
+                        boro = @Boro, bin = @Bin, block = @Block, lot = @Lot, issue_date = @IssueDate,
+                        violation_type_code = @ViolationTypeCode, violation_number = @ViolationNumber,
+                        house_number = @HouseNumber, street = @Street, description = @Description,
+                        number = @Number, violation_category = @ViolationCategory, violation_type = @ViolationType
+                    WHEN NOT MATCHED THEN INSERT (
+                        isn_dob_bis_viol, boro, bin, block, lot, issue_date, violation_type_code,
+                        violation_number, house_number, street, description, number, violation_category, violation_type
+                    ) VALUES (
+                        @IsnDobBisViol, @Boro, @Bin, @Block, @Lot, @IssueDate, @ViolationTypeCode,
+                        @ViolationNumber, @HouseNumber, @Street, @Description, @Number, @ViolationCategory, @ViolationType
+                    ) OUTPUT $action;";
+
+                await using var cmd = new SqlCommand(mergeSql, connection);
+                cmd.Parameters.AddWithValue("@IsnDobBisViol", record.IsnDobBisViol);
+                cmd.Parameters.AddWithValue("@Boro", ParseInt(record.Boro) ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@Bin", (object)record.Bin ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Block", (object)record.Block ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Lot", (object)record.Lot ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IssueDate", (object)ParseIsoDate(record.IssueDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ViolationTypeCode", (object)record.ViolationTypeCode ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ViolationNumber", (object)record.ViolationNumber ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@HouseNumber", (object)record.HouseNumber ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Street", (object)record.Street ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Description", (object)record.Description ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Number", (object)record.Number ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ViolationCategory", (object)record.ViolationCategory ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ViolationType", (object)record.ViolationType ?? DBNull.Value);
+
+                var action = (string)await cmd.ExecuteScalarAsync();
+                if (action == "INSERT") inserted++;
+                else if (action == "UPDATE") updated++;
+                else skipped++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upsert DOB violation {Id}", record.IsnDobBisViol);
+                skipped++;
+            }
+        }
+        return (inserted, updated, skipped);
+    }
+
+    public async Task<(int Inserted, int Updated, int Skipped)> UpsertHpdViolations(IReadOnlyList<SocrataHpdViolationRecord> records)
+    {
+        int inserted = 0, updated = 0, skipped = 0;
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        foreach (var record in records)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(record.ViolationId)) { skipped++; continue; }
+
+                const string mergeSql = @"
+                    MERGE HPD_Violations AS target
+                    USING (SELECT @ViolationId AS violation_id) AS source
+                    ON target.violation_id = source.violation_id
+                    WHEN MATCHED THEN UPDATE SET
+                        building_id = @BuildingId, boro = @Boro, boro_id = @BoroId, bin = @Bin,
+                        block = @Block, lot = @Lot, house_number = @HouseNumber, street_name = @StreetName,
+                        zip = @Zip, apartment = @Apartment, inspection_date = @InspectionDate,
+                        approved_date = @ApprovedDate, original_certify_by_date = @OriginalCertifyByDate,
+                        original_correct_by_date = @OriginalCorrectByDate, violation_status = @ViolationStatus,
+                        violation_type = @ViolationType, nov_description = @NovDescription, class = @Class
+                    WHEN NOT MATCHED THEN INSERT (
+                        violation_id, building_id, boro, boro_id, bin, block, lot, house_number, street_name,
+                        zip, apartment, inspection_date, approved_date, original_certify_by_date,
+                        original_correct_by_date, violation_status, violation_type, nov_description, class
+                    ) VALUES (
+                        @ViolationId, @BuildingId, @Boro, @BoroId, @Bin, @Block, @Lot, @HouseNumber, @StreetName,
+                        @Zip, @Apartment, @InspectionDate, @ApprovedDate, @OriginalCertifyByDate,
+                        @OriginalCorrectByDate, @ViolationStatus, @ViolationType, @NovDescription, @Class
+                    ) OUTPUT $action;";
+
+                await using var cmd = new SqlCommand(mergeSql, connection);
+                cmd.Parameters.AddWithValue("@ViolationId", record.ViolationId);
+                cmd.Parameters.AddWithValue("@BuildingId", (object)record.BuildingId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Boro", (object)record.Boro ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@BoroId", (object)record.BoroId ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Bin", (object)record.Bin ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Block", (object)record.Block ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Lot", (object)record.Lot ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@HouseNumber", (object)record.HouseNumber ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@StreetName", (object)record.StreetName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Zip", (object)record.Zip ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Apartment", (object)record.Apartment ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@InspectionDate", (object)ParseIsoDate(record.InspectionDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ApprovedDate", (object)ParseIsoDate(record.ApprovedDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@OriginalCertifyByDate", (object)ParseIsoDate(record.OriginalCertifyByDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@OriginalCorrectByDate", (object)ParseIsoDate(record.OriginalCorrectByDate) ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ViolationStatus", (object)record.ViolationStatus ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ViolationType", (object)record.ViolationType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@NovDescription", (object)record.NovDescription ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Class", (object)record.Class ?? DBNull.Value);
+
+                var action = (string)await cmd.ExecuteScalarAsync();
+                if (action == "INSERT") inserted++;
+                else if (action == "UPDATE") updated++;
+                else skipped++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upsert HPD violation {Id}", record.ViolationId);
+                skipped++;
+            }
+        }
+        return (inserted, updated, skipped);
+    }
+
     // ── Parsing Helpers ──
 
     private static int? ParseInt(string value)

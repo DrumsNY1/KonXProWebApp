@@ -32,5 +32,31 @@ namespace KonXProWebApp.Components.Pages
 
         [Inject]
         protected SecurityService Security { get; set; }
+
+        [Inject]
+        protected KonXProWebApp.Services.StripeService StripeService { get; set; }
+
+        protected async Task ManageSubscription()
+        {
+            try
+            {
+                var userId = Security.User.Id;
+                var returnUrl = NavigationManager.BaseUri + "subscription";
+                var url = await StripeService.CreatePortalSession(userId, returnUrl);
+                
+                if (!string.IsNullOrEmpty(url))
+                {
+                    NavigationManager.NavigateTo(url, true);
+                }
+                else
+                {
+                    NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = "Unable to launch billing portal." });
+                }
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(new NotificationMessage { Severity = NotificationSeverity.Error, Summary = "Error", Detail = ex.Message });
+            }
+        }
     }
 }
