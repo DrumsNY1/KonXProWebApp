@@ -37,10 +37,10 @@
     </div>
 
     @* Charts Row *@
-    <RadzenRow class="rz-mx-auto rz-mb-4" Style="max-width: 1440px;" Gap="1rem">
+    <RadzenRow class="rz-mx-auto rz-mb-4" Gap="1rem">
         @* Borough Distribution *@
         <RadzenColumn Size="12" SizeMD="6">
-            <div class="card" style="height: 100%;">
+            <div class="card h-full">
                 <div class="card-header">
                     <div class="card-title">Permits by Borough</div>
                 </div>
@@ -59,7 +59,7 @@
 
         @* Subscription Info *@
         <RadzenColumn Size="12" SizeMD="6">
-            <div class="card" style="height: 100%;">
+            <div class="card h-full">
                 <div class="card-header">
                     <div class="card-title">Subscription</div>
                 </div>
@@ -92,14 +92,14 @@
                                 </RadzenText>
                             </RadzenStack>
                             <RadzenButton Text="Manage Billing" Icon="settings" ButtonStyle="Radzen.ButtonStyle.Light"
-                                          Style="width: 100%;" class="rz-mt-2" Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
+                                          class="w-full rz-mt-2" Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
                         </RadzenStack>
                     }
                     else
                     {
-                        <RadzenStack AlignItems="Radzen.AlignItems.Center" Gap="1rem" Style="padding: 2rem 0;">
-                            <RadzenIcon Icon="rocket_launch" Style="font-size: 3rem; color: var(--rz-text-tertiary-color);" />
-                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color" Style="text-align: center;">
+                        <RadzenStack AlignItems="Radzen.AlignItems.Center" Gap="1rem" class="imp-py-8">
+                            <RadzenIcon Icon="rocket_launch" class="text-h1 text-muted-color" />
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color text-center">
                                 Start your 14-day free trial to unlock all features.
                             </RadzenText>
                             <RadzenButton Text="Subscribe Now" Icon="star" ButtonStyle="Radzen.ButtonStyle.Primary"
@@ -132,8 +132,8 @@
 }
 else
 {
-    <RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
-        <RadzenColumn Size="12" Style="text-align: center; padding: 4rem 0;">
+    <RadzenRow class="rz-mx-auto rz-px-4">
+        <RadzenColumn Size="12" class="text-center imp-py-16">
             <RadzenProgressBarCircular Value="100" ShowValue="false" Mode="Radzen.ProgressBarMode.Indeterminate" />
             <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-text-tertiary-color rz-mt-4">
                 Loading dashboard...

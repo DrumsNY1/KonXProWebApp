@@ -25,7 +25,7 @@
     </div>
     <div class="stat-card">
         <div class="stat-label-sm">💰 Est. Job Value</div>
-        <div class="stat-value" style="font-size:24px;">$8.4M</div>
+        <div class="stat-value text-h2">$8.4M</div>
         <div class="stat-change up">↑ in active permits</div>
     </div>
     <div class="stat-card">
@@ -112,7 +112,7 @@
                     AllowSorting="true" AllowPaging="true" PageSize="25"
                     ShowPagingSummary="true" PagerHorizontalAlign="Radzen.HorizontalAlign.Center"
                     AllowColumnResize="true" ColumnWidth="180px"
-                    Style="min-height: 400px; border-top: 1px solid var(--border); border-left: none; border-right: none; border-bottom: none; border-radius: 0 0 var(--radius) var(--radius);">
+                    Style="min-height: 400px;" class="rz-border-top">
         <Columns>
             <RadzenDataGridColumn TItem="DobjobFiling" Title="Permit #" Width="120px">
                 <Template Context="filing">
@@ -121,7 +121,7 @@
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DobjobFiling" Title="Address" Width="250px">
                 <Template Context="filing">
-                    <span class="permit-addr">@filing.HouseNum @filing.StreetName<span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">@filing.JobDescription</span></span>
+                    <span class="permit-addr">@filing.HouseNum @filing.StreetName<span class="text-truncate">@filing.JobDescription</span></span>
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
@@ -144,10 +144,10 @@
                 <Template Context="filing">
                     @if (filing.LeadScore.HasValue)
                     {
-                        <div style="display:flex; align-items:center; gap: 4px;">
+                        <div class="flex items-center imp-gap-1">
                             @for(int i = 0; i < filing.LeadScore.Value; i++)
                             {
-                                <span style="color:#FFA000;">🔥</span>
+                                <span class="text-accent">🔥</span>
                             }
                             @if(filing.LeadScore.Value >= 4)
                             {

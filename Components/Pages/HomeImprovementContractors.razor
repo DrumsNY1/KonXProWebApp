@@ -4,17 +4,17 @@
 
 <PageTitle>Home Improvement Contractors</PageTitle>
 
-<div class="dashboard-container" style="padding: 24px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+<div class="dashboard-container">
+    <div class="flex justify-between items-center imp-mb-6">
         <h2>Home Improvement Contractors</h2>
         <RadzenButton Icon="refresh" Text="Refresh" Click="@LoadData" ButtonStyle="ButtonStyle.Secondary" />
     </div>
 
     @if (isLoading)
     {
-        <div style="text-align: center; padding: 40px;">
+        <div class="text-center imp-p-10">
             <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-            <p style="margin-top: 16px; color: var(--text-muted);">Loading contractors...</p>
+            <p class="imp-mt-4 text-muted-color">Loading contractors...</p>
         </div>
     }
     else
@@ -28,11 +28,11 @@
                     <Template Context="contractor">
                         @if (contractor.LicenseStatus == "Active")
                         {
-                            <span class="badge" style="background-color: var(--success); color: white; padding: 4px 8px; border-radius: 4px;">Active</span>
+                            <span class="badge badge-success">Active</span>
                         }
                         else
                         {
-                            <span class="badge" style="background-color: var(--danger); color: white; padding: 4px 8px; border-radius: 4px;">@contractor.LicenseStatus</span>
+                            <span class="badge badge-danger">@contractor.LicenseStatus</span>
                         }
                     </Template>
                 </RadzenDataGridColumn>
@@ -47,10 +47,3 @@
     }
 </div>
 
-<style>
-    .modern-grid {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-</style>
