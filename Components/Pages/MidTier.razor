@@ -1,11 +1,6 @@
-@page "/MidTier"
-@attribute [Authorize]
-
-@* @attribute [Authorize] *@
-
+@page "/MidTier"
+@attribute [Authorize(Policy = "RequiresPro")]
 @using KonXProWebApp.Models.db_9f8bee_konxdev
-
-
 
 <PageTitle>Tiers</PageTitle>
 

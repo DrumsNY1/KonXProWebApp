@@ -40,13 +40,9 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         // Data
         protected IEnumerable<DobjobFiling> permits;
         protected RadzenDataGrid<DobjobFiling> grid0;
-        protected RadzenDropDown<IEnumerable<string>> boroughDropDown;
-        protected RadzenDropDown<IEnumerable<string>> jobTypeDropDown;
         protected int totalCount = 0;
 
         // Filter state
-        protected IEnumerable<string> selectedBoroughs;
-        protected IEnumerable<string> selectedJobTypes;
         protected string searchText = "";
         protected decimal? minCost;
         protected decimal? maxCost;
@@ -54,15 +50,22 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected DateTime? dateTo;
 
         // Filter options
-        protected List<string> boroughOptions = new() { "MANHATTAN", "BROOKLYN", "QUEENS", "BRONX", "STATEN ISLAND" };
-        protected List<DropDownItem> jobTypeOptions = new()
+        protected List<BoroughOption> boroughOptions = new()
         {
-            new() { Text = "A1 - Major Alteration", Value = "A1" },
-            new() { Text = "A2 - Minor Alteration", Value = "A2" },
-            new() { Text = "A3 - Minor Alteration", Value = "A3" },
-            new() { Text = "NB - New Building", Value = "NB" },
-            new() { Text = "DM - Demolition", Value = "DM" },
-            new() { Text = "SG - Sign", Value = "SG" },
+            new() { Name = "MANHATTAN" },
+            new() { Name = "BROOKLYN" },
+            new() { Name = "QUEENS" },
+            new() { Name = "BRONX" },
+            new() { Name = "STATEN ISLAND" }
+        };
+        protected List<JobTypeOption> jobTypeOptions = new()
+        {
+            new() { Key = "A1", Name = "A1 (Major)" },
+            new() { Key = "A2", Name = "A2 (Minor)" },
+            new() { Key = "A3", Name = "A3 (Minor)" },
+            new() { Key = "NB", Name = "New Building" },
+            new() { Key = "DM", Name = "Demolition" },
+            new() { Key = "SG", Name = "Sign" }
         };
 
         protected List<TradeOption> tradeOptions = new()
@@ -89,8 +92,8 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             var query = new PermitSearchQuery
             {
                 SearchText = searchText,
-                Boroughs = selectedBoroughs?.ToList() ?? new(),
-                JobTypes = selectedJobTypes?.ToList() ?? new(),
+                Boroughs = boroughOptions.Where(b => b.Selected).Select(b => b.Name).ToList(),
+                JobTypes = jobTypeOptions.Where(j => j.Selected).Select(j => j.Key).ToList(),
                 Trades = tradeOptions.Where(t => t.Selected).Select(t => t.Key).ToList(),
                 MinCost = minCost,
                 MaxCost = maxCost,
@@ -104,11 +107,6 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             totalCount = count;
         }
 
-        protected async Task OnFilterChanged()
-        {
-            // Debounce - just update state, don't auto-search
-        }
-
         protected void ViewDetail(DobjobFiling filing)
         {
             NavigationManager.NavigateTo($"/permit-intel/detail/{filing.Id}");
@@ -118,13 +116,14 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         {
             try
             {
-                var userId = Security.User?.Id;
-                if (string.IsNullOrEmpty(userId))
+                var isAuth = Security.IsAuthenticated() || (Security.User != null && Security.User.Name != "Anonymous" && !string.IsNullOrEmpty(Security.User.Id));
+                if (!isAuth)
                 {
                     NotificationService.Notify(NotificationSeverity.Warning, "Login Required", "Please log in to save leads.");
                     return;
                 }
 
+                var userId = Security.User.Id;
                 await PermitIntelService.SaveLead(userId, filing.Id);
                 NotificationService.Notify(NotificationSeverity.Success, "Lead Saved", $"{filing.HouseNum} {filing.StreetName} added to your leads.");
             }
@@ -148,6 +147,19 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         // Helper classes
         public class TradeOption
+        {
+            public string Name { get; set; }
+            public string Key { get; set; }
+            public bool Selected { get; set; }
+        }
+
+        public class BoroughOption
+        {
+            public string Name { get; set; }
+            public bool Selected { get; set; }
+        }
+
+        public class JobTypeOption
         {
             public string Name { get; set; }
             public string Key { get; set; }

@@ -569,14 +569,15 @@ public class IngestionService
     }
 
     // ── Parsing Helpers ──
+    // internal (not private) + InternalsVisibleTo so KonXProWebApp.Functions.Tests can unit test them directly.
 
-    private static int? ParseInt(string value)
+    internal static int? ParseInt(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         return int.TryParse(value, out var result) ? result : null;
     }
 
-    private static DateTime? ParseDate(string value)
+    internal static DateTime? ParseDate(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         // Socrata returns dates as "MM/dd/yyyy"
@@ -590,7 +591,7 @@ public class IngestionService
         return null;
     }
 
-    private static DateTime? ParseIsoDate(string value)
+    internal static DateTime? ParseIsoDate(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         // Socrata returns ISO 8601: "2022-02-24T00:00:00.000"
@@ -600,7 +601,7 @@ public class IngestionService
         return null;
     }
 
-    private static DateTime? ParseDobDate(string value)
+    internal static DateTime? ParseDobDate(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         if (DateTime.TryParseExact(value, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var result))
@@ -610,7 +611,7 @@ public class IngestionService
         return null;
     }
 
-    private static decimal? ParseCurrency(string value)
+    internal static decimal? ParseCurrency(string value)
     {
         if (string.IsNullOrWhiteSpace(value)) return null;
         // Strip "$" and "," → parse as decimal
@@ -620,7 +621,7 @@ public class IngestionService
             : null;
     }
 
-    private static int ComputeLeadScore(SocrataPermitRecord r)
+    internal static int ComputeLeadScore(SocrataPermitRecord r)
     {
         int score = 0;
         var cost = ParseCurrency(r.InitialCost);

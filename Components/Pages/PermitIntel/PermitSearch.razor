@@ -48,59 +48,57 @@
     </div>
     <div class="rz-p-4">
         <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Borough" Component="ddBorough" class="rz-mb-1 rz-display-block" />
-                <RadzenDropDown @ref="boroughDropDown" @bind-Value="selectedBoroughs" Data="boroughOptions" Multiple="true"
-                                Placeholder="All Boroughs" Style="width: 100%;" Name="ddBorough"
-                                Change="@(args => OnFilterChanged())">
-                    <FooterTemplate>
-                        <RadzenButton Text="Close" Click="@(() => boroughDropDown.ClosePopup())" Size="Radzen.ButtonSize.Small" ButtonStyle="Radzen.ButtonStyle.Light" class="rz-w-100" />
-                    </FooterTemplate>
-                </RadzenDropDown>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Job Type" Component="ddJobType" class="rz-mb-1 rz-display-block" />
-                <RadzenDropDown @ref="jobTypeDropDown" @bind-Value="selectedJobTypes" Data="jobTypeOptions" Multiple="true"
-                                Placeholder="All Types" Style="width: 100%;" Name="ddJobType"
-                                TextProperty="Text" ValueProperty="Value"
-                                Change="@(args => OnFilterChanged())">
-                    <FooterTemplate>
-                        <RadzenButton Text="Close" Click="@(() => jobTypeDropDown.ClosePopup())" Size="Radzen.ButtonSize.Small" ButtonStyle="Radzen.ButtonStyle.Light" class="rz-w-100" />
-                    </FooterTemplate>
-                </RadzenDropDown>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Date From" Component="dpFrom" class="rz-mb-1 rz-display-block" />
-                <RadzenDatePicker @bind-Value="dateFrom" Style="width: 100%;" Name="dpFrom"
-                                  DateFormat="MM/dd/yyyy" Change="@(args => OnFilterChanged())" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Date To" Component="dpTo" class="rz-mb-1 rz-display-block" />
-                <RadzenDatePicker @bind-Value="dateTo" Style="width: 100%;" Name="dpTo"
-                                  DateFormat="MM/dd/yyyy" Change="@(args => OnFilterChanged())" />
-            </RadzenColumn>
-        </RadzenRow>
-        
-        <RadzenRow class="rz-mt-4" Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Min Cost ($)" Component="numMin" class="rz-mb-1 rz-display-block" />
-                <RadzenNumeric @bind-Value="minCost" Style="width: 100%;" Name="numMin"
-                               Placeholder="0" Format="N0" Change="@((decimal? args) => OnFilterChanged())" />
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Max Cost ($)" Component="numMax" class="rz-mb-1 rz-display-block" />
-                <RadzenNumeric @bind-Value="maxCost" Style="width: 100%;" Name="numMax"
-                               Placeholder="No limit" Format="N0" Change="@((decimal? args) => OnFilterChanged())" />
+            <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Boroughs" class="rz-mb-1 rz-display-block" />
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                    @foreach (var b in boroughOptions)
+                    {
+                        <RadzenToggleButton @bind-Value="b.Selected" Text="@b.Name"
+                                             ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                             ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                    }
+                </RadzenStack>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="6">
+                <RadzenLabel Text="Job Types" class="rz-mb-1 rz-display-block" />
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                    @foreach (var j in jobTypeOptions)
+                    {
+                        <RadzenToggleButton @bind-Value="j.Selected" Text="@j.Name"
+                                             ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                             ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                    }
+                </RadzenStack>
+            </RadzenColumn>
+        </RadzenRow>
+        <RadzenRow class="rz-mt-4" Gap="1rem">
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Date From" class="rz-mb-1 rz-display-block" />
+                <input type="date" class="native-date-picker" @bind-value="dateFrom" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Date To" class="rz-mb-1 rz-display-block" />
+                <input type="date" class="native-date-picker" @bind-value="dateTo" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Min Cost ($)" class="rz-mb-1 rz-display-block" />
+                <RadzenNumeric @bind-Value="minCost" Style="width: 100%;" Name="numMin" Placeholder="0" Format="N0" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Max Cost ($)" class="rz-mb-1 rz-display-block" />
+                <RadzenNumeric @bind-Value="maxCost" Style="width: 100%;" Name="numMax" Placeholder="No limit" Format="N0" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        <RadzenRow class="rz-mt-4" Gap="1rem">
+            <RadzenColumn Size="12">
                 <RadzenLabel Text="Trades" class="rz-mb-1 rz-display-block" />
                 <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
                     @foreach (var trade in tradeOptions)
                     {
                         <RadzenToggleButton @bind-Value="trade.Selected" Text="@trade.Name"
                                              ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
-                                             ToggleButtonStyle="Radzen.ButtonStyle.Light"
-                                             Change="@(args => OnFilterChanged())" />
+                                             ToggleButtonStyle="Radzen.ButtonStyle.Light" />
                     }
                 </RadzenStack>
             </RadzenColumn>
@@ -114,33 +112,33 @@
                     AllowColumnResize="true" ColumnWidth="180px"
                     Style="min-height: 400px;" class="rz-border-top">
         <Columns>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Permit #" Width="120px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
                 <Template Context="filing">
                     <span class="permit-num">@filing.JobNum</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Address" Width="250px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="250px">
                 <Template Context="filing">
                     <span class="permit-addr">@filing.HouseNum @filing.StreetName<span class="text-truncate">@filing.JobDescription</span></span>
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Trade" Width="100px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobType" Title="Trade" Width="100px">
                 <Template Context="filing">
                     <span class="trade-tag trade-plumb">@filing.JobType</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Est. Value" Width="110px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="InitialCost" Title="Est. Value" Width="110px">
                 <Template Context="filing">
                     <span class="value-cell">@filing.InitialCost?.ToString("C0")</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Filed" Width="120px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Filed" Width="120px">
                 <Template Context="filing">
                     <span class="date-cell">@filing.LatestActionDate?.ToString("MM/dd/yyyy")</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Predictive Score" Width="130px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="LeadScore" Title="Predictive Score" Width="130px">
                 <Template Context="filing">
                     @if (filing.LeadScore.HasValue)
                     {
@@ -157,7 +155,7 @@
                     }
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="Status" Width="100px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="100px">
                 <Template Context="filing">
                     <span class="status-badge @(filing.JobStatusDescrp?.Contains("NEW") == true ? "status-new" : "status-hot")">@filing.JobStatusDescrp</span>
                 </Template>

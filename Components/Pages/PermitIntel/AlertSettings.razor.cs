@@ -37,26 +37,10 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected AlertPreference preference;
         protected bool isSaving = false;
 
-        // Filter state
-        protected IEnumerable<string> selectedBoroughs;
-        protected IEnumerable<string> selectedJobTypes;
-        protected IEnumerable<string> selectedTrades;
-
         // Options
-        protected List<string> boroughOptions = new() { "MANHATTAN", "BROOKLYN", "QUEENS", "BRONX", "STATEN ISLAND" };
-        protected List<DropDownItem> jobTypeOptions = new()
-        {
-            new() { Text = "A1 - Major Alteration", Value = "A1" },
-            new() { Text = "A2 - Minor Alteration", Value = "A2" },
-            new() { Text = "A3 - Minor Alteration", Value = "A3" },
-            new() { Text = "NB - New Building", Value = "NB" },
-            new() { Text = "DM - Demolition", Value = "DM" },
-        };
-        protected List<string> tradeOptions = new()
-        {
-            "Plumbing", "Mechanical", "Boiler", "Sprinkler",
-            "Fire Alarm", "Standpipe", "Equipment", "Fire Suppression", "Curb Cut"
-        };
+        protected List<BoroughOption> boroughOptions;
+        protected List<JobTypeOption> jobTypeOptions;
+        protected List<TradeOption> tradeOptions;
 
         protected override async Task OnInitializedAsync()
         {
@@ -75,18 +59,50 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 };
             }
 
-            // Parse comma-separated values back to lists
-            selectedBoroughs = string.IsNullOrEmpty(preference.Boroughs)
-                ? Enumerable.Empty<string>()
-                : preference.Boroughs.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            // Parse comma-separated values
+            var savedBoroughs = string.IsNullOrEmpty(preference.Boroughs)
+                ? new List<string>()
+                : preference.Boroughs.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-            selectedJobTypes = string.IsNullOrEmpty(preference.JobTypes)
-                ? Enumerable.Empty<string>()
-                : preference.JobTypes.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var savedJobTypes = string.IsNullOrEmpty(preference.JobTypes)
+                ? new List<string>()
+                : preference.JobTypes.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-            selectedTrades = string.IsNullOrEmpty(preference.Trades)
-                ? Enumerable.Empty<string>()
-                : preference.Trades.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var savedTrades = string.IsNullOrEmpty(preference.Trades)
+                ? new List<string>()
+                : preference.Trades.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+
+            // Initialize options with selection states
+            boroughOptions = new()
+            {
+                new() { Name = "MANHATTAN", Selected = savedBoroughs.Contains("MANHATTAN") },
+                new() { Name = "BROOKLYN", Selected = savedBoroughs.Contains("BROOKLYN") },
+                new() { Name = "QUEENS", Selected = savedBoroughs.Contains("QUEENS") },
+                new() { Name = "BRONX", Selected = savedBoroughs.Contains("BRONX") },
+                new() { Name = "STATEN ISLAND", Selected = savedBoroughs.Contains("STATEN ISLAND") }
+            };
+
+            jobTypeOptions = new()
+            {
+                new() { Key = "A1", Name = "A1 (Major)", Selected = savedJobTypes.Contains("A1") },
+                new() { Key = "A2", Name = "A2 (Minor)", Selected = savedJobTypes.Contains("A2") },
+                new() { Key = "A3", Name = "A3 (Minor)", Selected = savedJobTypes.Contains("A3") },
+                new() { Key = "NB", Name = "New Building", Selected = savedJobTypes.Contains("NB") },
+                new() { Key = "DM", Name = "Demolition", Selected = savedJobTypes.Contains("DM") }
+            };
+
+            tradeOptions = new()
+            {
+                new() { Key = "Plumbing", Name = "Plumbing", Selected = savedTrades.Contains("Plumbing") },
+                new() { Key = "Mechanical", Name = "Mechanical", Selected = savedTrades.Contains("Mechanical") },
+                new() { Key = "Boiler", Name = "Boiler", Selected = savedTrades.Contains("Boiler") },
+                new() { Key = "Sprinkler", Name = "Sprinkler", Selected = savedTrades.Contains("Sprinkler") },
+                new() { Key = "FireAlarm", Name = "Fire Alarm", Selected = savedTrades.Contains("FireAlarm") },
+                new() { Key = "Standpipe", Name = "Standpipe", Selected = savedTrades.Contains("Standpipe") },
+                new() { Key = "Equipment", Name = "Equipment", Selected = savedTrades.Contains("Equipment") },
+                new() { Key = "FireSuppression", Name = "Fire Suppression", Selected = savedTrades.Contains("FireSuppression") },
+                new() { Key = "CurbCut", Name = "Curb Cut", Selected = savedTrades.Contains("CurbCut") }
+            };
         }
 
         protected async Task SaveSettings()
@@ -95,12 +111,14 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             try
             {
                 // Serialize lists to comma-separated strings
-                preference.Boroughs = selectedBoroughs?.Any() == true
-                    ? string.Join(",", selectedBoroughs) : null;
-                preference.JobTypes = selectedJobTypes?.Any() == true
-                    ? string.Join(",", selectedJobTypes) : null;
-                preference.Trades = selectedTrades?.Any() == true
-                    ? string.Join(",", selectedTrades) : null;
+                var activeBoroughs = boroughOptions.Where(b => b.Selected).Select(b => b.Name).ToList();
+                preference.Boroughs = activeBoroughs.Any() ? string.Join(",", activeBoroughs) : null;
+
+                var activeJobTypes = jobTypeOptions.Where(j => j.Selected).Select(j => j.Key).ToList();
+                preference.JobTypes = activeJobTypes.Any() ? string.Join(",", activeJobTypes) : null;
+
+                var activeTrades = tradeOptions.Where(t => t.Selected).Select(t => t.Key).ToList();
+                preference.Trades = activeTrades.Any() ? string.Join(",", activeTrades) : null;
 
                 await PermitIntelService.SaveAlertPreference(preference);
 
@@ -117,7 +135,27 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             }
         }
 
-        // Helper class
+        // Helper classes
+        public class BoroughOption
+        {
+            public string Name { get; set; }
+            public bool Selected { get; set; }
+        }
+
+        public class JobTypeOption
+        {
+            public string Name { get; set; }
+            public string Key { get; set; }
+            public bool Selected { get; set; }
+        }
+
+        public class TradeOption
+        {
+            public string Name { get; set; }
+            public string Key { get; set; }
+            public bool Selected { get; set; }
+        }
+
         public class DropDownItem
         {
             public string Text { get; set; }

@@ -40,14 +40,16 @@ public class StripeServiceTests : IDisposable
     public void Dispose() => _context.Dispose();
 
     [Fact]
-    public void GetTierInfo_ReturnsFourTiers()
+    public void GetTierInfo_ReturnsSixTiers()
     {
         var tiers = StripeService.GetTierInfo();
-        Assert.Equal(4, tiers.Count);
+        Assert.Equal(6, tiers.Count);
         Assert.Contains(tiers, t => t.Name == "Starter" && t.Price == 29);
         Assert.Contains(tiers, t => t.Name == "Pro" && t.Price == 79);
         Assert.Contains(tiers, t => t.Name == "Business" && t.Price == 149);
         Assert.Contains(tiers, t => t.Name == "Agency" && t.Price == 299);
+        Assert.Contains(tiers, t => t.Name == "ComplianceAlerts" && t.Price == 39);
+        Assert.Contains(tiers, t => t.Name == "LandlordCompliance" && t.Price == 199);
     }
 
     [Fact]
@@ -60,10 +62,11 @@ public class StripeServiceTests : IDisposable
     }
 
     [Fact]
-    public void GetTierInfo_AllHaveTrialFeature()
+    public void GetTierInfo_MainTiersHaveTrialFeature()
     {
         var tiers = StripeService.GetTierInfo();
-        Assert.All(tiers, t => Assert.Contains(t.Features, f => f.Contains("14-day free trial")));
+        var mainTiers = new[] { "Starter", "Pro", "Business", "Agency" };
+        Assert.All(tiers.Where(t => mainTiers.Contains(t.Name)), t => Assert.Contains(t.Features, f => f.Contains("14-day free trial")));
     }
 
     [Fact]

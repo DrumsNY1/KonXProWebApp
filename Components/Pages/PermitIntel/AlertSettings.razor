@@ -28,24 +28,41 @@
 
                         @* Borough Filter *@
                         <RadzenStack Gap="0.25rem">
-                            <RadzenLabel Text="Boroughs" Component="ddAlertBoroughs" class="rz-text-tertiary-color" />
-                            <RadzenDropDown @bind-Value="selectedBoroughs" Data="boroughOptions" Multiple="true"
-                                            Placeholder="All Boroughs (no filter)" Style="width: 100%;" Name="ddAlertBoroughs" />
+                            <RadzenLabel Text="Boroughs" class="rz-text-tertiary-color" />
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                                @foreach (var b in boroughOptions)
+                                {
+                                    <RadzenToggleButton @bind-Value="b.Selected" Text="@b.Name"
+                                                         ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                                         ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                                }
+                            </RadzenStack>
                         </RadzenStack>
 
                         @* Job Type Filter *@
                         <RadzenStack Gap="0.25rem">
-                            <RadzenLabel Text="Job Types" Component="ddAlertJobTypes" class="rz-text-tertiary-color" />
-                            <RadzenDropDown @bind-Value="selectedJobTypes" Data="jobTypeOptions" Multiple="true"
-                                            Placeholder="All Job Types" Style="width: 100%;" Name="ddAlertJobTypes"
-                                            TextProperty="Text" ValueProperty="Value" />
+                            <RadzenLabel Text="Job Types" class="rz-text-tertiary-color" />
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                                @foreach (var j in jobTypeOptions)
+                                {
+                                    <RadzenToggleButton @bind-Value="j.Selected" Text="@j.Name"
+                                                         ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                                         ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                                }
+                            </RadzenStack>
                         </RadzenStack>
 
                         @* Trade Filter *@
                         <RadzenStack Gap="0.25rem">
-                            <RadzenLabel Text="Trades" Component="ddAlertTrades" class="rz-text-tertiary-color" />
-                            <RadzenDropDown @bind-Value="selectedTrades" Data="tradeOptions" Multiple="true"
-                                            Placeholder="All Trades" Style="width: 100%;" Name="ddAlertTrades" />
+                            <RadzenLabel Text="Trades" class="rz-text-tertiary-color" />
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                                @foreach (var t in tradeOptions)
+                                {
+                                    <RadzenToggleButton @bind-Value="t.Selected" Text="@t.Name"
+                                                         ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
+                                                         ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                                }
+                            </RadzenStack>
                         </RadzenStack>
 
                         @* Cost Range *@

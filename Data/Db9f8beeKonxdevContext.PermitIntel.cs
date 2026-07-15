@@ -55,5 +55,39 @@ public partial class db_9f8bee_konxdevContext
             entity.Property(p => p.ClosedDate).HasColumnType("datetime2");
             entity.HasIndex(e => e.Bbl);
         });
+
+        builder.Entity<DobViolation>(entity =>
+        {
+            entity.ToTable("DobBisViolations", "konx_admin");
+            
+            // Value converter for Id (isn_dob_bis_viol varchar in DB)
+            entity.Property(e => e.Id)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => ConvertBoroToInt(v)
+                )
+                .HasColumnType("varchar");
+            
+            // Value converter for IssueDate (char(8) YYYYMMDD in DB)
+            entity.Property(e => e.IssueDate)
+                .HasConversion(
+                    v => v.ToString("yyyyMMdd"),
+                    v => System.DateTime.ParseExact(v.Trim(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)
+                )
+                .HasColumnType("char(8)");
+
+            // Value converter for Boro (varchar in DB)
+            entity.Property(e => e.Boro)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => ConvertBoroToInt(v)
+                )
+                .HasColumnType("varchar");
+        });
+    }
+
+    private static int ConvertBoroToInt(string v)
+    {
+        return int.TryParse(v, out var result) ? result : 0;
     }
 }
