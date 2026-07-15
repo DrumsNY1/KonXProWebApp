@@ -16,11 +16,26 @@
     <Content Remove="KonXProWebApp.Tests\**" />
     <EmbeddedResource Remove="KonXProWebApp.Tests\**" />
     <None Remove="KonXProWebApp.Tests\**" />
+    <Compile Remove="KonXProWebApp.Functions.Tests\**" />
+    <Content Remove="KonXProWebApp.Functions.Tests\**" />
+    <EmbeddedResource Remove="KonXProWebApp.Functions.Tests\**" />
+    <None Remove="KonXProWebApp.Functions.Tests\**" />
+    <Compile Remove="KonXProWebApp.Integration.Tests\**" />
+    <Content Remove="KonXProWebApp.Integration.Tests\**" />
+    <EmbeddedResource Remove="KonXProWebApp.Integration.Tests\**" />
+    <None Remove="KonXProWebApp.Integration.Tests\**" />
+    <Compile Remove="KonXProWebApp.E2E.Tests\**" />
+    <Content Remove="KonXProWebApp.E2E.Tests\**" />
+    <EmbeddedResource Remove="KonXProWebApp.E2E.Tests\**" />
+    <None Remove="KonXProWebApp.E2E.Tests\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Components\Pages\ClaudeDobFilings.razor" />
     <Content Remove="Components\Pages\EditDobjobFiling.razor" />
     <Content Remove="Components\Pages\HighTierDashboard.razor" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="KonXProWebApp.Integration.Tests" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Radzen.Blazor" Version="*" />

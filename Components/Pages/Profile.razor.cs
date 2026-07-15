@@ -30,13 +30,26 @@ namespace KonXProWebApp.Components.Pages
         [Inject]
         protected NotificationService NotificationService { get; set; }
 
+        [Inject]
+        public KonXProWebApp.Services.PermitIntelService PermitIntelService { get; set; }
+
+        [Inject]
+        public KonXProWebApp.Services.StripeService StripeService { get; set; }
+
         protected string oldPassword = "";
         protected string newPassword = "";
         protected string confirmPassword = "";
         protected KonXProWebApp.Models.ApplicationUser user;
+        protected KonXProWebApp.Models.PermitIntel.Subscription activeSubscription;
         protected string error;
         protected bool errorVisible;
         protected bool successVisible;
+
+        // Profile details save state
+        protected bool isSavingProfile = false;
+        protected string profileError;
+        protected bool profileErrorVisible;
+        protected bool profileSuccessVisible;
 
         [Inject]
         protected SecurityService Security { get; set; }
@@ -44,6 +57,51 @@ namespace KonXProWebApp.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             user = await Security.GetUserById($"{Security.User.Id}");
+            if (user != null)
+            {
+                activeSubscription = await PermitIntelService.GetActiveSubscription(user.Id);
+            }
+        }
+
+        protected async Task OpenBillingPortal()
+        {
+            if (user == null) return;
+            try
+            {
+                var returnUrl = NavigationManager.BaseUri.TrimEnd('/') + "/profile";
+                var portalUrl = await StripeService.CreatePortalSession(user.Id, returnUrl);
+                await JSRuntime.InvokeVoidAsync("open", portalUrl, "_self");
+            }
+            catch (Exception ex)
+            {
+                NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+            }
+        }
+
+        protected async Task SaveProfile()
+        {
+            isSavingProfile = true;
+            profileErrorVisible = false;
+            profileSuccessVisible = false;
+            try
+            {
+                if (user != null)
+                {
+                    await Security.UpdateUser(user.Id, user);
+                    profileSuccessVisible = true;
+                    NotificationService.Notify(NotificationSeverity.Success, "Saved", "Profile details updated successfully.");
+                }
+            }
+            catch (Exception ex)
+            {
+                profileErrorVisible = true;
+                profileError = ex.Message;
+                NotificationService.Notify(NotificationSeverity.Error, "Error", ex.Message);
+            }
+            finally
+            {
+                isSavingProfile = false;
+            }
         }
 
         protected async Task FormSubmit()

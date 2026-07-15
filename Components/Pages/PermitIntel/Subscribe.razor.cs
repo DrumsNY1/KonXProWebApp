@@ -44,10 +44,14 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         protected override async Task OnInitializedAsync()
         {
-            var userId = Security.User?.Id;
-            if (!string.IsNullOrEmpty(userId))
+            var isAuth = Security.IsAuthenticated() || (Security.User != null && Security.User.Name != "Anonymous" && !string.IsNullOrEmpty(Security.User.Id));
+            if (isAuth)
             {
-                currentSubscription = await PermitIntelService.GetActiveSubscription(userId);
+                var userId = Security.User?.Id;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    currentSubscription = await PermitIntelService.GetActiveSubscription(userId);
+                }
             }
         }
 
@@ -56,7 +60,8 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             var userId = Security.User?.Id;
             var email = Security.User?.Email;
 
-            if (string.IsNullOrEmpty(userId))
+            var isAuth = Security.IsAuthenticated() || (Security.User != null && Security.User.Name != "Anonymous" && !string.IsNullOrEmpty(userId));
+            if (!isAuth)
             {
                 NavigationManager.NavigateTo("/Login");
                 return;

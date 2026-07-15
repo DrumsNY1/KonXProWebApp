@@ -46,11 +46,11 @@ namespace KonXProWebApp.Components.Pages
 
             await grid0.GoToPage(0);
 
-            dobViolations = await db_9f8bee_konxdevService.GetDobViolations(new Query { Filter = $@"i => i.IsnDobBisViol.Contains(@0) || i.Bin.Contains(@0) || i.Block.Contains(@0) || i.Lot.Contains(@0) || i.ViolationTypeCode.Contains(@0) || i.ViolationNumber.Contains(@0) || i.HouseNumber.Contains(@0) || i.Street.Contains(@0) || i.Description.Contains(@0) || i.Number.Contains(@0) || i.ViolationCategory.Contains(@0) || i.ViolationType.Contains(@0)", FilterParameters = new object[] { search } });
+            dobViolations = await db_9f8bee_konxdevService.GetDobViolations(new Query { Filter = $@"i => i.Bin.Contains(@0) || i.Block.Contains(@0) || i.Lot.Contains(@0) || i.ViolationTypeCode.Contains(@0) || i.ViolationNumber.Contains(@0) || i.HouseNumber.Contains(@0) || i.Street.Contains(@0) || i.Description.Contains(@0) || i.Number.Contains(@0) || i.ViolationCategory.Contains(@0) || i.ViolationType.Contains(@0)", FilterParameters = new object[] { search } });
         }
         protected override async Task OnInitializedAsync()
         {
-            dobViolations = await db_9f8bee_konxdevService.GetDobViolations(new Query { Filter = $@"i => i.IsnDobBisViol.Contains(@0) || i.Bin.Contains(@0) || i.Block.Contains(@0) || i.Lot.Contains(@0) || i.ViolationTypeCode.Contains(@0) || i.ViolationNumber.Contains(@0) || i.HouseNumber.Contains(@0) || i.Street.Contains(@0) || i.Description.Contains(@0) || i.Number.Contains(@0) || i.ViolationCategory.Contains(@0) || i.ViolationType.Contains(@0)", FilterParameters = new object[] { search } });
+            dobViolations = await db_9f8bee_konxdevService.GetDobViolations(new Query { Filter = $@"i => i.Bin.Contains(@0) || i.Block.Contains(@0) || i.Lot.Contains(@0) || i.ViolationTypeCode.Contains(@0) || i.ViolationNumber.Contains(@0) || i.HouseNumber.Contains(@0) || i.Street.Contains(@0) || i.Description.Contains(@0) || i.Number.Contains(@0) || i.ViolationCategory.Contains(@0) || i.ViolationType.Contains(@0)", FilterParameters = new object[] { search } });
         }
 
         protected async Task AddButtonClick(MouseEventArgs args)

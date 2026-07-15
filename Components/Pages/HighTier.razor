@@ -1,10 +1,6 @@
-@page "/highTier"
-@attribute [Authorize]
-@* @attribute [Authorize] *@
-
+@page "/highTier"
+@attribute [Authorize(Policy = "RequiresBusiness")]
 @using KonXProWebApp.Models.db_9f8bee_konxdev
-
-
 
 <PageTitle>Tiers</PageTitle>
 

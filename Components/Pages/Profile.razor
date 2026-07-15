@@ -1,53 +1,149 @@
 @page "/profile"
 @attribute [Authorize]
 
-<PageTitle>Profile</PageTitle>
-<RadzenStack>
-    <RadzenRow AlignItems="AlignItems.Center">
-        <RadzenColumn Size="12">
-            <RadzenText Text="Profile" TextStyle="TextStyle.H3" TagName="TagName.H1" style="margin: 0" />
-        </RadzenColumn>
-    </RadzenRow>
-    <RadzenRow>
-        <RadzenColumn SizeMD="12">
-            <RadzenTemplateForm Method="post" Submit="@FormSubmit" TItem="KonXProWebApp.Models.ApplicationUser" Data="@user"
-                Visible="@(user != null)">
-                <RadzenAlert Size="AlertSize.Large" Shade="Shade.Light" AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Title="Cannot change password" Visible="@errorVisible">@error</RadzenAlert>
-                <RadzenAlert Size="AlertSize.Large" Shade="Shade.Light" AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Visible="@successVisible">
-                    Your password has been changed.
-                </RadzenAlert>
+<PageTitle>Profile — NYC Permit Intel</PageTitle>
 
-                <RadzenStack style="margin-bottom: 1rem;">
-                    <RadzenFormField Text="Old Password" Variant="Variant.Filled">
-                        <ChildContent>
-                            <RadzenPassword @bind-Value="@oldPassword" style="display: block; width: 100%" Name="OldPassword" />
-                        </ChildContent>
-                        <Helper>
-                            <RadzenRequiredValidator Component="OldPassword" Text="Enter your current password" />
-                        </Helper>
-                    </RadzenFormField>
-                    <RadzenFormField Text="New Password" Variant="Variant.Filled">
-                        <ChildContent>
-                            <RadzenPassword @bind-Value="@newPassword" style="display: block; width: 100%" Name="NewPassword" />
-                        </ChildContent>
-                        <Helper>
-                            <RadzenRequiredValidator Component="NewPassword" Text="Enter your new password" />
-                        </Helper>
-                    </RadzenFormField>
-                    <RadzenFormField Text="Confirm Password" Variant="Variant.Filled">
-                        <ChildContent>
-                            <RadzenPassword @bind-Value="@confirmPassword" style="display: block; width: 100%" Name="ConfirmPassword" />
-                        </ChildContent>
-                        <Helper>
-                            <RadzenRequiredValidator Component="ConfirmPassword" Text="Confirm your new password" />
-                            <RadzenCompareValidator Component="ConfirmPassword" Text="Passwords should be the same" Value="@newPassword" />
-                        </Helper>
-                    </RadzenFormField>
-                </RadzenStack>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
-                        <RadzenButton ButtonType="ButtonType.Submit" Text="Change password" Variant="Variant.Flat" />
-                </RadzenStack>
-            </RadzenTemplateForm>
-        </RadzenColumn>
-    </RadzenRow>
-</RadzenStack>
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>User Profile</h1>
+    <p>Manage your account settings, subscription tier, and security preferences.</p>
+</div>
+
+<RadzenRow class="rz-mx-auto rz-px-4 rz-mb-4" Style="max-width: 1440px;" Gap="1.5rem">
+    @* Account Information Column *@
+    <RadzenColumn Size="12" SizeMD="6">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Account Information</div>
+            </div>
+            <div class="rz-p-4">
+                <RadzenTemplateForm Method="post" Submit="@SaveProfile" TItem="KonXProWebApp.Models.ApplicationUser" Data="@user"
+                                    Visible="@(user != null)">
+                    <RadzenAlert Size="AlertSize.Large" Shade="Shade.Light" AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Title="Cannot save profile" Visible="@profileErrorVisible">@profileError</RadzenAlert>
+                    <RadzenAlert Size="AlertSize.Large" Shade="Shade.Light" AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Visible="@profileSuccessVisible">
+                        Your profile has been updated.
+                    </RadzenAlert>
+
+                    <RadzenStack Gap="1rem">
+                        <RadzenFormField Text="Username" Variant="Variant.Filled">
+                            <ChildContent>
+                                <RadzenTextBox @bind-Value="@user.UserName" Disabled="true" style="width: 100%" Name="UserName" />
+                            </ChildContent>
+                        </RadzenFormField>
+
+                        <RadzenFormField Text="Email Address" Variant="Variant.Filled">
+                            <ChildContent>
+                                <RadzenTextBox @bind-Value="@user.Email" style="width: 100%" Name="Email" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="Email" Text="Email address is required" />
+                                <RadzenEmailValidator Component="Email" Text="Provide a valid email address" />
+                            </Helper>
+                        </RadzenFormField>
+
+                        <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End" class="rz-mt-1 rz-mb-3">
+                            <RadzenButton ButtonType="ButtonType.Submit" Text="Save Details" ButtonStyle="ButtonStyle.Primary" IsBusy="@isSavingProfile" />
+                        </RadzenStack>
+
+                        <hr style="border: 0; border-top: 1px solid var(--border-default); margin: 0.5rem 0;" />
+
+                        <RadzenStack Gap="0.5rem">
+                            <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-text-tertiary-color rz-m-0">Current Subscription Tier</RadzenText>
+                            @if (activeSubscription != null)
+                            {
+                                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="0.5rem">
+                                    <span class="badge badge-danger" style="font-size: 14px; padding: 6px 12px; font-weight: bold; text-transform: uppercase;">
+                                        @activeSubscription.Tier
+                                    </span>
+                                    <span class="badge status-new" style="font-size: 12px; padding: 4px 8px;">
+                                        @activeSubscription.Status
+                                    </span>
+                                </RadzenStack>
+                                <RadzenText TextStyle="TextStyle.Caption" class="rz-text-tertiary-color rz-mt-2">
+                                    Member since @activeSubscription.StartDate.ToString("MMMM dd, yyyy")
+                                    @if (activeSubscription.EndDate.HasValue)
+                                    {
+                                        <span> (Renews/Expires on @activeSubscription.EndDate.Value.ToString("MMMM dd, yyyy"))</span>
+                                    }
+                                </RadzenText>
+                            }
+                            else
+                            {
+                                <RadzenStack Gap="0.5rem">
+                                    <RadzenText TextStyle="TextStyle.Body1" class="rz-m-0">Free Tier</RadzenText>
+                                    <RadzenText TextStyle="TextStyle.Caption" class="rz-text-tertiary-color">
+                                        Unlock real-time lead score predictions, alerts, and unlimited search limits.
+                                    </RadzenText>
+                                    <div>
+                                        <RadzenButton Text="Upgrade Subscription" ButtonStyle="ButtonStyle.Primary" Size="ButtonSize.Small"
+                                                      Click="@(() => NavigationManager.NavigateTo("/permit-intel/subscribe"))" />
+                                    </div>
+                                </RadzenStack>
+                            }
+                        </RadzenStack>
+
+                        @if (activeSubscription != null)
+                        {
+                            <RadzenStack Gap="0.5rem" class="rz-mt-2">
+                                <RadzenText TextStyle="TextStyle.Subtitle2" class="rz-text-tertiary-color rz-m-0">Billing & Invoices</RadzenText>
+                                <div>
+                                    <RadzenButton Text="Manage Billing & Subscriptions" Icon="credit_card" ButtonStyle="ButtonStyle.Secondary"
+                                                  Click="@OpenBillingPortal" />
+                                </div>
+                            </RadzenStack>
+                        }
+                    </RadzenStack>
+                </RadzenTemplateForm>
+            </div>
+        </div>
+    </RadzenColumn>
+
+    @* Security Settings Column *@
+    <RadzenColumn Size="12" SizeMD="6">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Security & Password</div>
+            </div>
+            <div class="rz-p-4">
+                <RadzenTemplateForm Method="post" Submit="@FormSubmit" TItem="KonXProWebApp.Models.ApplicationUser" Data="@user"
+                                    Visible="@(user != null)">
+                    <RadzenAlert Size="AlertSize.Large" Shade="Shade.Light" AlertStyle="AlertStyle.Danger" Variant="Variant.Flat" Title="Cannot change password" Visible="@errorVisible">@error</RadzenAlert>
+                    <RadzenAlert Size="AlertSize.Large" Shade="Shade.Light" AlertStyle="AlertStyle.Success" Variant="Variant.Flat" Visible="@successVisible">
+                        Your password has been changed.
+                    </RadzenAlert>
+
+                    <RadzenStack Gap="1rem" class="rz-mb-4">
+                        <RadzenFormField Text="Old Password" Variant="Variant.Filled">
+                            <ChildContent>
+                                <RadzenPassword @bind-Value="@oldPassword" style="display: block; width: 100%" Name="OldPassword" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="OldPassword" Text="Enter your current password" />
+                            </Helper>
+                        </RadzenFormField>
+                        <RadzenFormField Text="New Password" Variant="Variant.Filled">
+                            <ChildContent>
+                                <RadzenPassword @bind-Value="@newPassword" style="display: block; width: 100%" Name="NewPassword" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="NewPassword" Text="Enter your new password" />
+                            </Helper>
+                        </RadzenFormField>
+                        <RadzenFormField Text="Confirm Password" Variant="Variant.Filled">
+                            <ChildContent>
+                                <RadzenPassword @bind-Value="@confirmPassword" style="display: block; width: 100%" Name="ConfirmPassword" />
+                            </ChildContent>
+                            <Helper>
+                                <RadzenRequiredValidator Component="ConfirmPassword" Text="Confirm your new password" />
+                                <RadzenCompareValidator Component="ConfirmPassword" Text="Passwords should be the same" Value="@newPassword" />
+                            </Helper>
+                        </RadzenFormField>
+                    </RadzenStack>
+                    <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" JustifyContent="JustifyContent.End">
+                        <RadzenButton ButtonType="ButtonType.Submit" Text="Change password" ButtonStyle="ButtonStyle.Primary" />
+                    </RadzenStack>
+                </RadzenTemplateForm>
+            </div>
+        </div>
+    </RadzenColumn>
+</RadzenRow>

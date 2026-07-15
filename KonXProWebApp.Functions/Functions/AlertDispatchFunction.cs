@@ -142,7 +142,36 @@ public class AlertDispatchFunction
     private async Task<List<AlertPermitMatch>> GetMatchingPermits(
         SqlConnection connection, AlertUser user)
     {
-        // Build dynamic WHERE clause based on user's preferences
+        var (sql, parameters) = BuildWhereClause(user);
+
+        var matches = new List<AlertPermitMatch>();
+        await using var cmd = new SqlCommand(sql, connection);
+        foreach (var p in parameters) cmd.Parameters.Add(p);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            matches.Add(new AlertPermitMatch
+            {
+                PermitId = reader.GetInt32(0),
+                Address = $"{(reader.IsDBNull(1) ? "" : reader.GetString(1))} {(reader.IsDBNull(2) ? "" : reader.GetString(2))}".Trim(),
+                Borough = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                JobType = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                EstCost = reader.IsDBNull(5) ? "N/A" : reader.GetDecimal(5).ToString("C0"),
+                Status = reader.IsDBNull(6) ? "" : reader.GetString(6),
+                LeadScore = reader.IsDBNull(7) ? 1 : reader.GetInt32(7)
+            });
+        }
+
+        return matches;
+    }
+
+    /// <summary>
+    /// Builds the parameterized WHERE clause + SELECT for matching permits against a user's alert
+    /// preferences. Extracted as internal static so it can be unit tested without a SQL connection.
+    /// </summary>
+    internal static (string Sql, List<SqlParameter> Parameters) BuildWhereClause(AlertUser user)
+    {
         var conditions = new List<string> { "d.LatestActionDate >= DATEADD(day, -1, GETUTCDATE())" };
         var parameters = new List<SqlParameter>();
 
@@ -205,29 +234,10 @@ public class AlertDispatchFunction
             WHERE {string.Join(" AND ", conditions)}
             ORDER BY d.LeadScore DESC, d.InitialCost DESC";
 
-        var matches = new List<AlertPermitMatch>();
-        await using var cmd = new SqlCommand(sql, connection);
-        foreach (var p in parameters) cmd.Parameters.Add(p);
-
-        await using var reader = await cmd.ExecuteReaderAsync();
-        while (await reader.ReadAsync())
-        {
-            matches.Add(new AlertPermitMatch
-            {
-                PermitId = reader.GetInt32(0),
-                Address = $"{(reader.IsDBNull(1) ? "" : reader.GetString(1))} {(reader.IsDBNull(2) ? "" : reader.GetString(2))}".Trim(),
-                Borough = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                JobType = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                EstCost = reader.IsDBNull(5) ? "N/A" : reader.GetDecimal(5).ToString("C0"),
-                Status = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                LeadScore = reader.IsDBNull(7) ? 1 : reader.GetInt32(7)
-            });
-        }
-
-        return matches;
+        return (sql, parameters);
     }
 
-    private class AlertUser
+    internal class AlertUser
     {
         public string UserId { get; set; }
         public string Boroughs { get; set; }

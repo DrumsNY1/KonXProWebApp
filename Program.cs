@@ -80,8 +80,11 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
-app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().Database.Migrate();
-app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().SeedTenantsAdmin().Wait();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().Database.Migrate();
+    app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().SeedTenantsAdmin().Wait();
+}
 
 //using (var scope = app.Services.CreateScope())
 //{
@@ -111,7 +114,13 @@ app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentit
 //    foreach (var viewSql in views)
 //    {
 //        context.Database.ExecuteSqlRaw(viewSql);
-//    }
+ //    }
 //}
 
 app.Run();
+
+/// <summary>
+/// Exposes the top-level Program as a public partial class so integration tests can boot the app
+/// in-process via WebApplicationFactory&lt;Program&gt;.
+/// </summary>
+public partial class Program { }

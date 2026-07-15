@@ -9,13 +9,11 @@ namespace KonXProWebApp.Models.db_9f8bee_konxdev
     public partial class DobViolation
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column("id")]
+        [Column("isn_dob_bis_viol")]
         public int Id { get; set; }
 
-        [Column("isn_dob_bis_viol")]
-        [Required]
-        public string IsnDobBisViol { get; set; }
+        [NotMapped]
+        public string IsnDobBisViol { get => Id.ToString(); set { } }
 
         [Column("boro")]
         [Required]

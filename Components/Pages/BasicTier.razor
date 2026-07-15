@@ -1,11 +1,6 @@
-@page "/BasicTier"
-@attribute [Authorize]
-
-@* @attribute [Authorize] *@
-
+@page "/BasicTier"
+@attribute [Authorize(Policy = "RequiresStarter")]
 @using KonXProWebApp.Models.db_9f8bee_konxdev
-
-
 
 <PageTitle>Tiers</PageTitle>
 

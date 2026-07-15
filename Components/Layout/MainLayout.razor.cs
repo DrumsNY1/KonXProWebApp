@@ -40,5 +40,12 @@ namespace KonXProWebApp.Components.Layout
                 Security.Logout();
             }
         }
+
+        protected bool isSidebarOpen = true;
+
+        protected void ToggleSidebar()
+        {
+            isSidebarOpen = !isSidebarOpen;
+        }
     }
 }

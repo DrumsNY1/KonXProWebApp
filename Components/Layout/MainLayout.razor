@@ -1,11 +1,13 @@
 @inherits LayoutComponentBase
 <RadzenComponents />
 
-<div class="sidebar">
-  <div class="sidebar-logo">
-    <div class="logo-icon">K</div>
-    <span class="logo-text">Kon<span>X</span>Pro</span>
-  </div>
+<div class="@(isSidebarOpen ? "sidebar-open" : "sidebar-collapsed")">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">K</div>
+      <span class="logo-text">Kon<span>X</span>Pro</span>
+      <button class="sidebar-close-btn" @onclick="ToggleSidebar" aria-label="Close menu">✕</button>
+    </div>
 
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
@@ -33,8 +35,8 @@
     </a>
 
     <div class="nav-section-label">Account</div>
-    <a class="nav-item" href="Account/Manage">
-      <span class="nav-icon">⚙️</span> Settings
+    <a class="nav-item" href="profile">
+      <span class="nav-icon">⚙️</span> Profile & Settings
     </a>
     <a class="nav-item text-accent" href="permit-intel/subscribe">
       <span class="nav-icon">⚡</span> Upgrade to Pro
@@ -47,22 +49,25 @@
     <button class="btn-upgrade" @onclick='() => NavigationManager.NavigateTo("permit-intel/subscribe")'>Upgrade Now — $149/mo</button>
   </div>
 
-  <div class="sidebar-user" @onclick='() => NavigationManager.NavigateTo("Account/Manage")'>
-    <div class="user-avatar">US</div>
+  <div class="sidebar-user" @onclick='() => NavigationManager.NavigateTo("profile")'>
+    <div class="user-avatar">
+        @(string.IsNullOrEmpty(Security.User?.Name) || Security.User?.Name == "Anonymous" ? "US" : Security.User.Name.Substring(0, Math.Min(2, Security.User.Name.Length)).ToUpper())
+    </div>
     <div>
-      <div class="user-name">User</div>
-      <div class="user-plan">Pro Trial · Plumber</div>
+      <div class="user-name">@(Security.User?.Name ?? "User")</div>
+      <div class="user-plan">Active Member</div>
     </div>
   </div>
-</div>
+  </div>
 
-<div class="main">
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <div class="topbar-search">
-      <span class="text-muted-color">🔍</span>
-      <input type="text" placeholder="Search permits, addresses, owners..." @onkeydown="SearchGlobal" />
-    </div>
+  <div class="main">
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <button class="hamburger-btn" @onclick="ToggleSidebar" aria-label="Toggle Navigation Menu">☰</button>
+      <div class="topbar-search">
+        <span class="text-muted-color">🔍</span>
+        <input type="text" placeholder="Search permits, addresses, owners..." @onkeydown="SearchGlobal" />
+      </div>
     <div class="topbar-date">@DateTime.Today.ToString("ddd, MMMM d, yyyy")</div>
     <div class="topbar-actions">
       <button class="topbar-btn" @onclick='() => NavigationManager.NavigateTo("permit-intel/map")'>
@@ -71,7 +76,9 @@
       <button class="topbar-btn" @onclick='() => NavigationManager.NavigateTo("permit-intel/alerts")'>
         🔔
       </button>
-      <div class="topbar-avatar" @onclick='() => NavigationManager.NavigateTo("Account/Manage")'>US</div>
+      <div class="topbar-avatar" @onclick='() => NavigationManager.NavigateTo("profile")'>
+        @(string.IsNullOrEmpty(Security.User?.Name) || Security.User?.Name == "Anonymous" ? "US" : Security.User.Name.Substring(0, Math.Min(2, Security.User.Name.Length)).ToUpper())
+      </div>
     </div>
   </header>
 
@@ -81,6 +88,7 @@
         @Body
     </div>
   </div>
+</div>
 </div>
 
 @code {
