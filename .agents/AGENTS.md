@@ -136,3 +136,41 @@ Rules:
 5. Test that the layout works at 375px mobile width
 6. Validate that icons have accessible labels
 7. Check that form inputs have associated labels (not just placeholders)
+
+## Development Tools & Deployment
+
+### Tool Paths (D: Drive)
+All development and deployment tools are installed on the **D: drive**. Always prepend these to `$env:PATH` before use:
+
+| Tool | Path |
+|---|---|
+| **Git** | `D:\Program Files\Git\cmd` |
+| **GitHub CLI (gh)** | `D:\Program Files\GitHub CLI` |
+| **Azure CLI (az)** | `D:\Program Files\Microsoft SDKs\Azure\CLI2\wbin` |
+| **Azure Functions Core Tools (func)** | `D:\Program Files\Microsoft\Azure Functions Core Tools` |
+
+**Standard PATH setup** (use at the start of any command that needs these tools):
+```powershell
+$env:PATH = "D:\Program Files\Git\cmd;D:\Program Files\GitHub CLI;D:\Program Files\Microsoft SDKs\Azure\CLI2\wbin;D:\Program Files\Microsoft\Azure Functions Core Tools;" + $env:PATH
+```
+
+### Web App Deployment (SmarterASP.NET)
+The main Blazor web app deploys via Web Deploy:
+```powershell
+dotnet publish KonXProWebApp.csproj /p:PublishProfile="D:\Workspace\KonXProWebApp\Properties\PublishProfiles\konxpro.com - Web Deploy.pubxml" /p:Password="Nkenge08!" /p:AllowUntrustedCertificate=True
+```
+
+### Azure Functions Deployment
+The Functions project (`KonXProWebApp.Functions`) deploys via Azure Functions Core Tools:
+```powershell
+func azure functionapp publish KonXProFunctionApp --dotnet-isolated
+```
+Requires Azure CLI authentication (`az login`) first.
+
+### WAF Considerations (SmarterASP.NET)
+The hosting WAF aggressively blocks:
+- OData-style URLs with parentheses and single quotes
+- Long base64-encoded query string parameters
+- Standard JSON bodies for ASP.NET Identity objects
+
+Use form-encoded POST bodies and short opaque tokens to bypass these restrictions.
