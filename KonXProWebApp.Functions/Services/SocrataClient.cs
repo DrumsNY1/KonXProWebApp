@@ -25,7 +25,9 @@ public class SocrataClient
 
     public IAsyncEnumerable<SocrataPermitRecord> GetPermitsSince(DateTime? since)
     {
-        return GetRecordsSince<SocrataPermitRecord>("ic3t-wcy2.json", "dobrundate", since, null);
+        // Cap at 50 pages (250K records) per run to stay within the 10-min function timeout.
+        // The watermark only advances on records found, so subsequent runs pick up the rest.
+        return GetRecordsSince<SocrataPermitRecord>("ic3t-wcy2.json", "dobrundate", since, null, maxPages: 50);
     }
 
     public IAsyncEnumerable<SocrataDobViolationRecord> GetDobViolationsSince(DateTime? since)
@@ -52,10 +54,11 @@ public class SocrataClient
         return GetRecordsSince<SocrataContractorRecord>("w7w3-xahh.json", "license_creation_date", since, extraWhere);
     }
 
-    private async IAsyncEnumerable<T> GetRecordsSince<T>(string resourceId, string dateColumn, DateTime? since, string extraWhere)
+    private async IAsyncEnumerable<T> GetRecordsSince<T>(string resourceId, string dateColumn, DateTime? since, string extraWhere, int? maxPages = null)
     {
         int offset = 0;
         bool hasMore = true;
+        int pageCount = 0;
 
         while (hasMore)
         {
@@ -110,6 +113,12 @@ public class SocrataClient
             else
             {
                 offset += PageSize;
+                pageCount++;
+                if (maxPages.HasValue && pageCount >= maxPages.Value)
+                {
+                    _logger.LogInformation("Reached max pages limit ({MaxPages}). Will continue on next run.", maxPages.Value);
+                    hasMore = false;
+                }
             }
         }
     }

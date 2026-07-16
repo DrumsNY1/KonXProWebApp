@@ -66,9 +66,24 @@ public class PermitIngestionFunction
             // Stream records from Socrata
             var batch = new List<Models.SocrataPermitRecord>();
             const int batchSize = 500;
+            int totalFiltered = 0;
+
+            // Only ingest permits with recent activity (lead generation focus).
+            // DOB re-processes the entire 1.8M+ dataset with a single dobrundate,
+            // but latest_action_date is a string field so we filter client-side.
+            var actionDateCutoff = DateTime.UtcNow.AddDays(-90);
 
             await foreach (var record in _socrataClient.GetPermitsSince(since))
             {
+                // Skip records with old action dates — not useful as leads
+                if (!string.IsNullOrEmpty(record.LatestActionDate) &&
+                    DateTime.TryParse(record.LatestActionDate, out var actionDate) &&
+                    actionDate < actionDateCutoff)
+                {
+                    totalFiltered++;
+                    continue;
+                }
+
                 batch.Add(record);
 
                 // Track the latest dobrundate as our new watermark
@@ -87,8 +102,8 @@ public class PermitIngestionFunction
                     totalUpdated += upd;
                     totalSkipped += skip;
                     _logger.LogInformation(
-                        "Batch processed: +{Inserted} inserted, ~{Updated} updated, -{Skipped} skipped",
-                        ins, upd, skip);
+                        "Batch processed: +{Inserted} inserted, ~{Updated} updated, -{Skipped} skipped (filtered {Filtered} old records so far)",
+                        ins, upd, skip, totalFiltered);
                     batch.Clear();
                 }
             }
@@ -103,8 +118,8 @@ public class PermitIngestionFunction
             }
 
             _logger.LogInformation(
-                "Ingestion complete: {Inserted} inserted, {Updated} updated, {Skipped} skipped",
-                totalInserted, totalUpdated, totalSkipped);
+                "Ingestion complete: {Inserted} inserted, {Updated} updated, {Skipped} skipped, {Filtered} old records filtered out",
+                totalInserted, totalUpdated, totalSkipped, totalFiltered);
         }
         catch (Exception ex)
         {
