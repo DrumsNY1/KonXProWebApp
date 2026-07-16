@@ -86,8 +86,12 @@ public class DobViolationIngestionFunction
             _logger.LogError(ex, "Ingestion failed");
         }
 
+        if (lastTimestamp == null && status == "Success")
+        {
+            _logger.LogInformation("No new DOB violations found. Watermark not advanced.");
+        }
         await _ingestionService.LogIngestionRun(
             totalInserted, totalUpdated, totalSkipped,
-            "DOBViolation_" + status, errorMessage, lastTimestamp ?? DateTime.UtcNow);
+            "DOBViolation_" + status, errorMessage, lastTimestamp);
     }
 }
