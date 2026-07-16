@@ -54,9 +54,14 @@ public class PermitIngestionFunction
 
         try
         {
-            // Get watermark from last successful run
+            // Get watermark from last successful run, but never look back further than 30 days
             var since = await _ingestionService.GetLastIngestionTimestamp();
-            _logger.LogInformation("Delta load since: {Since}", since?.ToString("o") ?? "(first run — no filter)");
+            var floor = DateTime.UtcNow.AddDays(-30);
+            if (!since.HasValue || since.Value < floor)
+            {
+                since = floor;
+            }
+            _logger.LogInformation("Delta load since: {Since}", since?.ToString("o") ?? "(first run)");
 
             // Stream records from Socrata
             var batch = new List<Models.SocrataPermitRecord>();
@@ -108,10 +113,14 @@ public class PermitIngestionFunction
             _logger.LogError(ex, "Ingestion failed");
         }
 
-        // Log the run
+        // Log the run — only advance watermark if we actually ingested records
+        if (lastTimestamp == null && status == "Success")
+        {
+            _logger.LogInformation("No new records found. Watermark not advanced.");
+        }
         await _ingestionService.LogIngestionRun(
             totalInserted, totalUpdated, totalSkipped,
-            status, errorMessage, lastTimestamp ?? DateTime.UtcNow);
+            status, errorMessage, lastTimestamp);
 
         _logger.LogInformation("PermitIngestionFunction completed at {Time}. Status: {Status}",
             DateTime.UtcNow, status);

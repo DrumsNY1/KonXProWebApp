@@ -5,7 +5,7 @@
     "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "SqlConnectionString": "Server=plesk9100.is.cc;Connection Timeout=30;Command Timeout=30;Persist Security Info=False;TrustServerCertificate=True;User ID=konx_admin;Password=KonxNkenge08!;Initial Catalog=priority_konx",
     "SocrataBaseUrl": "https://data.cityofnewyork.us/resource/",
-    "SocrataAppToken": "",
+    "SocrataAppToken": "0RiOM7IGCM0vCjlmHJofsdkox",
     "SmtpHost": "mail.konxpro.com",
     "SmtpPort": "587",
     "SmtpUser": "alerts@konxpro.com",

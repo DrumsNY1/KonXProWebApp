@@ -85,8 +85,12 @@ public class HpdViolationIngestionFunction
             _logger.LogError(ex, "Ingestion failed");
         }
 
+        if (lastTimestamp == null && status == "Success")
+        {
+            _logger.LogInformation("No new HPD violations found. Watermark not advanced.");
+        }
         await _ingestionService.LogIngestionRun(
             totalInserted, totalUpdated, totalSkipped,
-            "HPDViolation_" + status, errorMessage, lastTimestamp ?? DateTime.UtcNow);
+            "HPDViolation_" + status, errorMessage, lastTimestamp);
     }
 }

@@ -113,9 +113,14 @@ public class ContractorIngestionFunction
             _logger.LogError(ex, "Contractor Ingestion failed");
         }
 
+        // Only advance watermark if we actually ingested records
+        if (lastTimestamp == null && status == "Success")
+        {
+            _logger.LogInformation("No new contractor records found. Watermark not advanced.");
+        }
         await _ingestionService.LogIngestionRun(
             totalInserted, totalUpdated, totalSkipped,
-            status, errorMessage, lastTimestamp ?? DateTime.UtcNow);
+            status, errorMessage, lastTimestamp);
 
         _logger.LogInformation("ContractorIngestionFunction completed at {Time}. Status: {Status}",
             DateTime.UtcNow, status);
