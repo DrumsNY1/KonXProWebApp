@@ -27,7 +27,10 @@ builder.Services.AddDbContext<KonXProWebApp.Data.db_9f8bee_konxdevContext>(optio
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("db_9f8bee_konxdevConnection"));
 });
-builder.Services.AddHttpClient("KonXProWebApp").ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false }).AddHeaderPropagation(o => o.Headers.Add("Cookie"));
+builder.Services.AddHttpClient("KonXProWebApp", client =>
+{
+    client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+}).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { UseCookies = false }).AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddHeaderPropagation(o => o.Headers.Add("Cookie"));
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization(options =>
@@ -72,6 +75,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseHttpMethodOverride();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.UseHeaderPropagation();

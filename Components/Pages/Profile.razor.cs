@@ -87,7 +87,7 @@ namespace KonXProWebApp.Components.Pages
             {
                 if (user != null)
                 {
-                    await Security.UpdateUser(user.Id, user);
+                    await Security.UpdateProfile(user.Email);
                     profileSuccessVisible = true;
                     NotificationService.Notify(NotificationSeverity.Success, "Saved", "Profile details updated successfully.");
                 }

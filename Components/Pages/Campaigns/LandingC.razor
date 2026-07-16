@@ -1,0 +1,272 @@
+@page "/territory"
+@layout EmptyLayout
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject Data.db_9f8bee_konxdevContext Db
+
+<PageTitle>Lock Your Exclusive NYC Territory Slot | KonXPro</PageTitle>
+
+<style>
+    .campaign-container {
+        font-family: 'Inter', sans-serif;
+        background-color: #120b24;
+        color: #f6f3fc;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+    }
+    .urgency-banner {
+        background-color: #ff3366;
+        color: white;
+        width: 100%;
+        text-align: center;
+        padding: 12px 16px;
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+    .campaign-header {
+        width: 100%;
+        max-width: 1100px;
+        padding: 24px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .campaign-logo {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+    .campaign-logo span {
+        color: #9d4edd;
+    }
+    .hero-section {
+        max-width: 800px;
+        text-align: center;
+        padding: 40px 16px 40px 16px;
+    }
+    .hero-badge {
+        background-color: rgba(157, 78, 221, 0.15);
+        color: #b5179e;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 24px;
+    }
+    .hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 16px;
+        letter-spacing: -1px;
+    }
+    .hero-subtitle {
+        font-size: 18px;
+        color: #d8d2e7;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+    .territory-box {
+        background-color: #241442;
+        border: 1px solid #4a2880;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        width: 100%;
+        max-width: 600px;
+        text-align: left;
+        margin-bottom: 48px;
+    }
+    .borough-list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+    .borough-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background-color: #1a0b33;
+        border-radius: 8px;
+        border: 1px solid #4a2880;
+    }
+    .borough-name {
+        font-weight: 600;
+        font-size: 16px;
+    }
+    .pill {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    .pill.red {
+        background-color: rgba(255, 51, 102, 0.15);
+        color: #ff3366;
+    }
+    .pill.amber {
+        background-color: rgba(255, 193, 7, 0.15);
+        color: #ffc107;
+    }
+    .pill.green {
+        background-color: rgba(46, 196, 182, 0.15);
+        color: #2ec4b6;
+    }
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        max-width: 900px;
+        width: 100%;
+        padding: 40px 16px 80px 16px;
+    }
+    .comparison-card {
+        background-color: #241442;
+        border: 1px solid #4a2880;
+        border-radius: 8px;
+        padding: 24px;
+    }
+    .comparison-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+    .comparison-list {
+        padding-left: 20px;
+        line-height: 1.6;
+        color: #d8d2e7;
+    }
+    .comparison-list li {
+        margin-bottom: 10px;
+    }
+    .cta-btn {
+        background-color: #9d4edd;
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        padding: 16px 40px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+        width: 100%;
+        text-align: center;
+        display: block;
+    }
+    .cta-btn:hover {
+        background-color: #7b2cbf;
+    }
+</style>
+
+<div class="urgency-banner">
+    ⚠️ WARNING: Manhattan and Brooklyn boroughs are reaching maximum contractor capacity limits.
+</div>
+
+<div class="campaign-container">
+    <header class="campaign-header">
+        <div class="campaign-logo">Kon<span>X</span>Pro</div>
+        <div style="font-size: 14px; color: #d8d2e7;">Borough Territory Check</div>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-badge">⏳ NYC Exclusive Slots</div>
+        <h1 class="hero-title">Your competitors are already using this</h1>
+        <p class="hero-subtitle">We restrict our active subscriber slots per borough to protect local lead quality and ensure our partners win their local markets. Check if your territory is still accepting new registrations.</p>
+
+        <div class="territory-box">
+            <h3 style="margin-top: 0; font-weight: 800; font-size: 20px;">NYC Borough Availability Status</h3>
+            <div class="borough-list">
+                <div class="borough-row">
+                    <span class="borough-name">Manhattan</span>
+                    <span class="pill red">Low Capacity (2 Slots)</span>
+                </div>
+                <div class="borough-row">
+                    <span class="borough-name">Brooklyn</span>
+                    <span class="pill red">Low Capacity (1 Slot)</span>
+                </div>
+                <div class="borough-row">
+                    <span class="borough-name">Queens</span>
+                    <span class="pill amber">Filling Fast</span>
+                </div>
+                <div class="borough-row">
+                    <span class="borough-name">Bronx</span>
+                    <span class="pill green">Open Slots</span>
+                </div>
+                <div class="borough-row">
+                    <span class="borough-name">Staten Island</span>
+                    <span class="pill green">Open Slots</span>
+                </div>
+            </div>
+
+            <button class="cta-btn" @onclick="NavigateToSignup">Claim Your Borough Slot</button>
+        </div>
+    </section>
+
+    <h2 style="text-align: center; font-size: 30px; font-weight: 800;">Get Ahead of the Competition</h2>
+    <div class="card-grid">
+        <div class="comparison-card">
+            <h4 class="comparison-title" style="color: #ff3366;">Without KonXPro</h4>
+            <ul class="comparison-list">
+                <li>Arriving at jobs after other contractors have already secured contracts.</li>
+                <li>Spending thousands bidding for shared leads on Angi or Yelp.</li>
+                <li>Lacking insights on building owner permits and renovation histories.</li>
+            </ul>
+        </div>
+        <div class="comparison-card" style="border-color: #9d4edd;">
+            <h4 class="comparison-title" style="color: #9d4edd;">With KonXPro</h4>
+            <ul class="comparison-list">
+                <li>Automated notifications within 15 minutes of new DOB permit filings.</li>
+                <li>Direct contact with building decision makers without pay-per-lead costs.</li>
+                <li>Exclusive territorial leads in your registered NYC boroughs.</li>
+            </ul>
+        </div>
+    </div>
+
+    <footer style="padding: 40px 16px; border-top: 1px solid #4a2880; width: 100%; text-align: center; color: #d8d2e7; font-size: 14px;">
+        &copy; 2026 KonXPro. All rights reserved.
+    </footer>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "cid")]
+    public string Cid { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !string.IsNullOrEmpty(Cid))
+        {
+            if (int.TryParse(Cid, out int contractorId))
+            {
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("eval", $"document.cookie = 'cid={contractorId}; path=/; max-age=2592000'");
+                }
+                catch {}
+
+                var contractor = await Db.HomeImprovementContractors.FindAsync(contractorId);
+                if (contractor != null)
+                {
+                    contractor.CampaignVisited = true;
+                    contractor.CampaignVisitedAt = DateTime.UtcNow;
+                    await Db.SaveChangesAsync();
+                }
+            }
+        }
+    }
+
+    private void NavigateToSignup()
+    {
+        NavigationManager.NavigateTo("Login?register=true");
+    }
+}

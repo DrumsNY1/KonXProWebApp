@@ -1,0 +1,70 @@
+@inject Radzen.DialogService DialogService
+@using static KonXProWebApp.Components.Pages.HomeImprovementContractors
+
+<div class="imp-p-4">
+    <p class="text-muted-color imp-mb-4" style="font-size: 14px;">
+        Provision a new customer account and activate a 7-day trialing subscription for this contractor.
+    </p>
+
+    <div class="imp-mb-4">
+        <RadzenLabel Text="Username / Email Address" Component="emailInput" style="font-weight: 500; display: block; margin-bottom: 6px;" />
+        <RadzenTextBox @bind-Value="@model.Email" Id="emailInput" Placeholder="contractor@email.com" style="width: 100%;" />
+        @if (string.IsNullOrEmpty(model.Email))
+        {
+            <small style="color: var(--rz-danger); margin-top: 4px; display: block;">Email is required.</small>
+        }
+    </div>
+
+    <div class="imp-mb-4">
+        <RadzenLabel Text="Temporary Password" Component="passwordInput" style="font-weight: 500; display: block; margin-bottom: 6px;" />
+        <div class="flex gap-2">
+            <RadzenTextBox @bind-Value="@model.Password" Id="passwordInput" Placeholder="Password123!" style="width: 100%;" />
+            <RadzenButton Icon="casino" Click="@GeneratePassword" ButtonStyle="ButtonStyle.Secondary" ToolTip="Generate random password" />
+        </div>
+        @if (string.IsNullOrEmpty(model.Password) || model.Password.Length < 6)
+        {
+            <small style="color: var(--rz-danger); margin-top: 4px; display: block;">Password must be at least 6 characters.</small>
+        }
+    </div>
+
+    <div class="imp-mb-6">
+        <RadzenLabel Text="Subscription Plan Tier" Component="tierSelect" style="font-weight: 500; display: block; margin-bottom: 6px;" />
+        <RadzenDropDown @bind-Value="@model.Tier" Id="tierSelect" Data="@tiers" style="width: 100%;" />
+    </div>
+
+    <div class="flex justify-end gap-3 imp-mt-6">
+        <RadzenButton Text="Cancel" Click="() => DialogService.Close(null)" ButtonStyle="ButtonStyle.Light" />
+        <RadzenButton Text="Onboard & Activate" Click="@Submit" Disabled="@(string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password) || model.Password.Length < 6)" ButtonStyle="ButtonStyle.Primary" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string DefaultEmail { get; set; } = "";
+
+    private OnboardModel model = new OnboardModel();
+    private List<string> tiers = new List<string> { "Starter", "Pro", "Business", "Agency" };
+
+    protected override void OnInitialized()
+    {
+        model.Email = DefaultEmail;
+        model.Tier = "Pro"; // Default tier
+        GeneratePassword();
+    }
+
+    private void GeneratePassword()
+    {
+        const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$";
+        var random = new Random();
+        model.Password = "KXP!" + new string(Enumerable.Repeat(chars, 8)
+            .Select(s => s[random.Next(s.Length)]).ToArray());
+    }
+
+    private void Submit()
+    {
+        if (!string.IsNullOrEmpty(model.Email) && !string.IsNullOrEmpty(model.Password) && model.Password.Length >= 6)
+        {
+            DialogService.Close(model);
+        }
+    }
+}

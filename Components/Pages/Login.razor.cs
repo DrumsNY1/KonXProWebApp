@@ -52,6 +52,34 @@ namespace KonXProWebApp.Components.Pages
             errorVisible = !string.IsNullOrEmpty(error);
 
             infoVisible = !string.IsNullOrEmpty(info);
+
+            if (query.Get("register") == "true")
+            {
+                var emailParam = query.Get("email");
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(200);
+                    await InvokeAsync(async () =>
+                    {
+                        var dialogParams = new Dictionary<string, object>();
+                        if (!string.IsNullOrEmpty(emailParam))
+                        {
+                            dialogParams.Add("Email", emailParam);
+                        }
+                        var result = await DialogService.OpenAsync<RegisterApplicationUser>("Register Application User", dialogParams);
+                        if (result == true)
+                        {
+                            infoVisible = true;
+                            info = "Registration accepted. Please check your email for further instructions.";
+                            StateHasChanged();
+                        }
+                        else if (result is string str && str == "forgot_password")
+                        {
+                            await ResetPassword();
+                        }
+                    });
+                });
+            }
         }
 
         protected async Task Register()
@@ -63,6 +91,10 @@ namespace KonXProWebApp.Components.Pages
                 infoVisible = true;
 
                 info = "Registration accepted. Please check your email for further instructions.";
+            }
+            else if (result is string str && str == "forgot_password")
+            {
+                await ResetPassword();
             }
         }
 

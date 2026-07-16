@@ -1,49 +1,268 @@
 @page "/admin/contractors"
 @layout KonXProWebApp.Components.Layout.MainLayout
-@attribute [Microsoft.AspNetCore.Authorization.Authorize]
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Roles = "Admin, Marketing")]
 
-<PageTitle>Home Improvement Contractors</PageTitle>
+<PageTitle>Home Improvement Contractors — Onboarding & Marketing</PageTitle>
 
 <div class="dashboard-container">
+    <!-- Header Block -->
     <div class="flex justify-between items-center imp-mb-6">
-        <h2>Home Improvement Contractors</h2>
-        <RadzenButton Icon="refresh" Text="Refresh" Click="@LoadData" ButtonStyle="ButtonStyle.Secondary" />
+        <div>
+            <h2 class="imp-m-0">Home Improvement Contractors</h2>
+            <p class="text-muted-color imp-m-0" style="font-size: 14px;">Manage sales pipeline, run direct postcard exports, and onboard active subscribers.</p>
+        </div>
+        <div class="flex gap-3">
+            <RadzenButton Icon="sync" Text="@(isSyncing ? "Syncing..." : "Sync NYC Open Data")" 
+                          Click="@SyncFromSocrata" Disabled="@isSyncing" ButtonStyle="ButtonStyle.Primary" />
+            <RadzenButton Icon="group_work" Text="Auto-Assign Cohorts" 
+                          Click="@AutoAssignCohorts" ButtonStyle="ButtonStyle.Info" />
+            <RadzenButton Icon="download" Text="Export CSV for Postcards" 
+                          Click="@ExportCsvForPostcards" ButtonStyle="ButtonStyle.Secondary" />
+            <RadzenButton Icon="refresh" Text="Refresh" 
+                          Click="@LoadData" ButtonStyle="ButtonStyle.Light" />
+        </div>
+    </div>
+
+    <!-- A/B Campaign Testing Performance Bar -->
+    <div style="background: var(--rz-base-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h4 style="margin-top: 0; margin-bottom: 16px; font-weight: 700;">📊 A/B Testing Campaign Analytics</h4>
+        <div class="grid grid-cols-3 gap-4">
+            <!-- Cohort A Card -->
+            <div style="border-left: 4px solid var(--rz-primary); padding-left: 12px; background: rgba(58, 123, 213, 0.02); padding-top: 4px; padding-bottom: 4px; border-radius: 0 4px 4px 0;">
+                <div style="font-weight: 700; font-size: 14px; color: var(--rz-primary);">Version A (Speed - /first)</div>
+                <div class="flex gap-4 mt-2">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortAReach</div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Mailed/Emailed</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortAClicks <span style="font-size:11px; font-weight:500;">(@GetPercent(cohortAClicks, cohortAReach)%)</span></div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Visits</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortAConversions <span style="font-size:11px; font-weight:500;">(@GetPercent(cohortAConversions, cohortAClicks)%)</span></div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Conversions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cohort B Card -->
+            <div style="border-left: 4px solid #28a745; padding-left: 12px; background: rgba(40, 167, 69, 0.02); padding-top: 4px; padding-bottom: 4px; border-radius: 0 4px 4px 0;">
+                <div style="font-weight: 700; font-size: 14px; color: #28a745;">Version B (Leads - /leads)</div>
+                <div class="flex gap-4 mt-2">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortBReach</div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Mailed/Emailed</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortBClicks <span style="font-size:11px; font-weight:500;">(@GetPercent(cohortBClicks, cohortBReach)%)</span></div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Visits</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortBConversions <span style="font-size:11px; font-weight:500;">(@GetPercent(cohortBConversions, cohortBClicks)%)</span></div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Conversions</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cohort C Card -->
+            <div style="border-left: 4px solid #9d4edd; padding-left: 12px; background: rgba(157, 78, 221, 0.02); padding-top: 4px; padding-bottom: 4px; border-radius: 0 4px 4px 0;">
+                <div style="font-weight: 700; font-size: 14px; color: #9d4edd;">Version C (FOMO - /territory)</div>
+                <div class="flex gap-4 mt-2">
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortCReach</div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Mailed/Emailed</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortCClicks <span style="font-size:11px; font-weight:500;">(@GetPercent(cohortCClicks, cohortCReach)%)</span></div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Visits</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 16px; font-weight: 700;">@cohortCConversions <span style="font-size:11px; font-weight:500;">(@GetPercent(cohortCConversions, cohortCClicks)%)</span></div>
+                        <div style="font-size: 10px; color: var(--rz-text-muted-color);">Conversions</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI Metrics Dashboard -->
+    <div class="grid grid-cols-4 gap-4 imp-mb-6">
+        <!-- Card 1 -->
+        <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 32px; background: rgba(58, 123, 213, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rz-primary);">👷</div>
+            <div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@totalCount</div>
+                <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Total Ingested</div>
+            </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 32px; background: rgba(40, 167, 69, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #28a745;">✅</div>
+            <div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@activeCount</div>
+                <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Active DCA Licenses</div>
+            </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 32px; background: rgba(255, 193, 7, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffc107;">📬</div>
+            <div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@postcardsCount</div>
+                <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Postcards Mailed</div>
+            </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 32px; background: rgba(23, 162, 184, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #17a2b8;">📧</div>
+            <div>
+                <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@emailsCount</div>
+                <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Emails Sent</div>
+            </div>
+        </div>
     </div>
 
     @if (isLoading)
     {
         <div class="text-center imp-p-10">
             <RadzenProgressBar Value="100" ShowValue="false" Mode="ProgressBarMode.Indeterminate" />
-            <p class="imp-mt-4 text-muted-color">Loading contractors...</p>
+            <p class="imp-mt-4 text-muted-color">Querying database...</p>
         </div>
     }
     else
     {
-        <RadzenDataGrid @ref="grid" Data="@contractors" TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" AllowPaging="true" PageSize="10" AllowSorting="true" AllowFiltering="true" FilterMode="FilterMode.Advanced" LogicalFilterOperator="LogicalFilterOperator.Or" class="modern-grid">
+        <RadzenDataGrid @ref="grid" Data="@contractors" TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" 
+                        AllowPaging="true" PageSize="15" AllowSorting="true" AllowFiltering="true" 
+                        FilterMode="FilterMode.Advanced" LogicalFilterOperator="LogicalFilterOperator.Or" class="modern-grid">
             <Columns>
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="LicenseNumber" Title="License #" Width="120px" />
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="BusinessName" Title="Business Name" />
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="DbaTradeName" Title="DBA/Trade Name" />
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="LicenseStatus" Title="Status" Width="120px">
-                    <Template Context="contractor">
-                        @if (contractor.LicenseStatus == "Active")
+                <!-- License Info -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="LicenseNumber" Title="License #" Width="110px" />
+                
+                <!-- Business Name -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="BusinessName" Title="Business Details">
+                    <Template Context="c">
+                        <div style="font-weight: 600; color: var(--rz-text-color);">@c.BusinessName</div>
+                        @if (!string.IsNullOrEmpty(c.DbaTradeName) && c.DbaTradeName != c.BusinessName)
                         {
-                            <span class="badge badge-success">Active</span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-danger">@contractor.LicenseStatus</span>
+                            <div style="font-size: 12px; color: var(--rz-text-muted-color);">DBA: @c.DbaTradeName</div>
                         }
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="ContactPhoneNumber" Title="Phone" Width="140px" />
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="AddressCity" Title="City" Width="150px" />
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="LicenseExpirationDate" Title="Expiration" FormatString="{0:d}" Width="120px" />
-                
-                <!-- Expanded address details can be shown, but to keep the grid clean, maybe keep some hidden by default or show AddressStreetName -->
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="AddressStreetName" Title="Street" Visible="false" />
+
+                <!-- Email Outreach -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="EmailAddress" Title="Outreach Email" Width="200px">
+                    <Template Context="c">
+                        <input type="text" value="@c.EmailAddress" 
+                               @onchange="@((ChangeEventArgs args) => UpdateEmailAddress(c, args.Value?.ToString()))"
+                               placeholder="Enter email..."
+                               style="width: 100%; border: 1px solid var(--rz-border-color); border-radius: 4px; padding: 4px 8px; font-size: 13px; background: transparent; color: var(--rz-text-color);" />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!-- Sales Status -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="SalesStatus" Title="Sales Pipeline" Width="160px">
+                    <Template Context="c">
+                        <select value="@c.SalesStatus" 
+                                @onchange="@((ChangeEventArgs args) => UpdateSalesStatus(c, args.Value?.ToString()))"
+                                style="width: 100%; border: 1px solid var(--rz-border-color); border-radius: 4px; padding: 4px 8px; font-size: 13px; background: transparent; color: var(--rz-text-color); font-weight: 500;">
+                            <option value="New">🆕 New</option>
+                            <option value="Contacted">📞 Contacted</option>
+                            <option value="Interested">⭐ Interested</option>
+                            <option value="Not Interested">❌ Not Interested</option>
+                            <option value="Subscribed">👑 Subscribed</option>
+                        </select>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!-- Campaign Cohort -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="CampaignCohort" Title="Cohort" Width="105px">
+                    <Template Context="c">
+                        <span class="badge" style="background-color: @(c.CampaignCohort == "A" ? "rgba(58, 123, 213, 0.15)" : c.CampaignCohort == "B" ? "rgba(40, 167, 69, 0.15)" : c.CampaignCohort == "C" ? "rgba(157, 78, 221, 0.15)" : "rgba(255,255,255,0.05)"); color: @(c.CampaignCohort == "A" ? "var(--rz-primary)" : c.CampaignCohort == "B" ? "#28a745" : c.CampaignCohort == "C" ? "#9d4edd" : "var(--rz-text-muted-color)"); padding: 4px 8px; border-radius: 4px; font-weight: 700; font-size: 11px;">
+                            @(string.IsNullOrEmpty(c.CampaignCohort) ? "None" : $"Group {c.CampaignCohort}")
+                        </span>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!-- Campaign Tracking Flags -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Title="Campaign Outreach" Width="200px" Filterable="false" Sortable="false">
+                    <Template Context="c">
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-3">
+                                <!-- Postcard Switch -->
+                                <button class="flex items-center gap-1" style="border: none; background: transparent; cursor: pointer; padding: 4px;" 
+                                        @onclick="() => TogglePostcardSent(c)" title="Toggle Postcard Sent">
+                                    <span style="font-size: 18px; filter: @(c.PostcardSent ? "none" : "grayscale(100%) opacity(40%)")">📬</span>
+                                    <span style="font-size: 11px; font-weight: 600; color: @(c.PostcardSent ? "var(--rz-primary)" : "var(--rz-text-muted-color)")">Postcard</span>
+                                </button>
+
+                                <!-- Email Switch -->
+                                <button class="flex items-center gap-1" style="border: none; background: transparent; cursor: pointer; padding: 4px;" 
+                                        @onclick="() => ToggleEmailSent(c)" title="Toggle Email Sent">
+                                    <span style="font-size: 18px; filter: @(c.EmailSent ? "none" : "grayscale(100%) opacity(40%)")">📧</span>
+                                    <span style="font-size: 11px; font-weight: 600; color: @(c.EmailSent ? "var(--rz-primary)" : "var(--rz-text-muted-color)")">Email</span>
+                                </button>
+                            </div>
+                            <div class="flex gap-1 flex-wrap">
+                                @if (c.CampaignVisited)
+                                {
+                                    <span class="badge" title="Visited: @c.CampaignVisitedAt?.ToLocalTime().ToString()" style="font-size: 10px; background-color: rgba(40, 167, 69, 0.15); color: #28a745; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px;">👁️ Visited</span>
+                                }
+                                @if (c.CampaignConverted)
+                                {
+                                    <span class="badge" title="Converted: @c.CampaignConvertedAt?.ToLocalTime().ToString()" style="font-size: 10px; background-color: rgba(157, 78, 221, 0.15); color: #9d4edd; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px;">🎯 Converted</span>
+                                }
+                            </div>
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!-- Contact & Address -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Property="ContactPhoneNumber" Title="Address & Phone">
+                    <Template Context="c">
+                        @if (!string.IsNullOrEmpty(c.ContactPhoneNumber))
+                        {
+                            <div style="font-weight: 500; font-size: 13px;">📞 @c.ContactPhoneNumber</div>
+                        }
+                        <div style="font-size: 12px; color: var(--rz-text-muted-color);">
+                            📍 @c.AddressBuilding @c.AddressStreetName, @c.AddressCity, @(c.AddressState ?? "NY") @c.AddressZip
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <!-- Action Funnel -->
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.HomeImprovementContractor" Title="Prospecting Actions" Width="210px" Filterable="false" Sortable="false">
+                    <Template Context="c">
+                        <div class="flex gap-2">
+                            <!-- Find Active Permits -->
+                            <RadzenButton Icon="search" ButtonStyle="ButtonStyle.Light" Size="ButtonSize.Small" 
+                                          Click='() => NavigationManager.NavigateTo($"permit-intel/search?search={Uri.EscapeDataString(c.BusinessName)}")' 
+                                          ToolTip="Search active building permits filed by this contractor" />
+
+                            <!-- Edit Outreach Notes -->
+                            <RadzenButton Icon="edit_note" 
+                                          ButtonStyle="@(string.IsNullOrEmpty(c.SalesNotes) ? ButtonStyle.Light : ButtonStyle.Warning)" 
+                                          Size="ButtonSize.Small" 
+                                          Click="() => EditNotes(c)" 
+                                          ToolTip="Edit conversation and sales notes" />
+
+                            <!-- Convert to Customer -->
+                            @if (c.SalesStatus == "Subscribed")
+                            {
+                                <span class="badge badge-success" style="padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;">👑 Active Cust</span>
+                            }
+                            else
+                            {
+                                <RadzenButton Icon="person_add" Text="Convert" ButtonStyle="ButtonStyle.Success" Size="ButtonSize.Small" 
+                                              Click="() => ConvertToCustomer(c)" 
+                                              ToolTip="Onboard contractor as a KonXPro subscriber" />
+                            }
+                        </div>
+                    </Template>
+                </RadzenDataGridColumn>
             </Columns>
         </RadzenDataGrid>
     }
 </div>
-

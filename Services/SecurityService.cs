@@ -169,7 +169,7 @@ namespace KonXProWebApp
 
         public async Task<HttpResponseMessage> DeleteRole(string id)
         {
-            var uri = new Uri(baseUri, $"ApplicationRoles('{id}')");
+            var uri = new Uri(baseUri, $"ApplicationRoles/{id}");
 
             return await httpClient.DeleteAsync(uri);
         }
@@ -206,14 +206,14 @@ namespace KonXProWebApp
 
         public async Task<HttpResponseMessage> DeleteUser(string id)
         {
-            var uri = new Uri(baseUri, $"ApplicationUsers('{id}')");
+            var uri = new Uri(baseUri, $"ApplicationUsers/{id}");
 
             return await httpClient.DeleteAsync(uri);
         }
 
         public async Task<ApplicationUser> GetUserById(string id)
         {
-            var uri = new Uri(baseUri, $"ApplicationUsers('{id}')?$expand=Roles");
+            var uri = new Uri(baseUri, $"ApplicationUsers/{id}?$expand=Roles");
 
             var response = await httpClient.GetAsync(uri);
 
@@ -227,11 +227,25 @@ namespace KonXProWebApp
 
         public async Task<ApplicationUser> UpdateUser(string id, ApplicationUser user)
         {
-            var uri = new Uri(baseUri, $"ApplicationUsers('{id}')");
+            var uri = new Uri(baseUri, $"ApplicationUsers/{id}");
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Patch, uri)
+            var payload = JsonSerializer.Serialize(new
             {
-                Content = new StringContent(JsonSerializer.Serialize(user), Encoding.UTF8, "application/json")
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                PhoneNumber = !string.IsNullOrEmpty(user.PhoneNumber) ? user.PhoneNumber : null,
+                Password = !string.IsNullOrEmpty(user.Password) ? user.Password : null,
+                ConfirmPassword = !string.IsNullOrEmpty(user.ConfirmPassword) ? user.ConfirmPassword : null,
+                TenantId = user.TenantId,
+                Roles = user.Roles?.Any() == true ? user.Roles.Select(r => new { Id = r.Id, Name = r.Name }) : null
+            }, new JsonSerializerOptions {
+                DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            });
+
+            var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), uri)
+            {
+                Content = new StringContent(payload, Encoding.UTF8, "application/json")
             };
 
             var response = await httpClient.SendAsync(httpRequestMessage);
@@ -269,16 +283,14 @@ namespace KonXProWebApp
 
         public async System.Threading.Tasks.Task<HttpResponseMessage> DeleteTenant(int id = default(int))
         {
-            var uri = new Uri(baseUri, $"ApplicationTenants({id})");
+            var uri = new Uri(baseUri, $"ApplicationTenants/{id}");
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Delete, uri);
-
-            return await httpClient.SendAsync(httpRequestMessage);
+            return await httpClient.DeleteAsync(uri);
         }
 
         public async System.Threading.Tasks.Task<ApplicationTenant> GetTenantById(int id = default(int))
         {
-            var uri = new Uri(baseUri, $"ApplicationTenants({id})");
+            var uri = new Uri(baseUri, $"ApplicationTenants/{id}");
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
@@ -294,11 +306,12 @@ namespace KonXProWebApp
 
         public async System.Threading.Tasks.Task<HttpResponseMessage> UpdateTenant(int id = default(int), ApplicationTenant tenant = default(ApplicationTenant))
         {
-            var uri = new Uri(baseUri, $"ApplicationTenants({id})");
+            var uri = new Uri(baseUri, $"ApplicationTenants/{id}");
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Patch, uri);
-
-            httpRequestMessage.Content = new StringContent(ODataJsonSerializer.Serialize(tenant), Encoding.UTF8, "application/json");
+            var httpRequestMessage = new HttpRequestMessage(new HttpMethod("PATCH"), uri)
+            {
+                Content = new StringContent(ODataJsonSerializer.Serialize(tenant), Encoding.UTF8, "application/json")
+            };
 
             return await httpClient.SendAsync(httpRequestMessage);
         }
@@ -309,6 +322,24 @@ namespace KonXProWebApp
             var content = new FormUrlEncodedContent(new Dictionary<string, string> {
                 { "oldPassword", oldPassword },
                 { "newPassword", newPassword }
+            });
+
+            var response = await httpClient.PostAsync(uri, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                var message = await response.Content.ReadAsStringAsync();
+
+                throw new ApplicationException(message);
+            }
+        }
+
+        public async Task UpdateProfile(string email)
+        {
+            var uri = new Uri($"{navigationManager.BaseUri}Account/UpdateProfile");
+
+            var content = new FormUrlEncodedContent(new Dictionary<string, string> {
+                { "email", email }
             });
 
             var response = await httpClient.PostAsync(uri, content);

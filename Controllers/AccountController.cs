@@ -174,6 +174,40 @@ If you didn't request this code, you can safely ignore this email. Someone else 
         }
 
         [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> UpdateProfile(string email)
+        {
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest("Email is required.");
+            }
+
+            var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userManager.FindByIdAsync(id);
+
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            user.Email = email;
+            user.UserName = email;
+            user.NormalizedEmail = email.ToUpperInvariant();
+            user.NormalizedUserName = email.ToUpperInvariant();
+
+            userManager.UserValidators.Clear();
+            var result = await userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                return Ok();
+            }
+
+            var msg = string.Join(", ", result.Errors.Select(error => error.Description));
+            return BadRequest(msg);
+        }
+
+        [HttpPost]
         public ApplicationAuthenticationState CurrentUser()
         {
             return new ApplicationAuthenticationState
@@ -217,9 +251,36 @@ If you didn't request this code, you can safely ignore this email. Someone else 
             {
                 try
                 {
-                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    if (Request.Cookies.TryGetValue("cid", out string cidStr) && int.TryParse(cidStr, out int cid))
+                    {
+                        var dbContext = (Data.db_9f8bee_konxdevContext)HttpContext.RequestServices.GetService(typeof(Data.db_9f8bee_konxdevContext));
+                        if (dbContext != null)
+                        {
+                            var contractor = dbContext.HomeImprovementContractors.FirstOrDefault(c => c.Id == cid);
+                            if (contractor != null)
+                            {
+                                contractor.SalesStatus = "Subscribed";
+                                contractor.CampaignConverted = true;
+                                contractor.CampaignConvertedAt = DateTime.UtcNow;
+                                dbContext.SaveChanges();
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error tracking campaign conversion: {ex.Message}");
+                }
 
-                    var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, code }, protocol: Request.Scheme);
+                try
+                {
+                    var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(code));
+
+                    var shortToken = Guid.NewGuid().ToString("N");
+                    _confirmationTokens[shortToken] = (user.Id, code, DateTime.UtcNow.AddHours(24));
+
+                    var callbackUrl = $"{Request.Scheme}://{Request.Host}/Verify/ConfirmEmail?token={shortToken}";
 
                     var text = $@"Hi, <br /> <br />
 We received your registration request for KonXProWebApp. <br /> <br />
@@ -241,6 +302,7 @@ If you didn't request this registration, you can safely ignore this email. Someo
                 }
                 catch (Exception ex)
                 {
+                    Console.Error.WriteLine($"Error during registration: {ex}");
                     return BadRequest(ex.Message);
                 }
             }
@@ -250,9 +312,37 @@ If you didn't request this registration, you can safely ignore this email. Someo
             return BadRequest(message);
         }
 
-        public async Task<IActionResult> ConfirmEmail(string userId, string code)
+        // In-memory store for email confirmation tokens to keep URLs short and WAF-safe
+        private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (string UserId, string Code, DateTime Expiry)> _confirmationTokens = new();
+
+        [HttpGet("/Verify/ConfirmEmail")]
+        public async Task<IActionResult> ConfirmEmail(string token)
         {
-            var user = await userManager.FindByIdAsync(userId);
+            if (string.IsNullOrEmpty(token) || !_confirmationTokens.TryRemove(token, out var entry))
+            {
+                return RedirectWithError("Invalid or expired confirmation link");
+            }
+
+            if (entry.Expiry < DateTime.UtcNow)
+            {
+                return RedirectWithError("Confirmation link has expired");
+            }
+
+            var user = await userManager.FindByIdAsync(entry.UserId);
+            if (user == null)
+            {
+                return RedirectWithError("Invalid user");
+            }
+
+            var code = entry.Code;
+            try
+            {
+                code = System.Text.Encoding.UTF8.GetString(Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlDecode(code));
+            }
+            catch
+            {
+                // Fallback for raw legacy codes
+            }
 
             var result = await userManager.ConfirmEmailAsync(user, code);
 
@@ -276,8 +366,12 @@ If you didn't request this registration, you can safely ignore this email. Someo
             try
             {
                 var code = await userManager.GeneratePasswordResetTokenAsync(user);
+                code = Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlEncode(System.Text.Encoding.UTF8.GetBytes(code));
 
-                var callbackUrl = Url.Action("ConfirmPasswordReset", "Account", new { userId = user.Id, code }, protocol: Request.Scheme);
+                var shortToken = Guid.NewGuid().ToString("N");
+                _confirmationTokens[shortToken] = (user.Id, code, DateTime.UtcNow.AddHours(24));
+
+                var callbackUrl = $"{Request.Scheme}://{Request.Host}/Verify/ConfirmPasswordReset?token={shortToken}";
 
                 var body = string.Format(@"<a href=""{0}"">{1}</a>", callbackUrl, "Please confirm your password reset.");
 
@@ -287,17 +381,39 @@ If you didn't request this registration, you can safely ignore this email. Someo
             }
             catch (Exception ex)
             {
+                Console.Error.WriteLine($"Error resetting password: {ex}");
                 return BadRequest(ex.Message);
             }
         }
 
-        public async Task<IActionResult> ConfirmPasswordReset(string userId, string code)
+        [HttpGet("/Verify/ConfirmPasswordReset")]
+        public async Task<IActionResult> ConfirmPasswordReset(string token)
         {
-            var user = await userManager.FindByIdAsync(userId);
+            if (string.IsNullOrEmpty(token) || !_confirmationTokens.TryRemove(token, out var entry))
+            {
+                return Redirect("~/Login?error=Invalid or expired reset link");
+            }
+
+            if (entry.Expiry < DateTime.UtcNow)
+            {
+                return Redirect("~/Login?error=Reset link has expired");
+            }
+
+            var user = await userManager.FindByIdAsync(entry.UserId);
 
             if (user == null)
             {
                 return Redirect("~/Login?error=Invalid user");
+            }
+
+            var code = entry.Code;
+            try
+            {
+                code = System.Text.Encoding.UTF8.GetString(Microsoft.AspNetCore.WebUtilities.WebEncoders.Base64UrlDecode(code));
+            }
+            catch
+            {
+                // Fallback for raw legacy codes
             }
 
             var password = GenerateRandomPassword();

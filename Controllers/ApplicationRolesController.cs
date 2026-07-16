@@ -19,6 +19,7 @@ namespace KonXProWebApp.Controllers
         }
     }
     [Authorize]
+    [IgnoreAntiforgeryToken]
     [Route("odata/Identity/ApplicationRoles")]
     public partial class ApplicationRolesController : ODataController
     {
@@ -86,7 +87,7 @@ namespace KonXProWebApp.Controllers
        partial void OnRoleDeleted(ApplicationRole role);
 
        [HttpDelete("{Id}")]
-       public async Task<IActionResult> Delete(string key)
+       public async Task<IActionResult> Delete([FromRoute(Name = "Id")] string key)
        {
            var role = await roleManager.FindByIdAsync(key);
 

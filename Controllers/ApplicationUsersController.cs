@@ -18,6 +18,7 @@ using KonXProWebApp.Models;
 namespace KonXProWebApp.Controllers
 {
     [Authorize]
+    [IgnoreAntiforgeryToken]
     [Route("odata/Identity/ApplicationUsers")]
     public partial class ApplicationUsersController : ODataController
     {
@@ -58,7 +59,7 @@ namespace KonXProWebApp.Controllers
 
         [EnableQuery]
         [HttpGet("{Id}")]
-        public SingleResult<ApplicationUser> GetApplicationUser(string key)
+        public SingleResult<ApplicationUser> GetApplicationUser([FromRoute(Name = "Id")] string key)
         {
             var user = context.Users.Where(i => i.Id == key);
 
@@ -68,7 +69,7 @@ namespace KonXProWebApp.Controllers
         partial void OnUserDeleted(ApplicationUser user);
 
         [HttpDelete("{Id}")]
-        public async Task<IActionResult> Delete(string key)
+        public async Task<IActionResult> Delete([FromRoute(Name = "Id")] string key)
         {
             var user = await userManager.FindByIdAsync(key);
 
@@ -92,7 +93,7 @@ namespace KonXProWebApp.Controllers
         partial void OnUserUpdated(ApplicationUser user);
 
         [HttpPatch("{Id}")]
-        public async Task<IActionResult> Patch(string key, [FromBody]ApplicationUser data)
+        public async Task<IActionResult> Patch([FromRoute(Name = "Id")] string key, [FromBody]ApplicationUser data)
         {
             var user = await userManager.FindByIdAsync(key);
 
@@ -102,6 +103,9 @@ namespace KonXProWebApp.Controllers
             }
 
             OnUserUpdated(data);
+
+            user.Email = data.Email;
+            user.UserName = data.Email;
 
             IdentityResult result = null;
 
@@ -192,6 +196,7 @@ namespace KonXProWebApp.Controllers
     }
 
     [Authorize]
+    [IgnoreAntiforgeryToken]
     [Route("odata/Identity/ApplicationTenants")]
     public partial class ApplicationTenantsController : ODataController
     {
@@ -224,7 +229,7 @@ namespace KonXProWebApp.Controllers
 
         [EnableQuery]
         [HttpGet("{Id}")]
-        public async Task<IActionResult> GetApplicationTenant(int key)
+        public async Task<IActionResult> GetApplicationTenant([FromRoute(Name = "Id")] int key)
         {
             var item = this.context.Tenants.Where(i=>i.Id == key).FirstOrDefault();
 
@@ -234,7 +239,7 @@ namespace KonXProWebApp.Controllers
         partial void OnTenantDeleted(ApplicationTenant tenant);
 
         [HttpDelete("{Id}")]
-        public async Task<IActionResult> Delete(int key)
+        public async Task<IActionResult> Delete([FromRoute(Name = "Id")] int key)
         {
             try
             {
@@ -274,7 +279,7 @@ namespace KonXProWebApp.Controllers
         partial void OnTenantUpdated(ApplicationTenant tenant);
 
         [HttpPatch("{Id}")]
-        public async Task<IActionResult> Patch(int key, [FromBody]Delta<ApplicationTenant> patch)
+        public async Task<IActionResult> Patch([FromRoute(Name = "Id")] int key, [FromBody]Delta<ApplicationTenant> patch)
         {
             if (HttpContext.User.Identity.Name != "tenantsadmin")
             {

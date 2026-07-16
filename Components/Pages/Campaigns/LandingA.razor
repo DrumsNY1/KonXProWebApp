@@ -1,0 +1,308 @@
+@page "/first"
+@layout EmptyLayout
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject Data.db_9f8bee_konxdevContext Db
+
+<PageTitle>Be First to Every New Job in NYC | KonXPro</PageTitle>
+
+<style>
+    .campaign-container {
+        font-family: 'Inter', sans-serif;
+        background-color: #0b1329;
+        color: #f4f6fa;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+    }
+    .campaign-header {
+        width: 100%;
+        max-width: 1100px;
+        padding: 24px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .campaign-logo {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+    .campaign-logo span {
+        color: #ffc107;
+    }
+    .hero-section {
+        max-width: 800px;
+        text-align: center;
+        padding: 60px 16px 40px 16px;
+    }
+    .hero-badge {
+        background-color: rgba(30, 144, 255, 0.15);
+        color: #1e90ff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 24px;
+    }
+    .hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 16px;
+        letter-spacing: -1px;
+    }
+    .hero-subtitle {
+        font-size: 18px;
+        color: #a0aec0;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+    .cta-box {
+        background-color: #1c2541;
+        border: 1px solid #3a506b;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        max-width: 500px;
+        margin: 0 auto 40px auto;
+    }
+    .cta-input {
+        width: 100%;
+        background-color: #0b1329;
+        border: 1px solid #3a506b;
+        border-radius: 6px;
+        color: white;
+        padding: 12px;
+        font-size: 16px;
+        margin-bottom: 16px;
+        outline: none;
+    }
+    .cta-input:focus {
+        border-color: #1e90ff;
+        box-shadow: 0 0 0 2px rgba(30, 144, 255, 0.2);
+    }
+    .cta-button {
+        background-color: #1e90ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    .cta-button:hover {
+        background-color: #0077e6;
+    }
+    .stats-bar {
+        background-color: #1c2541;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding: 24px 16px;
+        border-top: 1px solid #3a506b;
+        border-bottom: 1px solid #3a506b;
+    }
+    .stats-container {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        max-width: 900px;
+        flex-wrap: wrap;
+        gap: 24px;
+    }
+    .stat-item {
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1e90ff;
+    }
+    .stat-label {
+        font-size: 14px;
+        color: #a0aec0;
+        margin-top: 4px;
+    }
+    .features-section {
+        max-width: 1000px;
+        padding: 80px 16px;
+        width: 100%;
+    }
+    .section-title {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 48px;
+    }
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 32px;
+    }
+    .feature-card {
+        background-color: #1c2541;
+        border: 1px solid #3a506b;
+        border-radius: 8px;
+        padding: 24px;
+    }
+    .feature-number {
+        background-color: rgba(30, 144, 255, 0.15);
+        color: #1e90ff;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+    .feature-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    .feature-desc {
+        color: #a0aec0;
+        line-height: 1.5;
+    }
+    .testimonial-card {
+        background-color: #1c2541;
+        border-left: 4px solid #1e90ff;
+        padding: 24px;
+        border-radius: 0 8px 8px 0;
+        max-width: 600px;
+        margin: 40px auto 80px auto;
+        text-align: left;
+    }
+    .testimonial-text {
+        font-style: italic;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 12px;
+    }
+    .testimonial-author {
+        font-weight: 600;
+        color: #1e90ff;
+    }
+</style>
+
+<div class="campaign-container">
+    <header class="campaign-header">
+        <div class="campaign-logo">Kon<span>X</span>Pro</div>
+        <div style="font-size: 14px; color: #a0aec0;">Exclusive NYC Contractor Access</div>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-badge">⚡ Real-time NYC Open Data Alerts</div>
+        <h1 class="hero-title">Be first to every new job in NYC</h1>
+        <p class="hero-subtitle">Stop chasing stale leads. We monitor and sync NYC permit filings every 15 minutes to deliver high-value remodeling and contracting opportunities directly to your inbox before the competition even knows they exist.</p>
+        
+        <div class="cta-box">
+            <h3 style="margin-top: 0; margin-bottom: 16px; font-weight: 700; text-align: left;">Claim Your Fast-Access Account</h3>
+            <input type="email" placeholder="Enter your business email" class="cta-input" @bind="emailAddress" />
+            <button class="cta-button" @onclick="NavigateToSignup">Get Started Now</button>
+            <p style="font-size: 12px; color: #a0aec0; margin-top: 12px; margin-bottom: 0; text-align: left;">No credit card required. Free trial included.</p>
+        </div>
+    </section>
+
+    <div class="stats-bar">
+        <div class="stats-container">
+            <div class="stat-item">
+                <div class="stat-value">15m</div>
+                <div class="stat-label">Sync Frequency</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">12k+</div>
+                <div class="stat-label">Active Permits Ingested</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">3.4x</div>
+                <div class="stat-label">Higher Close Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <section class="features-section">
+        <h2 class="section-title">How KonXPro Puts You First</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-number">1</div>
+                <h4 class="feature-title">NYC Database Monitored</h4>
+                <p class="feature-desc">We ingest live data streams from NYC Department of Buildings (DOB) and consumer affairs instantly.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-number">2</div>
+                <h4 class="feature-title">Smart Matching Filter</h4>
+                <p class="feature-desc">Our systems filter for active home improvement and renovation projects matching your specific trade.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-number">3</div>
+                <h4 class="feature-title">Primacy Alert Delivery</h4>
+                <p class="feature-desc">Receive direct phone, email, or SMS notifications with the owner's building and contact details immediately.</p>
+            </div>
+        </div>
+
+        <div class="testimonial-card">
+            <p class="testimonial-text">"KonXPro changed our entire prospecting model. We've closed three high-end home renovation contracts in Brooklyn this month because we reached out hours before anyone else."</p>
+            <p class="testimonial-author">— Michael S., NYC Prime Builders</p>
+        </div>
+    </section>
+
+    <footer style="padding: 40px 16px; border-top: 1px solid #1c2541; width: 100%; text-align: center; color: #a0aec0; font-size: 14px;">
+        &copy; 2026 KonXPro. All rights reserved.
+    </footer>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "cid")]
+    public string Cid { get; set; }
+
+    private string emailAddress = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !string.IsNullOrEmpty(Cid))
+        {
+            if (int.TryParse(Cid, out int contractorId))
+            {
+                try
+                {
+                    // Write campaign tracker cookie via JS Eval (Safe for interactive server mode)
+                    await JSRuntime.InvokeVoidAsync("eval", $"document.cookie = 'cid={contractorId}; path=/; max-age=2592000'");
+                }
+                catch {}
+
+                // Log visit in Database
+                var contractor = await Db.HomeImprovementContractors.FindAsync(contractorId);
+                if (contractor != null)
+                {
+                    contractor.CampaignVisited = true;
+                    contractor.CampaignVisitedAt = DateTime.UtcNow;
+                    await Db.SaveChangesAsync();
+                }
+            }
+        }
+    }
+
+    private void NavigateToSignup()
+    {
+        if (!string.IsNullOrEmpty(emailAddress))
+        {
+            NavigationManager.NavigateTo($"Login?register=true&email={Uri.EscapeDataString(emailAddress)}");
+        }
+        else
+        {
+            NavigationManager.NavigateTo("Login?register=true");
+        }
+    }
+}

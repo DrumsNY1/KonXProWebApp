@@ -81,6 +81,33 @@ namespace KonXProWebApp.Data
             }
 
             await this.SaveChangesAsync();
+
+            // Seed Admin and Marketing roles
+            var adminRole = new ApplicationRole { Name = "Admin", NormalizedName = "ADMIN", Id = Guid.NewGuid().ToString() };
+            var marketingRole = new ApplicationRole { Name = "Marketing", NormalizedName = "MARKETING", Id = Guid.NewGuid().ToString() };
+
+            if (!this.Roles.Any(r => r.Name == "Admin"))
+            {
+                this.Roles.Add(adminRole);
+            }
+            if (!this.Roles.Any(r => r.Name == "Marketing"))
+            {
+                this.Roles.Add(marketingRole);
+            }
+            await this.SaveChangesAsync();
+
+            // Assign tenantsadmin to Admin role
+            var dbUser = this.Users.FirstOrDefault(u => u.UserName == "tenantsadmin");
+            var dbRole = this.Roles.FirstOrDefault(r => r.Name == "Admin");
+            if (dbUser != null && dbRole != null)
+            {
+                var hasRole = this.UserRoles.Any(ur => ur.UserId == dbUser.Id && ur.RoleId == dbRole.Id);
+                if (!hasRole)
+                {
+                    this.UserRoles.Add(new IdentityUserRole<string> { UserId = dbUser.Id, RoleId = dbRole.Id });
+                    await this.SaveChangesAsync();
+                }
+            }
         }
     }
 
