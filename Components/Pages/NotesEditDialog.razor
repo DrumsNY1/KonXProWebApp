@@ -1,0 +1,18 @@
+@inject Radzen.DialogService DialogService
+
+<div class="imp-p-4">
+    <div class="imp-mb-4">
+        <RadzenLabel Text="Outreach Notes" Component="notesArea" style="font-weight: 500; display: block; margin-bottom: 8px;" />
+        <RadzenTextArea @bind-Value="@Notes" Id="notesArea" Rows="6" style="width: 100%;" Placeholder="Enter conversation notes, postcard mailing feedback, or onboarding details..." />
+    </div>
+
+    <div class="flex justify-end gap-3 imp-mt-6">
+        <RadzenButton Text="Cancel" Click="() => DialogService.Close(null)" ButtonStyle="ButtonStyle.Light" />
+        <RadzenButton Text="Save Notes" Click="() => DialogService.Close(Notes)" ButtonStyle="ButtonStyle.Primary" />
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Notes { get; set; } = "";
+}

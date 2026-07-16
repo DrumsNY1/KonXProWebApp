@@ -39,5 +39,11 @@
                     <RadzenButton ButtonStyle="ButtonStyle.Light" Text="Cancel" Click="@CancelClick" Variant="Variant.Flat" />
             </RadzenStack>
         </RadzenTemplateForm>
+        <div class="rz-display-flex rz-justify-content-center rz-align-items-center rz-mt-4" style="font-size: 14px; gap: 0.5rem;">
+            <span>Already have an account?</span>
+            <a href="javascript:void(0)" @onclick="LoginRedirect" style="color: var(--rz-primary); text-decoration: none; font-weight: 500; cursor: pointer;">Log in</a>
+            <span style="color: var(--rz-text-disabled-color);">|</span>
+            <a href="javascript:void(0)" @onclick="ForgotPasswordRedirect" style="color: var(--rz-primary); text-decoration: none; font-weight: 500; cursor: pointer;">Forgot password?</a>
+        </div>
     </RadzenColumn>
 </RadzenRow>

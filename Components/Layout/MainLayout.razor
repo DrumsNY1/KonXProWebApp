@@ -29,10 +29,14 @@
       <span class="nav-icon">📊</span> Reports
     </a>
 
-    <div class="nav-section-label">Admin</div>
-    <a class="nav-item" href="admin/contractors">
-      <span class="nav-icon">👷</span> Contractors
-    </a>
+    <AuthorizeView Roles="Admin, Marketing">
+      <Authorized>
+        <div class="nav-section-label">Admin</div>
+        <a class="nav-item" href="admin/contractors">
+          <span class="nav-icon">👷</span> Contractors
+        </a>
+      </Authorized>
+    </AuthorizeView>
 
     <div class="nav-section-label">Account</div>
     <a class="nav-item" href="profile">

@@ -1,0 +1,288 @@
+@page "/leads"
+@layout EmptyLayout
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject Data.db_9f8bee_konxdevContext Db
+
+<PageTitle>Get Hundreds of NYC Construction Leads Daily | KonXPro</PageTitle>
+
+<style>
+    .campaign-container {
+        font-family: 'Inter', sans-serif;
+        background-color: #071e16;
+        color: #f4f7f5;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0;
+        margin: 0;
+    }
+    .campaign-header {
+        width: 100%;
+        max-width: 1100px;
+        padding: 24px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .campaign-logo {
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+    .campaign-logo span {
+        color: #2ec4b6;
+    }
+    .hero-section {
+        max-width: 850px;
+        text-align: center;
+        padding: 60px 16px 40px 16px;
+    }
+    .hero-badge {
+        background-color: rgba(46, 196, 182, 0.15);
+        color: #2ec4b6;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 24px;
+    }
+    .hero-title {
+        font-size: 48px;
+        font-weight: 800;
+        line-height: 1.2;
+        margin-bottom: 16px;
+        letter-spacing: -1px;
+    }
+    .hero-subtitle {
+        font-size: 18px;
+        color: #cadad2;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+    .lead-preview-card {
+        background-color: #0c3829;
+        border: 1px solid #1f5e49;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        margin-bottom: 48px;
+        width: 100%;
+        max-width: 750px;
+        text-align: left;
+    }
+    .preview-header {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #2ec4b6;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .preview-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .preview-table th, .preview-table td {
+        padding: 12px;
+        border-bottom: 1px solid #1f5e49;
+        font-size: 14px;
+    }
+    .preview-table th {
+        color: #cadad2;
+        font-weight: 600;
+        text-align: left;
+    }
+    .blur-text {
+        filter: blur(4px);
+        user-select: none;
+    }
+    .status-badge {
+        background-color: rgba(46, 196, 182, 0.2);
+        color: #2ec4b6;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+    .comparison-section {
+        max-width: 900px;
+        width: 100%;
+        padding: 60px 16px;
+    }
+    .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 32px;
+        margin-top: 32px;
+    }
+    .comp-card {
+        background-color: #0c3829;
+        border-radius: 12px;
+        padding: 32px;
+        border: 1px solid #1f5e49;
+    }
+    .comp-card.premium {
+        border: 2px solid #2ec4b6;
+        box-shadow: 0 0 15px rgba(46, 196, 182, 0.2);
+    }
+    .comp-title {
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    .comp-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .comp-list li {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        font-size: 15px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .cta-container {
+        text-align: center;
+        margin-top: 40px;
+        margin-bottom: 60px;
+    }
+    .cta-btn {
+        background-color: #2ec4b6;
+        color: #071e16;
+        font-size: 18px;
+        font-weight: 700;
+        padding: 16px 40px;
+        border-radius: 6px;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+    }
+    .cta-btn:hover {
+        background-color: #26a89c;
+    }
+</style>
+
+<div class="campaign-container">
+    <header class="campaign-header">
+        <div class="campaign-logo">Kon<span>X</span>Pro</div>
+        <div style="font-size: 14px; color: #cadad2;">NYC Contractor Lead Pipeline</div>
+    </header>
+
+    <section class="hero-section">
+        <div class="hero-badge">📈 High Volume Remodeling Leads</div>
+        <h1 class="hero-title">Hundreds of new leads, delivered daily</h1>
+        <p class="hero-subtitle">Gain access to the most comprehensive, unfiltered list of active home improvement, plumbing, and electrical permit filings in New York City. Direct client info, no referral fees.</p>
+
+        <div class="lead-preview-card">
+            <div class="preview-header">
+                <span>🔴 Live NYC Ingestion Stream (Recent Filings)</span>
+                <span class="status-badge">Updated 4m ago</span>
+            </div>
+            <table class="preview-table">
+                <thead>
+                    <tr>
+                        <th>Job Description</th>
+                        <th>Borough</th>
+                        <th>Est. Cost</th>
+                        <th>Contact Phone / Email</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Renovation & Kitchen Remodel</td>
+                        <td>Manhattan</td>
+                        <td style="color: #2ec4b6; font-weight: 600;">$64,000</td>
+                        <td><span class="blur-text">212-555-0193</span> <span style="font-size:12px;color:#a0aec0;">(Blurred)</span></td>
+                    </tr>
+                    <tr>
+                        <td>Residential Roofing Replacement</td>
+                        <td>Brooklyn</td>
+                        <td style="color: #2ec4b6; font-weight: 600;">$28,500</td>
+                        <td><span class="blur-text">718-555-0922</span> <span style="font-size:12px;color:#a0aec0;">(Blurred)</span></td>
+                    </tr>
+                    <tr>
+                        <td>Full Plumbing Pipe Renovation</td>
+                        <td>Queens</td>
+                        <td style="color: #2ec4b6; font-weight: 600;">$14,200</td>
+                        <td><span class="blur-text">john.smith@gmail.com</span> <span style="font-size:12px;color:#a0aec0;">(Blurred)</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="comparison-section">
+        <h2 style="text-align: center; font-size: 32px; font-weight: 800;">Why Contractors Prefer KonXPro</h2>
+        <p style="text-align: center; color: #cadad2; max-width: 600px; margin: 12px auto 0 auto;">See how we compare against traditional pay-per-lead bidding portals that squeeze your margins.</p>
+        
+        <div class="comparison-grid">
+            <div class="comp-card">
+                <h3 class="comp-title" style="color: #e63946;">Traditional Bidding Platforms</h3>
+                <ul class="comp-list">
+                    <li>❌ Pay $35 - $150 for every single lead</li>
+                    <li>❌ Shared with 5+ competing contractors</li>
+                    <li>❌ High platform fees and bidding wars</li>
+                    <li>❌ Middleman screens and owns your customer</li>
+                </ul>
+            </div>
+            <div class="comp-card premium">
+                <h3 class="comp-title" style="color: #2ec4b6;">KonXPro Flat Platform</h3>
+                <ul class="comp-list">
+                    <li>✅ Flat monthly rate — unlimited lead views</li>
+                    <li>✅ Direct contact info (Phone/Email/Borough)</li>
+                    <li>✅ Zero commission or lead referral fees</li>
+                    <li>✅ Be the first to reach out, keep 100% profit</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="cta-container">
+            <button class="cta-btn" @onclick="NavigateToSignup">Unlock Your Leads Now</button>
+            <p style="font-size: 13px; color: #cadad2; margin-top: 12px;">Start receiving daily NYC contractor leads risk-free.</p>
+        </div>
+    </section>
+
+    <footer style="padding: 40px 16px; border-top: 1px solid #1f5e49; width: 100%; text-align: center; color: #cadad2; font-size: 14px;">
+        &copy; 2026 KonXPro. All rights reserved.
+    </footer>
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "cid")]
+    public string Cid { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !string.IsNullOrEmpty(Cid))
+        {
+            if (int.TryParse(Cid, out int contractorId))
+            {
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("eval", $"document.cookie = 'cid={contractorId}; path=/; max-age=2592000'");
+                }
+                catch {}
+
+                var contractor = await Db.HomeImprovementContractors.FindAsync(contractorId);
+                if (contractor != null)
+                {
+                    contractor.CampaignVisited = true;
+                    contractor.CampaignVisitedAt = DateTime.UtcNow;
+                    await Db.SaveChangesAsync();
+                }
+            }
+        }
+    }
+
+    private void NavigateToSignup()
+    {
+        NavigationManager.NavigateTo("Login?register=true");
+    }
+}

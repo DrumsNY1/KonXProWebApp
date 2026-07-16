@@ -9,10 +9,13 @@
             Method="post">
             <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
             <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Info" Visible="@infoVisible">@info</RadzenAlert>
-            <RadzenLogin AllowResetPassword="true" AllowRegister="true" FormFieldVariant="Variant.Filled"
-                    ResetPassword="@ResetPassword"
-                    Register="@Register"
+            <RadzenLogin AllowResetPassword="false" AllowRegister="false" FormFieldVariant="Variant.Filled"
+                    Text="Log in to KonXPro"
             />
         </RadzenTemplateForm>
+        <div class="rz-display-flex rz-justify-content-space-between rz-mt-4" style="font-size: 14px; padding: 0 0.5rem;">
+            <a href="javascript:void(0)" @onclick="ResetPassword" style="color: var(--rz-primary); text-decoration: none; font-weight: 500; cursor: pointer;">Forgot password?</a>
+            <a href="javascript:void(0)" @onclick="Register" style="color: var(--rz-primary); text-decoration: none; font-weight: 500; cursor: pointer;">Create an account</a>
+        </div>
     </RadzenColumn>
 </RadzenRow>

@@ -38,9 +38,12 @@ namespace KonXProWebApp.Components.Pages
         [Inject]
         protected SecurityService Security { get; set; }
 
+        [Parameter]
+        public string Email { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
-            user = new KonXProWebApp.Models.ApplicationUser();
+            user = new KonXProWebApp.Models.ApplicationUser { Email = Email, UserName = Email };
         }
 
         protected async Task FormSubmit()
@@ -65,6 +68,16 @@ namespace KonXProWebApp.Components.Pages
         protected async Task CancelClick()
         {
             DialogService.Close(false);
+        }
+
+        protected async Task LoginRedirect()
+        {
+            DialogService.Close(false);
+        }
+
+        protected async Task ForgotPasswordRedirect()
+        {
+            DialogService.Close("forgot_password");
         }
     }
 }

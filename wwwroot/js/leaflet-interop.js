@@ -88,3 +88,12 @@ window.leafletInterop = {
         }
     }
 };
+
+window.saveAsFile = function (filename, base64) {
+    var link = document.createElement('a');
+    link.download = filename;
+    link.href = 'data:text/csv;base64,' + base64;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};

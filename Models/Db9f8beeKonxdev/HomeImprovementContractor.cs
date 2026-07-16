@@ -52,5 +52,29 @@ namespace KonXProWebApp.Models.db_9f8bee_konxdev
         public string Borough { get; set; }
 
         public DateTime IngestedAt { get; set; } = DateTime.UtcNow;
+
+        [StringLength(255)]
+        public string EmailAddress { get; set; }
+
+        [StringLength(50)]
+        public string SalesStatus { get; set; } = "New";
+
+        [StringLength(1000)]
+        public string SalesNotes { get; set; }
+
+        public bool PostcardSent { get; set; }
+
+        public bool EmailSent { get; set; }
+
+        [StringLength(10)]
+        public string CampaignCohort { get; set; }
+
+        public bool CampaignVisited { get; set; }
+
+        public DateTime? CampaignVisitedAt { get; set; }
+
+        public bool CampaignConverted { get; set; }
+
+        public DateTime? CampaignConvertedAt { get; set; }
     }
 }

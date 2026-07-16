@@ -4,16 +4,19 @@ using KonXProWebApp.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace KonXProWebApp.Data.Migrations
+namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
 {
     [DbContext(typeof(db_9f8bee_konxdevContext))]
-    partial class db_9f8bee_konxdevContextModelSnapshot : ModelSnapshot
+    [Migration("20260715075107_AddCampaignTrackingToContractors")]
+    partial class AddCampaignTrackingToContractors
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
