@@ -154,12 +154,6 @@ All development and deployment tools are installed on the **D: drive**. Always p
 $env:PATH = "D:\Program Files\Git\cmd;D:\Program Files\GitHub CLI;D:\Program Files\Microsoft SDKs\Azure\CLI2\wbin;D:\Program Files\Microsoft\Azure Functions Core Tools;" + $env:PATH
 ```
 
-### Web App Deployment (SmarterASP.NET)
-The main Blazor web app deploys via Web Deploy:
-```powershell
-dotnet publish KonXProWebApp.csproj /p:PublishProfile="D:\Workspace\KonXProWebApp\Properties\PublishProfiles\konxpro.com - Web Deploy.pubxml" /p:Password="Nkenge08!" /p:AllowUntrustedCertificate=True
-```
-
 ### Azure Functions Deployment
 The Functions project (`KonXProWebApp.Functions`) deploys via Azure Functions Core Tools:
 ```powershell
@@ -167,10 +161,3 @@ func azure functionapp publish KonXProFunctionApp --dotnet-isolated
 ```
 Requires Azure CLI authentication (`az login`) first.
 
-### WAF Considerations (SmarterASP.NET)
-The hosting WAF aggressively blocks:
-- OData-style URLs with parentheses and single quotes
-- Long base64-encoded query string parameters
-- Standard JSON bodies for ASP.NET Identity objects
-
-Use form-encoded POST bodies and short opaque tokens to bypass these restrictions.
