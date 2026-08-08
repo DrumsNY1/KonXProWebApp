@@ -123,7 +123,8 @@ public partial class PermitIntelService
         {
             var bbl = GetBblFromFiling(r);
             var velocity = await Get311ComplaintVelocity(bbl);
-            r.LeadScore = ScorePermit(r, velocity);
+            var (dobCount, hpdCount, hpdClassCCount) = await GetViolationSummaryByBin(r.Bin);
+            r.LeadScore = ScorePermit(r, velocity, dobCount, hpdClassCCount);
         }
 
         return (results, totalCount);
@@ -139,9 +140,9 @@ public partial class PermitIntelService
     public async Task<IEnumerable<DobViolation>> GetDobViolationsByBin(string bin)
     {
         if (string.IsNullOrWhiteSpace(bin)) return Enumerable.Empty<DobViolation>();
-        // Wait, context might not expose DobViolations if it wasn't there. But assuming it is or we query directly.
-        return await context.Set<DobViolation>()
-            .Where(v => v.Bin == bin)
+        var cleanBin = bin.Trim();
+        return await context.DobViolations
+            .Where(v => v.Bin.Trim() == cleanBin || v.Bin == cleanBin)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -149,22 +150,55 @@ public partial class PermitIntelService
     public async Task<IEnumerable<HpdViolation>> GetHpdViolationsByBin(string bin)
     {
         if (string.IsNullOrWhiteSpace(bin)) return Enumerable.Empty<HpdViolation>();
+        var cleanBin = bin.Trim();
         return await context.HpdViolations
-            .Where(v => v.Bin == bin)
+            .Where(v => v.Bin.Trim() == cleanBin || v.Bin == cleanBin)
             .AsNoTracking()
             .ToListAsync();
+    }
+
+    public async Task<(int DobCount, int HpdCount, int HpdClassCCount)> GetViolationSummaryByBin(string bin)
+    {
+        if (string.IsNullOrWhiteSpace(bin)) return (0, 0, 0);
+        var cleanBin = bin.Trim();
+
+        var dobCount = await context.DobViolations
+            .CountAsync(v => v.Bin.Trim() == cleanBin || v.Bin == cleanBin);
+
+        var hpdViolations = await context.HpdViolations
+            .Where(v => v.Bin.Trim() == cleanBin || v.Bin == cleanBin)
+            .Select(v => v.Class)
+            .ToListAsync();
+
+        var hpdCount = hpdViolations.Count;
+        var hpdClassCCount = hpdViolations.Count(c => c == "C");
+
+        return (dobCount, hpdCount, hpdClassCCount);
     }
 
     // ── Saved Leads ──
 
     public async Task<IEnumerable<SavedLead>> GetSavedLeads(string userId)
     {
-        return await context.SavedLeads
+        var saved = await context.SavedLeads
             .Include(s => s.DobjobFiling)
             .Where(s => s.UserId == userId)
             .OrderByDescending(s => s.SavedAt)
             .AsNoTracking()
             .ToListAsync();
+
+        foreach (var lead in saved)
+        {
+            if (lead.DobjobFiling != null)
+            {
+                var bbl = GetBblFromFiling(lead.DobjobFiling);
+                var velocity = await Get311ComplaintVelocity(bbl);
+                var (dobCount, hpdCount, hpdClassCCount) = await GetViolationSummaryByBin(lead.DobjobFiling.Bin);
+                lead.DobjobFiling.LeadScore = ScorePermit(lead.DobjobFiling, velocity, dobCount, hpdClassCCount);
+            }
+        }
+
+        return saved;
     }
 
     public async Task<SavedLead> SaveLead(string userId, int dobjobFilingId)
@@ -374,7 +408,7 @@ public partial class PermitIntelService
             .ToListAsync();
     }
 
-    public static int ScorePermit(DobjobFiling filing, int complaintVelocity = 0)
+    public static int ScorePermit(DobjobFiling filing, int complaintVelocity = 0, int activeDobViolations = 0, int hpdClassCCount = 0)
     {
         int score = 0;
 
@@ -402,11 +436,23 @@ public partial class PermitIntelService
         if (filing.Standpipe == "X") tradeCount++;
         if (tradeCount >= 2) score++;
 
-        // Predictive Intel Boost
+        // Predictive Intel Boost (311 Complaints)
         if (complaintVelocity >= 3)
             score += 2;
         else if (complaintVelocity > 0)
             score += 1;
+
+        // Violation Boosts:
+        // +1 for 1-2 active DOB/general violations, +2 for 3+
+        if (activeDobViolations >= 3)
+            score += 2;
+        else if (activeDobViolations > 0)
+            score += 1;
+
+        // Severe HPD Class C (Immediately Hazardous) Boost:
+        // +2 points for active Class C HPD violations
+        if (hpdClassCCount > 0)
+            score += 2;
 
         // +1 for expansion (more units proposed than existing)
         if (int.TryParse(filing.ProposedDwellingUnits, out var proposed) &&

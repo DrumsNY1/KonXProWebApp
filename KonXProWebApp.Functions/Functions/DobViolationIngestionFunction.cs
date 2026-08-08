@@ -54,11 +54,11 @@ public class DobViolationIngestionFunction
             {
                 batch.Add(record);
 
-                if (!string.IsNullOrEmpty(record.IssueDate) &&
-                    DateTime.TryParse(record.IssueDate, out var recordDate))
+                var parsedDate = IngestionService.ParseDobDate(record.IssueDate);
+                if (parsedDate.HasValue)
                 {
-                    if (!lastTimestamp.HasValue || recordDate > lastTimestamp.Value)
-                        lastTimestamp = recordDate;
+                    if (!lastTimestamp.HasValue || parsedDate.Value > lastTimestamp.Value)
+                        lastTimestamp = parsedDate.Value;
                 }
 
                 if (batch.Count >= batchSize)

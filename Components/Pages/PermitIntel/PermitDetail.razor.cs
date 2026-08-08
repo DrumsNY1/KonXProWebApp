@@ -49,23 +49,22 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
             if (filing != null)
             {
+                int dobCount = 0, hpdCount = 0, hpdClassCCount = 0;
                 if (!string.IsNullOrEmpty(filing.Bin))
                 {
                     hpdViolations = await PermitIntelService.GetHpdViolationsByBin(filing.Bin);
                     dobViolations = await PermitIntelService.GetDobViolationsByBin(filing.Bin);
+                    (dobCount, hpdCount, hpdClassCCount) = await PermitIntelService.GetViolationSummaryByBin(filing.Bin);
                 }
                 
                 var bbl = KonXProWebApp.Services.PermitIntelService.GetBblFromFiling(filing);
+                int velocity = 0;
                 if (!string.IsNullOrEmpty(bbl))
                 {
                     complaints311 = await PermitIntelService.Get311ComplaintsByBbl(bbl);
-                    // Also update LeadScore for display if not stored in DB
-                    filing.LeadScore = KonXProWebApp.Services.PermitIntelService.ScorePermit(filing, await PermitIntelService.Get311ComplaintVelocity(bbl));
+                    velocity = await PermitIntelService.Get311ComplaintVelocity(bbl);
                 }
-                else
-                {
-                    filing.LeadScore = KonXProWebApp.Services.PermitIntelService.ScorePermit(filing);
-                }
+                filing.LeadScore = KonXProWebApp.Services.PermitIntelService.ScorePermit(filing, velocity, dobCount, hpdClassCCount);
 
                 var userId = Security.User?.Id;
                 if (!string.IsNullOrEmpty(userId))

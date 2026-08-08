@@ -113,7 +113,7 @@ public class SocrataClientTests
 
         await foreach (var _ in client.GetContractorsSince(null)) { }
 
-        var decoded = Uri.UnescapeDataString(handler.LastRequestUri!);
+        var decoded = System.Web.HttpUtility.UrlDecode(handler.LastRequestUri!);
         Assert.Contains("Home Improvement Contractor", decoded);
     }
 
@@ -125,7 +125,7 @@ public class SocrataClientTests
 
         await foreach (var _ in client.GetBuilding311ComplaintsSince(null)) { }
 
-        var decoded = Uri.UnescapeDataString(handler.LastRequestUri!);
+        var decoded = System.Web.HttpUtility.UrlDecode(handler.LastRequestUri!);
         Assert.Contains("bbl IS NOT NULL", decoded);
     }
 
