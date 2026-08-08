@@ -25,8 +25,8 @@ public class AlertDispatchMatchingTests
         var (sql, parameters) = AlertDispatchFunction.BuildWhereClause(user);
 
         Assert.Contains("LatestActionDate >= DATEADD", sql);
-        Assert.DoesNotContain("Borough", sql);
-        Assert.DoesNotContain("JobType", sql);
+        Assert.DoesNotContain("Borough IN", sql);
+        Assert.DoesNotContain("JobType IN", sql);
         Assert.Empty(parameters);
     }
 

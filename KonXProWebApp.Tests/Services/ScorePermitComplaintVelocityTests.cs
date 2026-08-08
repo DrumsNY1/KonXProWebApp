@@ -64,4 +64,35 @@ public class ScorePermitComplaintVelocityTests
         var score = PermitIntelService.ScorePermit(filing, complaintVelocity: 1);
         Assert.Equal(3, score);
     }
+
+    [Fact]
+    public void ScorePermit_ActiveDobViolations_AddsViolationBoost()
+    {
+        var filing = new DobjobFiling { JobType = "A3" };
+        // +1 for active DOB violation (1 violation = +1)
+        var score1 = PermitIntelService.ScorePermit(filing, activeDobViolations: 1);
+        Assert.Equal(1, score1);
+
+        // +2 for 3+ active DOB violations
+        var score2 = PermitIntelService.ScorePermit(filing, activeDobViolations: 3);
+        Assert.Equal(2, score2);
+    }
+
+    [Fact]
+    public void ScorePermit_SevereHpdClassCViolation_AddsExtraTwoPoints()
+    {
+        var filing = new DobjobFiling { JobType = "A3" };
+        // Base score 0 + 2 (HPD Class C boost) = 2
+        var score = PermitIntelService.ScorePermit(filing, hpdClassCCount: 1);
+        Assert.Equal(2, score);
+    }
+
+    [Fact]
+    public void ScorePermit_CombinedDobAndHpdClassC_BoostsScoreAndClampsAtFive()
+    {
+        var filing = new DobjobFiling { JobType = "A1", InitialCost = 60_000m };
+        // +1 cost > 10K, +1 cost > 50K, +1 A1, +2 DOB (3+), +2 HPD Class C = 7 -> clamped at 5
+        var score = PermitIntelService.ScorePermit(filing, activeDobViolations: 3, hpdClassCCount: 1);
+        Assert.Equal(5, score);
+    }
 }
