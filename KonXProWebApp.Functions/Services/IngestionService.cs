@@ -384,7 +384,7 @@ public class IngestionService
                 if (string.IsNullOrEmpty(record.IsnDobBisViol)) { skipped++; continue; }
 
                 const string mergeSql = @"
-                    MERGE dbo.DobBisViolations AS target
+                    MERGE konx_admin.DobBisViolations AS target
                     USING (SELECT @IsnDobBisViol AS isn_dob_bis_viol) AS source
                     ON target.isn_dob_bis_viol = source.isn_dob_bis_viol
                     WHEN MATCHED THEN UPDATE SET

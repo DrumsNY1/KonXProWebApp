@@ -58,7 +58,7 @@ public partial class db_9f8bee_konxdevContext
 
         builder.Entity<DobViolation>(entity =>
         {
-            entity.ToTable("DobBisViolations", "dbo");
+            entity.ToTable("DobBisViolations", "konx_admin");
             
             // Value converter for Id (isn_dob_bis_viol varchar in DB)
             entity.Property(e => e.Id)
