@@ -1,0 +1,163 @@
+@page "/permit-intel/contractor/{Id:int}"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>Contractor Profile — NYC Permit Intel</PageTitle>
+
+@if (contractor == null)
+{
+    <RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+        <RadzenColumn Size="12" Style="text-align: center; padding: 4rem 0;">
+            <RadzenProgressBarCircular ShowValue="false" Mode="Radzen.ProgressBarMode.Indeterminate" />
+        </RadzenColumn>
+    </RadzenRow>
+}
+else
+{
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h1>@contractor.BusinessName</h1>
+                <p>License #@contractor.LicenseNumber · @contractor.Borough, NYC</p>
+            </div>
+            <RadzenButton Text="Back to Directory" Icon="arrow_back" ButtonStyle="Radzen.ButtonStyle.Light"
+                          Click="@(() => NavigationManager.NavigateTo("/permit-intel/contractors"))" />
+        </div>
+    </div>
+
+    <!-- RISK & COMPLIANCE ASSESSMENT CARD -->
+    @if (riskProfile != null)
+    {
+        <div class="card rz-mb-4">
+            <div class="card-header" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(15, 23, 42, 0.05) 100%); border-bottom: 1px solid var(--rz-border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.25rem;">🛡️</span>
+                        <div>
+                            <div class="card-title">Contractor Compliance & Risk Evaluation</div>
+                            <div class="card-subtitle">AI compliance rating based on DCA status & building records</div>
+                        </div>
+                    </div>
+                    <RadzenBadge Text="@riskProfile.RiskLevel.ToUpper()"
+                                 BadgeStyle="@(riskProfile.RiskLevel == "Low Risk" ? Radzen.BadgeStyle.Success : (riskProfile.RiskLevel == "Moderate Risk" ? Radzen.BadgeStyle.Warning : Radzen.BadgeStyle.Danger))"
+                                 Style="font-weight: 700; padding: 0.4rem 0.8rem; font-size: 0.85rem;" />
+                </div>
+            </div>
+            <div class="rz-p-4">
+                <RadzenRow Gap="1.5rem">
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">License Status</RadzenText>
+                            <RadzenBadge Text="@contractor.LicenseStatus"
+                                         BadgeStyle="@(riskProfile.IsLicenseActive ? Radzen.BadgeStyle.Success : Radzen.BadgeStyle.Danger)" />
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Expiration Date</RadzenText>
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0">@(contractor.LicenseExpirationDate?.ToString("MM/dd/yyyy") ?? "N/A")</RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Recent Permit Filings</RadzenText>
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0">@riskProfile.TotalPermitFilingsCount</RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                    <RadzenColumn Size="12" SizeMD="3">
+                        <RadzenStack Gap="0.25rem">
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Est. Construction Volume</RadzenText>
+                            <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="value-cell rz-m-0">@riskProfile.TotalEstJobVolume.ToString("C0")</RadzenText>
+                        </RadzenStack>
+                    </RadzenColumn>
+                </RadzenRow>
+
+                @if (riskProfile.TrustSignals.Any())
+                {
+                    <div class="rz-mt-3">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color rz-mb-1 rz-display-block">Verified Compliance Signals</RadzenText>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                            @foreach (var signal in riskProfile.TrustSignals)
+                            {
+                                <span class="badge badge-success" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">✓ @signal</span>
+                            }
+                        </RadzenStack>
+                    </div>
+                }
+
+                @if (riskProfile.RiskFactors.Any())
+                {
+                    <div class="rz-mt-3">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color rz-mb-1 rz-display-block">Risk Flags</RadzenText>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                            @foreach (var factor in riskProfile.RiskFactors)
+                            {
+                                <span class="badge badge-danger" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">⚠️ @factor</span>
+                            }
+                        </RadzenStack>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- PROFILE TABS -->
+    <RadzenTabs class="rz-mb-4">
+        <Tabs>
+            <RadzenTabsItem Text="Contractor Profile Details">
+                <div class="card rz-mt-2">
+                    <div class="rz-p-4">
+                        <RadzenRow Gap="1.5rem">
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenStack Gap="0.75rem">
+                                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6">Business Information</RadzenText>
+                                    <div><strong>Legal Business Name:</strong> @contractor.BusinessName</div>
+                                    <div><strong>DBA / Trade Name:</strong> @(string.IsNullOrEmpty(contractor.DbaTradeName) ? "—" : contractor.DbaTradeName)</div>
+                                    <div><strong>License Number:</strong> @contractor.LicenseNumber</div>
+                                    <div><strong>Phone:</strong> @(string.IsNullOrEmpty(contractor.ContactPhoneNumber) ? "—" : contractor.ContactPhoneNumber)</div>
+                                    <div><strong>Email:</strong> @(string.IsNullOrEmpty(contractor.EmailAddress) ? "—" : contractor.EmailAddress)</div>
+                                </RadzenStack>
+                            </RadzenColumn>
+                            <RadzenColumn Size="12" SizeMD="6">
+                                <RadzenStack Gap="0.75rem">
+                                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H6">Address & Licensing</RadzenText>
+                                    <div><strong>Building & Street:</strong> @contractor.AddressBuilding @contractor.AddressStreetName</div>
+                                    <div><strong>City, State Zip:</strong> @contractor.AddressCity, @contractor.AddressState @contractor.AddressZip</div>
+                                    <div><strong>Borough:</strong> @contractor.Borough</div>
+                                    <div><strong>License Issued:</strong> @(contractor.LicenseIssueDate?.ToString("MM/dd/yyyy") ?? "—")</div>
+                                    <div><strong>License Expires:</strong> @(contractor.LicenseExpirationDate?.ToString("MM/dd/yyyy") ?? "—")</div>
+                                </RadzenStack>
+                            </RadzenColumn>
+                        </RadzenRow>
+                    </div>
+                </div>
+            </RadzenTabsItem>
+            <RadzenTabsItem Text=@($"Recent Permit Filings ({permitFilings.Count})")>
+                <div class="card rz-mt-2">
+                    <div class="rz-p-4">
+                        <RadzenDataGrid Data="@permitFilings" TItem="DobjobFiling" AllowPaging="true" PageSize="10" AllowSorting="true">
+                            <Columns>
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="110px" />
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="HouseNum" Title="Address" Width="220px">
+                                    <Template Context="f">
+                                        <RadzenLink Path="@($"/permit-intel/detail/{f.Id}")" Text="@($"{f.HouseNum} {f.StreetName}")" />
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobType" Title="Type" Width="90px" />
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="InitialCost" Title="Est. Cost" Width="120px">
+                                    <Template Context="f">
+                                        <span class="value-cell">@(f.InitialCost?.ToString("C0") ?? "—")</span>
+                                    </Template>
+                                </RadzenDataGridColumn>
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Filed Date" FormatString="{0:MM/dd/yyyy}" Width="110px" />
+                            </Columns>
+                        </RadzenDataGrid>
+                    </div>
+                </div>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+}
