@@ -76,10 +76,11 @@ public class SmsService
     }
 
     /// <summary>
-    /// Builds a short SMS summary for a permit alert.
+    /// Builds a short SMS summary for a permit alert with lead tier context.
     /// </summary>
-    public static string BuildAlertSms(int matchCount, string topAddress)
+    public static string BuildAlertSms(int matchCount, string topAddress, int topScore = 1, string topTier = "Standard")
     {
-        return $"NYC Permit Intel: {matchCount} new permit(s) match your alerts. Top: {topAddress}. View at konxpro.com/permit-intel/search";
+        var icon = topScore >= 4 ? "🔥" : (topScore == 3 ? "⚡" : "📋");
+        return $"{icon} NYC Permit Intel: {matchCount} new permit lead(s) match your alerts. Top: {topAddress} ({topScore}★ {topTier.ToUpper()}). View at konxpro.com/permit-intel/search";
     }
 }

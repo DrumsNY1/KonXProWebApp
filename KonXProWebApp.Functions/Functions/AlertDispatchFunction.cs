@@ -81,8 +81,9 @@ public class AlertDispatchFunction
                     // Send SMS if channel is SMS or Both (Pro+ only)
                     if (user.AlertChannel is "SMS" or "Both" && !string.IsNullOrEmpty(user.PhoneNumber))
                     {
+                        var topMatch = matches.First();
                         var smsText = SmsService.BuildAlertSms(
-                            matches.Count, matches.First().Address);
+                            matches.Count, topMatch.Address, topMatch.LeadScore, topMatch.ScoreTier);
                         await _smsService.SendSmsAsync(user.PhoneNumber, smsText);
                         smsSent++;
                     }
@@ -151,6 +152,15 @@ public class AlertDispatchFunction
         await using var reader = await cmd.ExecuteReaderAsync();
         while (await reader.ReadAsync())
         {
+            var score = reader.IsDBNull(7) ? 1 : reader.GetInt32(7);
+            var tier = score switch
+            {
+                5 => "Hot",
+                4 => "High Priority",
+                3 => "Medium Priority",
+                _ => "Standard"
+            };
+
             matches.Add(new AlertPermitMatch
             {
                 PermitId = reader.GetInt32(0),
@@ -159,7 +169,8 @@ public class AlertDispatchFunction
                 JobType = reader.IsDBNull(4) ? "" : reader.GetString(4),
                 EstCost = reader.IsDBNull(5) ? "N/A" : reader.GetDecimal(5).ToString("C0"),
                 Status = reader.IsDBNull(6) ? "" : reader.GetString(6),
-                LeadScore = reader.IsDBNull(7) ? 1 : reader.GetInt32(7)
+                LeadScore = score,
+                ScoreTier = tier
             });
         }
 
@@ -205,6 +216,12 @@ public class AlertDispatchFunction
             parameters.Add(new SqlParameter("@maxCost", user.MaxCost.Value));
         }
 
+        if (user.MinLeadScore.HasValue && user.MinLeadScore.Value > 1)
+        {
+            conditions.Add("d.LeadScore >= @minLeadScore");
+            parameters.Add(new SqlParameter("@minLeadScore", user.MinLeadScore.Value));
+        }
+
         // Trade filters
         if (!string.IsNullOrEmpty(user.Trades))
         {
@@ -245,6 +262,7 @@ public class AlertDispatchFunction
         public string Trades { get; set; }
         public decimal? MinCost { get; set; }
         public decimal? MaxCost { get; set; }
+        public int? MinLeadScore { get; set; }
         public string AlertChannel { get; set; }
         public string AlertFrequency { get; set; }
         public string Email { get; set; }
