@@ -1,0 +1,151 @@
+@page "/permit-intel/compliance"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>Property Compliance Hub — NYC Permit Intel</PageTitle>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>Property Compliance Intelligence Hub</h1>
+    <p>Track DOB building violations, Class A/B/C HPD housing quality violations, and property risk ratings.</p>
+</div>
+
+<!-- STATS BANNER -->
+<div class="stats-row rz-mb-4">
+    <div class="stat-card">
+        <div class="stat-label-sm">🏢 DOB Violations Count</div>
+        <div class="stat-value">@($"{totalDobCount:N0}")</div>
+        <div class="stat-change neutral">building safety</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">🚨 HPD Housing Violations</div>
+        <div class="stat-value text-danger">@($"{totalHpdCount:N0}")</div>
+        <div class="stat-change up">housing code</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">⚠️ Class C Severe Violations</div>
+        <div class="stat-value text-danger">@($"{classCCount:N0}")</div>
+        <div class="stat-change down">immediately hazardous</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">🏙️ Covered Boroughs</div>
+        <div class="stat-value">5 NYC Boroughs</div>
+        <div class="stat-change neutral">citywide database</div>
+    </div>
+</div>
+
+<div class="card rz-mb-4">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Building Compliance Search</div>
+            <div class="card-subtitle">Search by address, BIN, or violation description</div>
+        </div>
+        <div class="card-actions">
+            <RadzenButton Text="Search Violations" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@SearchViolations" IsBusy="@isLoading" />
+            <RadzenButton Text="Reset" Icon="restart_alt" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small" Click="@ResetFilters" />
+        </div>
+    </div>
+
+    <!-- FILTER TOOLBAR -->
+    <div class="rz-p-4" style="background: rgba(15, 31, 61, 0.4); border-bottom: 1px solid var(--border);">
+        <RadzenRow Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="5">
+                <RadzenLabel Text="Search Property / BIN / Violation #" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenTextBox @bind-Value="searchText" Placeholder="Address, BIN, violation #, description..." Style="width: 100%;" Change="@(args => SearchViolations())" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Borough" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
+                                Placeholder="All Boroughs" Style="width: 100%;"
+                                Change="@(args => SearchViolations())" AllowClear="true" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="HPD Severity Class" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedSeverity" Data="severityOptions"
+                                Placeholder="All Severity Classes" Style="width: 100%;"
+                                Change="@(args => SearchViolations())" AllowClear="true" />
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+
+    <!-- VIOLATION TABS -->
+    <RadzenTabs class="rz-m-0">
+        <Tabs>
+            <RadzenTabsItem Text=@($"HPD Housing Quality Violations ({totalHpdCount:N0})")>
+                <RadzenDataGrid Data="@hpdViolations" TItem="HpdViolation"
+                                AllowSorting="true" AllowPaging="true" PageSize="20"
+                                ShowPagingSummary="true" ColumnWidth="160px"
+                                Style="min-height: 400px; border-top: none;">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="HpdViolation" Property="Class" Title="Severity Class" Width="120px">
+                            <Template Context="v">
+                                <RadzenBadge Text=@($"CLASS {v.Class}")
+                                             BadgeStyle="@(v.Class == "C" ? Radzen.BadgeStyle.Danger : (v.Class == "B" ? Radzen.BadgeStyle.Warning : Radzen.BadgeStyle.Info))" />
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="HpdViolation" Property="HouseNumber" Title="Property Address" Width="220px">
+                            <Template Context="v">
+                                <div style="font-weight: 600; color: var(--rz-text-title-color);">@v.HouseNumber @v.StreetName</div>
+                                <div style="font-size: 11px; color: var(--rz-text-tertiary-color);">Borough: @v.Boro · BIN @(string.IsNullOrEmpty(v.Bin) ? "N/A" : v.Bin)</div>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="HpdViolation" Property="NovDescription" Title="Violation Description" Width="300px">
+                            <Template Context="v">
+                                <div style="font-size: 12px; line-height: 1.4;">@(string.IsNullOrEmpty(v.NovDescription) ? "No description provided." : v.NovDescription)</div>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="HpdViolation" Property="ViolationStatus" Title="Status" Width="120px">
+                            <Template Context="v">
+                                <span class="badge @(v.ViolationStatus?.Contains("Close") == true ? "badge-success" : "badge-warning")">
+                                    @(v.ViolationStatus ?? "Open")
+                                </span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="HpdViolation" Property="InspectionDate" Title="Inspection Date" Width="130px">
+                            <Template Context="v">
+                                <span class="date-cell">@(v.InspectionDate?.ToString("MM/dd/yyyy") ?? "—")</span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+
+            <RadzenTabsItem Text=@($"DOB Building Safety Violations ({totalDobCount:N0})")>
+                <RadzenDataGrid Data="@dobViolations" TItem="DobViolation"
+                                AllowSorting="true" AllowPaging="true" PageSize="20"
+                                ShowPagingSummary="true" ColumnWidth="160px"
+                                Style="min-height: 400px; border-top: none;">
+                    <Columns>
+                        <RadzenDataGridColumn TItem="DobViolation" Property="ViolationNumber" Title="Violation #" Width="140px">
+                            <Template Context="v">
+                                <span class="permit-num">@v.ViolationNumber</span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="DobViolation" Property="HouseNumber" Title="Property Address" Width="220px">
+                            <Template Context="v">
+                                <div style="font-weight: 600; color: var(--rz-text-title-color);">@v.HouseNumber @v.Street</div>
+                                <div style="font-size: 11px; color: var(--rz-text-tertiary-color);">BIN @v.Bin · Block @v.Block / Lot @v.Lot</div>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="DobViolation" Property="ViolationCategory" Title="Category" Width="150px">
+                            <Template Context="v">
+                                <span>@(string.IsNullOrEmpty(v.ViolationCategory) ? v.ViolationTypeCode : v.ViolationCategory)</span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="DobViolation" Property="Description" Title="Description" Width="300px">
+                            <Template Context="v">
+                                <div style="font-size: 12px; line-height: 1.4;">@v.Description</div>
+                            </Template>
+                        </RadzenDataGridColumn>
+                        <RadzenDataGridColumn TItem="DobViolation" Property="IssueDate" Title="Issued Date" Width="130px">
+                            <Template Context="v">
+                                <span class="date-cell">@v.IssueDate.ToString("MM/dd/yyyy")</span>
+                            </Template>
+                        </RadzenDataGridColumn>
+                    </Columns>
+                </RadzenDataGrid>
+            </RadzenTabsItem>
+        </Tabs>
+    </RadzenTabs>
+</div>
