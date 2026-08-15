@@ -1116,3 +1116,51 @@ body,
   scrollbar-width: thin;
   scrollbar-color: var(--color-primary-light) var(--surface-base);
 }
+
+/* ── Leaflet Permit Map Styles ── */
+.permit-marker-wrapper {
+  background: transparent !important;
+  border: none !important;
+}
+
+.custom-permit-pin {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: pointer;
+}
+
+.custom-permit-pin:hover {
+  transform: scale(1.35);
+  z-index: 1000 !important;
+}
+
+.marker-glow-red {
+  animation: pulse-red 2s infinite;
+}
+
+.marker-glow-amber {
+  animation: pulse-amber 2.5s infinite;
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes pulse-amber {
+  0% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(245, 158, 11, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+  }
+}
