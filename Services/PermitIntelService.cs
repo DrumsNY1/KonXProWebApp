@@ -315,6 +315,67 @@ public partial class PermitIntelService
         return await context.SavedLeads.CountAsync(s => s.UserId == userId);
     }
 
+    public async Task<PermitAnalyticsSummary> GetAnalyticsSummary()
+    {
+        var filings = await context.DobjobFilings
+            .AsNoTracking()
+            .ToListAsync();
+
+        var summary = new PermitAnalyticsSummary
+        {
+            TotalFilingsCount = filings.Count,
+            TotalJobCost = filings.Sum(f => f.InitialCost ?? 0m),
+            AverageJobCost = filings.Count > 0 ? filings.Average(f => f.InitialCost ?? 0m) : 0m
+        };
+
+        // Borough metrics
+        summary.BoroughMetrics = filings
+            .Where(f => !string.IsNullOrEmpty(f.Borough))
+            .GroupBy(f => f.Borough.Trim().ToUpper())
+            .Select(g => new BoroughMetric
+            {
+                Borough = g.Key,
+                Count = g.Count(),
+                TotalCost = g.Sum(f => f.InitialCost ?? 0m)
+            })
+            .OrderByDescending(b => b.TotalCost)
+            .ToList();
+
+        // Job type metrics
+        summary.JobTypeMetrics = filings
+            .Where(f => !string.IsNullOrEmpty(f.JobType))
+            .GroupBy(f => f.JobType.Trim().ToUpper())
+            .Select(g => new JobTypeMetric
+            {
+                JobType = g.Key,
+                Count = g.Count(),
+                TotalCost = g.Sum(f => f.InitialCost ?? 0m)
+            })
+            .OrderByDescending(j => j.Count)
+            .ToList();
+
+        // Lead score distribution
+        var scoreGroups = filings
+            .GroupBy(f => ScorePermit(f))
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        summary.ScoreMetrics = new List<ScoreTierMetric>
+        {
+            new() { Score = 5, Tier = "🔥 Hot Lead", Count = scoreGroups.GetValueOrDefault(5) },
+            new() { Score = 4, Tier = "⚡ High Priority", Count = scoreGroups.GetValueOrDefault(4) },
+            new() { Score = 3, Tier = "📊 Medium Priority", Count = scoreGroups.GetValueOrDefault(3) },
+            new() { Score = 2, Tier = "📋 Standard", Count = scoreGroups.GetValueOrDefault(2) },
+            new() { Score = 1, Tier = "📋 Low Priority", Count = scoreGroups.GetValueOrDefault(1) }
+        };
+
+        int hotCount = scoreGroups.GetValueOrDefault(5) + scoreGroups.GetValueOrDefault(4);
+        summary.HotLeadsPercentage = filings.Count > 0
+            ? Math.Round((double)hotCount / filings.Count * 100.0, 1)
+            : 0.0;
+
+        return summary;
+    }
+
     // ── Alert Preferences ──
 
     public async Task<AlertPreference> GetAlertPreference(string userId)

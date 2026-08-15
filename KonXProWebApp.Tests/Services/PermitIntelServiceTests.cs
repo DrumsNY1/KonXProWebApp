@@ -382,4 +382,23 @@ public class PermitIntelServiceTests : IDisposable
         Assert.Contains("Contacted", csvText);
         Assert.Contains("Called owner John", csvText);
     }
+
+    [Fact]
+    public async Task GetAnalyticsSummary_AggregatesBoroughsAndJobTypes()
+    {
+        _context.DobjobFilings.AddRange(
+            new DobjobFiling { Borough = "MANHATTAN", JobType = "NB", InitialCost = 500_000m },
+            new DobjobFiling { Borough = "BROOKLYN", JobType = "A1", InitialCost = 200_000m },
+            new DobjobFiling { Borough = "MANHATTAN", JobType = "A2", InitialCost = 100_000m }
+        );
+        await _context.SaveChangesAsync();
+
+        var summary = await _service.GetAnalyticsSummary();
+
+        Assert.Equal(3, summary.TotalFilingsCount);
+        Assert.Equal(800_000m, summary.TotalJobCost);
+        Assert.Contains(summary.BoroughMetrics, b => b.Borough == "MANHATTAN" && b.Count == 2 && b.TotalCost == 600_000m);
+        Assert.Contains(summary.BoroughMetrics, b => b.Borough == "BROOKLYN" && b.Count == 1);
+        Assert.Equal(3, summary.JobTypeMetrics.Count);
+    }
 }
