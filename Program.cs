@@ -24,6 +24,7 @@ builder.Services.AddScoped<KonXProWebApp.Services.PermitIntelService>();
 builder.Services.AddScoped<KonXProWebApp.Services.ContractorIntelService>();
 builder.Services.AddScoped<KonXProWebApp.Services.StripeService>();
 builder.Services.AddScoped<KonXProWebApp.Services.SubscriptionTierService>();
+builder.Services.AddScoped<KonXProWebApp.Services.ComplianceIntelService>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, KonXProWebApp.Authorization.SubscriptionAuthorizationHandler>();
 builder.Services.AddDbContext<KonXProWebApp.Data.db_9f8bee_konxdevContext>(options =>
 {
