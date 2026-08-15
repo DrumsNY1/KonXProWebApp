@@ -97,6 +97,44 @@ if (!app.Environment.IsEnvironment("Testing"))
         var identityDb = scope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
         identityDb.Database.Migrate();
         identityDb.SeedTenantsAdmin().Wait();
+
+        var permitDb = scope.ServiceProvider.GetRequiredService<KonXProWebApp.Data.db_9f8bee_konxdevContext>();
+        logger.LogInformation("Ensuring permit intel database schema is created...");
+        permitDb.Database.EnsureCreated();
+
+        var views = new[]
+        {
+            @"CREATE OR ALTER VIEW dbo.vwFreeTierDashboard AS
+              SELECT JobNum, Borough, ISNULL(HouseNum, '') + ' ' + ISNULL(StreetName, '') AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
+              FROM konx_admin.DOBJobFilings;",
+              
+            @"CREATE OR ALTER VIEW dbo.vwBasicTierDashboard AS
+              SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
+              FROM konx_admin.DOBJobFilings;",
+              
+            @"CREATE OR ALTER VIEW dbo.vwMidTierDashboard AS
+              SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
+              FROM konx_admin.DOBJobFilings;",
+              
+            @"CREATE OR ALTER VIEW dbo.vwHighTierDashboard AS
+              SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
+              FROM konx_admin.DOBJobFilings;",
+              
+            @"CREATE OR ALTER VIEW dbo.vwDemoDisplay AS
+              SELECT 'Sample Content' AS Content, 'Sample Summary' AS Summary, CAST(GETDATE() AS datetime2) AS CompletionDate;"
+        };
+
+        foreach (var viewSql in views)
+        {
+            try
+            {
+                permitDb.Database.ExecuteSqlRaw(viewSql);
+            }
+            catch (Exception exView)
+            {
+                logger.LogWarning(exView, "View creation skipped or non-fatal error");
+            }
+        }
     }
     catch (Exception ex)
     {
@@ -105,37 +143,6 @@ if (!app.Environment.IsEnvironment("Testing"))
         logger.LogError(ex, "An exception occurred while migrating or seeding the database on startup.");
     }
 }
-
-//using (var scope = app.Services.CreateScope())
-//{
-//    var context = scope.ServiceProvider.GetRequiredService<KonXProWebApp.Data.db_9f8bee_konxdevContext>();
-//    var views = new[]
-//    {
-//        @"CREATE OR ALTER VIEW dbo.vwFreeTierDashboard AS
-//          SELECT JobNum, Borough, ISNULL(HouseNum, '') + ' ' + ISNULL(StreetName, '') AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-//          FROM dbo.DOBJobFilings;",
-          
-//        @"CREATE OR ALTER VIEW dbo.vwBasicTierDashboard AS
-//          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-//          FROM dbo.DOBJobFilings;",
-          
-//        @"CREATE OR ALTER VIEW dbo.vwMidTierDashboard AS
-//          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-//          FROM dbo.DOBJobFilings;",
-          
-//        @"CREATE OR ALTER VIEW dbo.vwHighTierDashboard AS
-//          SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-//          FROM dbo.DOBJobFilings;",
-          
-//        @"CREATE OR ALTER VIEW dbo.vwDemoDisplay AS
-//          SELECT 'Sample Content' AS Content, 'Sample Summary' AS Summary, CAST(GETDATE() AS datetime2) AS CompletionDate;"
-//    };
-
-//    foreach (var viewSql in views)
-//    {
-//        context.Database.ExecuteSqlRaw(viewSql);
- //    }
-//}
 
 app.Run();
 
