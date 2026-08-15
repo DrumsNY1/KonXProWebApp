@@ -3,31 +3,84 @@
 @using KonXProWebApp.Models.db_9f8bee_konxdev
 @using KonXProWebApp.Models.PermitIntel
 
-<PageTitle>Permit Map — NYC Permit Intel</PageTitle>
+<PageTitle>Spatial Permit Intel Map — NYC Permit Intel</PageTitle>
 
 <!-- PAGE HEADER -->
 <div class="page-header">
-    <h1>Permit Map</h1>
-    <p>Visualize active permits across NYC.</p>
+    <h1>Permit Intelligence Map</h1>
+    <p>Spatial analysis & GIS visualization across 5 NYC Boroughs</p>
+</div>
+
+<!-- STATS CARDS OVERLAY -->
+<div class="stats-row rz-mb-4">
+    <div class="stat-card">
+        <div class="stat-label-sm">📌 Pins Displayed</div>
+        <div class="stat-value">@($"{mapPermitCount:N0}")</div>
+        <div class="stat-change neutral">spatial filings</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">🔥 Hot Leads (Score 4-5)</div>
+        <div class="stat-value text-danger">@($"{hotLeadsCount:N0}")</div>
+        <div class="stat-change up">high priority targets</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">💰 Map Job Volume</div>
+        <div class="stat-value text-h2">@totalMapValue</div>
+        <div class="stat-change up">est. construction cost</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">🏙️ Borough Focus</div>
+        <div class="stat-value">@(string.IsNullOrEmpty(selectedBorough) ? "ALL NYC" : selectedBorough)</div>
+        <div class="stat-change neutral">geographic filter</div>
+    </div>
 </div>
 
 <div class="card rz-mb-4">
     <div class="card-header">
         <div>
-            <div class="card-title">Interactive Map</div>
-            <div class="card-subtitle">@($"{mapPermitCount:N0} permits currently shown")</div>
+            <div class="card-title">Interactive GIS Map</div>
+            <div class="card-subtitle">Filter by Location, Trade, Lead Score, and Job Value</div>
         </div>
         <div class="card-actions">
-            <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
-                            Placeholder="All Boroughs" Style="width: 200px;"
-                            Change="@(args => LoadMapData())" AllowClear="true" />
-            <RadzenDropDown @bind-Value="selectedJobType" Data="jobTypeOptions"
-                            Placeholder="All Job Types" Style="width: 200px;"
-                            Change="@(args => LoadMapData())" AllowClear="true" />
-            <RadzenButton Text="Refresh Map" Icon="refresh" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@LoadMapData" />
+            <RadzenButton Text="Filter Map" Icon="filter_alt" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@LoadMapData" IsBusy="@isLoading" />
+            <RadzenButton Text="Reset" Icon="restart_alt" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small" Click="@ResetFilters" />
         </div>
     </div>
+
+    <!-- FILTER TOOLBAR -->
+    <div class="rz-p-4" style="background: rgba(15, 31, 61, 0.4); border-bottom: 1px solid var(--border);">
+        <RadzenRow Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Search Location / BIN" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenTextBox @bind-Value="searchText" Placeholder="Address, street, BIN..." Style="width: 100%;" Change="@(args => LoadMapData())" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenLabel Text="Borough" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
+                                Placeholder="All Boroughs" Style="width: 100%;"
+                                Change="@OnBoroughChanged" AllowClear="true" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenLabel Text="Job Type" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedJobType" Data="jobTypeOptions"
+                                Placeholder="All Job Types" Style="width: 100%;"
+                                Change="@(args => LoadMapData())" AllowClear="true" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenLabel Text="Min Lead Score" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedMinScore" Data="scoreOptions" ValueProperty="Key" TextProperty="Value"
+                                Placeholder="All Scores" Style="width: 100%;"
+                                Change="@(args => LoadMapData())" AllowClear="true" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Min Est. Value" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedMinCost" Data="costOptions" ValueProperty="Key" TextProperty="Value"
+                                Placeholder="Any Cost" Style="width: 100%;"
+                                Change="@(args => LoadMapData())" AllowClear="true" />
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
     
-    @* Map Container *@
-    <div id="permit-map" style="height: 600px; width: 100%; border-radius: 0 0 var(--radius) var(--radius); border-top: 1px solid var(--border);"></div>
+    @* Map Canvas Container *@
+    <div id="permit-map" style="height: 650px; width: 100%; border-radius: 0 0 var(--radius) var(--radius);"></div>
 </div>
