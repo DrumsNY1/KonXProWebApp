@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KonXProWebApp.Models.db_9f8bee_konxdev
 {
-    [Table("HPD_Violations", Schema = "dbo")]
+    [Table("HPD_Violations", Schema = "konx_admin")]
     public partial class HpdViolation
     {
         [Key]
