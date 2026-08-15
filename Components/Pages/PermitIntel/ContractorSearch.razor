@@ -1,0 +1,117 @@
+@page "/permit-intel/contractors"
+@attribute [Authorize]
+@using KonXProWebApp.Models.db_9f8bee_konxdev
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>Contractor Directory — NYC Permit Intel</PageTitle>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>NYC Contractor Directory</h1>
+    <p>Look up licensed contractors, verify compliance records, and check permit track records.</p>
+</div>
+
+<!-- STATS CARDS -->
+<div class="stats-row rz-mb-4">
+    <div class="stat-card">
+        <div class="stat-label-sm">👷 Licensed Contractors</div>
+        <div class="stat-value">@($"{totalCount:N0}")</div>
+        <div class="stat-change neutral">NYC Open Data verified</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">✅ Active DCA Licenses</div>
+        <div class="stat-value text-success">@($"{activeCount:N0}")</div>
+        <div class="stat-change up">verified status</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">🏙️ Borough Coverage</div>
+        <div class="stat-value">5 Boroughs</div>
+        <div class="stat-change neutral">citywide records</div>
+    </div>
+</div>
+
+<div class="card rz-mb-4">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Contractor Database</div>
+            <div class="card-subtitle">Filter by Business Name, License #, Borough, or License Status</div>
+        </div>
+        <div class="card-actions">
+            <RadzenButton Text="Search" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@SearchContractors" IsBusy="@isLoading" />
+            <RadzenButton Text="Reset" Icon="restart_alt" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small" Click="@ResetFilters" />
+        </div>
+    </div>
+
+    <!-- FILTER TOOLBAR -->
+    <div class="rz-p-4" style="background: rgba(15, 31, 61, 0.4); border-bottom: 1px solid var(--border);">
+        <RadzenRow Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="5">
+                <RadzenLabel Text="Search Contractor / License #" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenTextBox @bind-Value="searchText" Placeholder="Business name, DBA, or license #..." Style="width: 100%;" Change="@(args => SearchContractors())" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="3">
+                <RadzenLabel Text="Borough" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
+                                Placeholder="All Boroughs" Style="width: 100%;"
+                                Change="@(args => SearchContractors())" AllowClear="true" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="License Status" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedStatus" Data="statusOptions"
+                                Placeholder="All License Statuses" Style="width: 100%;"
+                                Change="@(args => SearchContractors())" AllowClear="true" />
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+
+    @* Contractors Grid *@
+    <RadzenDataGrid Data="@contractors" TItem="HomeImprovementContractor"
+                    AllowSorting="true" AllowPaging="true" PageSize="25"
+                    ShowPagingSummary="true" PagerHorizontalAlign="Radzen.HorizontalAlign.Center"
+                    AllowColumnResize="true" ColumnWidth="180px"
+                    Style="min-height: 400px;">
+        <Columns>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Property="LicenseNumber" Title="License #" Width="120px">
+                <Template Context="c">
+                    <span class="permit-num">@c.LicenseNumber</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Property="BusinessName" Title="Business Name" Width="260px">
+                <Template Context="c">
+                    <div style="font-weight: 600; color: var(--rz-text-title-color);">@c.BusinessName</div>
+                    @if (!string.IsNullOrEmpty(c.DbaTradeName))
+                    {
+                        <div style="font-size: 11px; color: var(--rz-text-tertiary-color);">DBA: @c.DbaTradeName</div>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Property="Borough" Title="Borough / Location" Width="180px">
+                <Template Context="c">
+                    <div>@c.Borough</div>
+                    <div style="font-size: 11px; color: var(--rz-text-tertiary-color);">@c.AddressStreetName</div>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Property="ContactPhoneNumber" Title="Phone" Width="140px">
+                <Template Context="c">
+                    <span>@(string.IsNullOrEmpty(c.ContactPhoneNumber) ? "—" : c.ContactPhoneNumber)</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Property="LicenseStatus" Title="Status" Width="120px">
+                <Template Context="c">
+                    <RadzenBadge Text="@c.LicenseStatus"
+                                 BadgeStyle="@(c.LicenseStatus?.Equals("Active", StringComparison.OrdinalIgnoreCase) == true ? Radzen.BadgeStyle.Success : Radzen.BadgeStyle.Danger)" />
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Property="LicenseExpirationDate" Title="Expiration Date" Width="140px">
+                <Template Context="c">
+                    <span class="date-cell">@(c.LicenseExpirationDate?.ToString("MM/dd/yyyy") ?? "—")</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="HomeImprovementContractor" Title="" Width="100px" Sortable="false" Filterable="false">
+                <Template Context="c">
+                    <RadzenButton Text="Profile →" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small" Click="@(() => ViewContractorDetail(c.Id))" />
+                </Template>
+            </RadzenDataGridColumn>
+        </Columns>
+    </RadzenDataGrid>
+</div>

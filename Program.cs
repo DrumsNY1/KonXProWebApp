@@ -21,6 +21,7 @@ builder.Services.AddRadzenCookieThemeService(options =>
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<KonXProWebApp.db_9f8bee_konxdevService>();
 builder.Services.AddScoped<KonXProWebApp.Services.PermitIntelService>();
+builder.Services.AddScoped<KonXProWebApp.Services.ContractorIntelService>();
 builder.Services.AddScoped<KonXProWebApp.Services.StripeService>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, KonXProWebApp.Authorization.SubscriptionAuthorizationHandler>();
 builder.Services.AddDbContext<KonXProWebApp.Data.db_9f8bee_konxdevContext>(options =>
