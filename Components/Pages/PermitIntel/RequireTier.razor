@@ -1,0 +1,43 @@
+@inject KonXProWebApp.Services.SubscriptionTierService SubscriptionTierService
+@inject KonXProWebApp.SecurityService SecurityService
+@inject NavigationManager NavigationManager
+
+@if (isAuthorized)
+{
+    @ChildContent
+}
+else
+{
+    <div class="card rz-my-4" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1px solid var(--rz-primary); border-radius: 12px; padding: 2.5rem; text-align: center;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+        <h2 style="color: #ffffff; margin: 0 0 0.5rem 0; font-weight: 700;">@RequiredTier Tier Required</h2>
+        <p style="color: var(--rz-text-tertiary-color); max-width: 540px; margin: 0 auto 1.5rem auto; font-size: 0.95rem;">
+            The <strong>@FeatureName</strong> feature is exclusively available on the <strong>@RequiredTier</strong> tier or higher. Start your 14-day free trial today to unlock instant access.
+        </p>
+        <RadzenButton Text=@($"Upgrade to {RequiredTier} →")
+                      Icon="rocket_launch"
+                      ButtonStyle="Radzen.ButtonStyle.Primary"
+                      Size="Radzen.ButtonSize.Large"
+                      Click="@(() => NavigationManager.NavigateTo("/subscription"))" />
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string RequiredTier { get; set; } = "Pro";
+
+    [Parameter]
+    public string FeatureName { get; set; } = "Premium Feature";
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private bool isAuthorized = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var userId = SecurityService?.User?.Id;
+        var currentTier = await SubscriptionTierService.GetUserActiveTier(userId);
+        isAuthorized = Services.SubscriptionTierService.TierSatisfiesRequirement(currentTier, RequiredTier);
+    }
+}

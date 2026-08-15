@@ -1,12 +1,117 @@
 @page "/subscription"
-
 @attribute [Authorize]
+@using KonXProWebApp.Services
 
-<PageTitle>Subscription</PageTitle>
-<RadzenRow>
-    <RadzenColumn Size="12">
-        <RadzenText Text="Subscription" TextStyle="TextStyle.H3" TagName="TagName.H1" />
-        <RadzenText Text="Manage your current subscription tier and billing details below." TextStyle="TextStyle.Body1" class="mb-4" />
-        <RadzenButton Text="Manage Subscription / Upgrade Tier" ButtonStyle="ButtonStyle.Primary" Click="@ManageSubscription" />
-    </RadzenColumn>
-</RadzenRow>
+<PageTitle>Subscription & Billing — NYC Permit Intel</PageTitle>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>Subscription & Billing Plans</h1>
+    <p>Select the plan that fits your business needs. All paid plans include a 14-day free trial with instant cancellation.</p>
+</div>
+
+<!-- CURRENT SUBSCRIPTION STATUS CARD -->
+<div class="card rz-mb-4" style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.95) 100%); border: 1px solid var(--rz-border-color);">
+    <div class="card-header">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <span style="font-size: 1.5rem;">💳</span>
+            <div>
+                <div class="card-title">Your Current Subscription</div>
+                <div class="card-subtitle">Active tier rights & billing status</div>
+            </div>
+        </div>
+        <div>
+            <RadzenBadge Text="@($"{currentTier.ToUpper()} TIER")"
+                         BadgeStyle="@(currentTier != "Free" ? Radzen.BadgeStyle.Success : Radzen.BadgeStyle.Light)"
+                         Style="font-weight: 700; padding: 0.5rem 1rem; font-size: 0.85rem;" />
+        </div>
+    </div>
+    <div class="rz-p-4">
+        <RadzenRow Gap="1.5rem" AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="8">
+                @if (currentSubscription != null)
+                {
+                    <div style="font-size: 1rem; color: #ffffff; margin-bottom: 0.25rem;">
+                        <strong>Status:</strong> @currentSubscription.Status ·
+                        @if (currentSubscription.TrialEndDate.HasValue && currentSubscription.TrialEndDate.Value > DateTime.UtcNow)
+                        {
+                            <span style="color: #F59E0B;">Trial active until @currentSubscription.TrialEndDate.Value.ToString("MM/dd/yyyy")</span>
+                        }
+                        else
+                        {
+                            <span>Renews on @currentSubscription.StartDate.AddMonths(1).ToString("MM/dd/yyyy")</span>
+                        }
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--rz-text-tertiary-color);">
+                        Manage your credit card, download VAT/sales invoices, or change plan limits in the Stripe Customer Portal.
+                    </div>
+                }
+                else
+                {
+                    <div style="font-size: 1rem; color: #ffffff;">You are currently on the <strong>Free Tier</strong> (Limited Search & Lead Capacity).</div>
+                    <div style="font-size: 0.85rem; color: var(--rz-text-tertiary-color);">Upgrade to unlock instant email/SMS alerts, high lead scores, and map tools.</div>
+                }
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4" Style="text-align: right;">
+                <RadzenButton Text="Manage Billing & Invoices" Icon="credit_card"
+                              ButtonStyle="Radzen.ButtonStyle.Light"
+                              Click="@ManageSubscription" IsBusy="@isPortalLoading" />
+            </RadzenColumn>
+        </RadzenRow>
+    </div>
+</div>
+
+<!-- PRICING TIERS MATRIX -->
+<div class="rz-mt-4">
+    <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 1.25rem; color: var(--rz-text-title-color);">Available Pricing Plans</h2>
+
+    <RadzenRow Gap="1.5rem">
+        @foreach (var tier in tiers)
+        {
+            <RadzenColumn Size="12" SizeMD="4" class="rz-mb-4">
+                <div class="card" style="height: 100%; display: flex; flex-direction: column; position: relative; border: @(tier.IsPopular ? "2px solid var(--rz-primary)" : "1px solid var(--rz-border-color)");">
+                    @if (tier.IsPopular)
+                    {
+                        <div style="position: absolute; top: -12px; right: 20px; background: var(--rz-primary); color: #ffffff; padding: 2px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                            Most Popular
+                        </div>
+                    }
+
+                    <div class="rz-p-4" style="border-bottom: 1px solid var(--rz-border-color);">
+                        <h3 style="font-size: 1.25rem; font-weight: 700; margin: 0 0 0.25rem 0;">@tier.Name</h3>
+                        <p style="font-size: 0.85rem; color: var(--rz-text-tertiary-color); margin: 0 0 1rem 0;">@tier.Description</p>
+                        <div style="font-size: 2.25rem; font-weight: 800; color: var(--rz-text-title-color);">
+                            $@tier.Price <span style="font-size: 0.9rem; font-weight: 400; color: var(--rz-text-tertiary-color);">/ month</span>
+                        </div>
+                    </div>
+
+                    <div class="rz-p-4" style="flex-grow: 1;">
+                        <ul style="list-style: none; padding: 0; margin: 0;">
+                            @foreach (var feature in tier.Features)
+                            {
+                                <li style="padding: 0.4rem 0; font-size: 0.88rem; display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #10B981; font-weight: 700;">✓</span> @feature
+                                </li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="rz-p-4" style="border-top: 1px solid var(--rz-border-color); text-align: center;">
+                        @if (currentTier.Equals(tier.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            <RadzenButton Text="Current Active Plan" ButtonStyle="Radzen.ButtonStyle.Light" Style="width: 100%;" Disabled="true" />
+                        }
+                        else
+                        {
+                            <RadzenButton Text="Start 14-Day Free Trial"
+                                          ButtonStyle="@GetButtonStyle(tier.ButtonStyle)"
+                                          Style="width: 100%; font-weight: 700;"
+                                          Click="@(() => SubscribeToTier(tier.Name))"
+                                          IsBusy="@(subscribingTier == tier.Name)" />
+                        }
+                    </div>
+                </div>
+            </RadzenColumn>
+        }
+    </RadzenRow>
+</div>
