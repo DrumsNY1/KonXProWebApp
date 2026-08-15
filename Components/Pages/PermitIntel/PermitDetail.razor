@@ -31,36 +31,81 @@ else
         </div>
     </div>
 
-    @* Lead Score *@
+    @* Lead Score & Quality Intelligence *@
     <div class="card rz-mb-4">
+        <div class="card-header" style="background: linear-gradient(135deg, rgba(255, 180, 0, 0.1) 0%, rgba(255, 100, 0, 0.05) 100%); border-bottom: 1px solid var(--rz-border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.25rem;">🔥</span>
+                    <div>
+                        <div class="card-title">Lead Quality Intelligence</div>
+                        <div class="card-subtitle">AI-weighted lead priority & risk signals</div>
+                    </div>
+                </div>
+                @if (filing.LeadScoreBreakdown != null)
+                {
+                    <RadzenBadge Text="@($"{filing.LeadScoreBreakdown.Tier.ToUpper()} PRIORITY")"
+                                 BadgeStyle="@(filing.LeadScoreBreakdown.TotalScore >= 4 ? Radzen.BadgeStyle.Danger : (filing.LeadScoreBreakdown.TotalScore == 3 ? Radzen.BadgeStyle.Warning : Radzen.BadgeStyle.Info))"
+                                 Style="font-weight: 600; padding: 0.35rem 0.75rem; font-size: 0.85rem;" />
+                }
+            </div>
+        </div>
         <div class="rz-p-4">
-            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="2rem" AlignItems="Radzen.AlignItems.Center" Wrap="Radzen.FlexWrap.Wrap">
-                <RadzenStack Gap="0.25rem">
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Lead Score</RadzenText>
-                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0">
-                        @for (int i = 0; i < (filing.LeadScore ?? 1); i++)
+            <RadzenRow Gap="1.5rem">
+                <RadzenColumn Size="12" SizeMD="4">
+                    <RadzenStack Gap="0.5rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Predictive Score</RadzenText>
+                        <RadzenStack Orientation="Radzen.Orientation.Horizontal" AlignItems="Radzen.AlignItems.Center" Gap="0.5rem">
+                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0">
+                                @for (int i = 0; i < (filing.LeadScore ?? 1); i++)
+                                {
+                                    <RadzenIcon Icon="star" Style="color: #FFB400; font-size: 24px;" />
+                                }
+                                @for (int i = (filing.LeadScore ?? 1); i < 5; i++)
+                                {
+                                    <RadzenIcon Icon="star_border" Style="color: var(--rz-text-tertiary-color); font-size: 24px;" />
+                                }
+                            </RadzenStack>
+                            <span style="font-weight: 700; font-size: 1.25rem; color: var(--rz-text-title-color);">@filing.LeadScore / 5</span>
+                        </RadzenStack>
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="3">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Estimated Job Cost</RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="value-cell rz-m-0">@(filing.InitialCost?.ToString("C0") ?? "N/A")</RadzenText>
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="2">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Job Type</RadzenText>
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0">@filing.JobType</RadzenText>
+                    </RadzenStack>
+                </RadzenColumn>
+                <RadzenColumn Size="12" SizeMD="3">
+                    <RadzenStack Gap="0.25rem">
+                        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Filing Status</RadzenText>
+                        <span class="status-badge @(filing.JobStatusDescrp?.Contains("NEW") == true ? "status-new" : "status-hot")">@filing.JobStatusDescrp</span>
+                    </RadzenStack>
+                </RadzenColumn>
+            </RadzenRow>
+
+            @if (filing.LeadScoreBreakdown?.Factors?.Any() == true)
+            {
+                <div class="rz-mt-4 rz-pt-3" style="border-top: 1px dashed var(--rz-border-color);">
+                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color rz-mb-2 rz-display-block">Contributing Score Factors</RadzenText>
+                    <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                        @foreach (var factor in filing.LeadScoreBreakdown.Factors)
                         {
-                            <RadzenIcon Icon="star" Style="color: #FFB400; font-size: 20px;" />
-                        }
-                        @for (int i = (filing.LeadScore ?? 1); i < 5; i++)
-                        {
-                            <RadzenIcon Icon="star_border" Style="color: var(--rz-text-tertiary-color); font-size: 20px;" />
+                            <span class="badge @(factor.BadgeStyle == "danger" ? "badge-danger" : (factor.BadgeStyle == "warning" ? "badge-warning" : "badge-info"))"
+                                  title="@factor.Description" style="padding: 0.35rem 0.6rem; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                <span>+@factor.Points</span>
+                                <strong>@factor.Name</strong>
+                            </span>
                         }
                     </RadzenStack>
-                </RadzenStack>
-                <RadzenStack Gap="0.25rem">
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Estimated Cost</RadzenText>
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="value-cell rz-m-0">@(filing.InitialCost?.ToString("C0") ?? "N/A")</RadzenText>
-                </RadzenStack>
-                <RadzenStack Gap="0.25rem">
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Job Type</RadzenText>
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.H5" class="rz-m-0">@filing.JobType</RadzenText>
-                </RadzenStack>
-                <RadzenStack Gap="0.25rem">
-                    <RadzenText TextStyle="Radzen.Blazor.TextStyle.Caption" class="rz-text-tertiary-color">Status</RadzenText>
-                    <span class="status-badge @(filing.JobStatusDescrp?.Contains("NEW") == true ? "status-new" : "status-hot")">@filing.JobStatusDescrp</span>
-                </RadzenStack>
-            </RadzenStack>
+                </div>
+            }
         </div>
     </div>
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using KonXProWebApp.Models.PermitIntel;
 
 namespace KonXProWebApp.Models.db_9f8bee_konxdev
 {
@@ -224,5 +225,8 @@ namespace KonXProWebApp.Models.db_9f8bee_konxdev
 
         [Column("LeadScore")]
         public int? LeadScore { get; set; }
+
+        [NotMapped]
+        public LeadScoreBreakdown LeadScoreBreakdown { get; set; }
     }
 }

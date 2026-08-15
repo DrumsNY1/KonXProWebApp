@@ -43,7 +43,7 @@
         </div>
         <div class="card-actions">
             <RadzenButton Text="Search" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@SearchPermits" />
-            <RadzenButton Text="Export CSV" Icon="get_app" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small" Click="@(async args => await ExportClick(new RadzenSplitButtonItem() { Value = "csv" }))" />
+            <RadzenButton Text="Export CSV" Icon="get_app" ButtonStyle="Radzen.ButtonStyle.Light" Size="Radzen.ButtonSize.Small" Click="@(() => ExportClick("csv"))" />
         </div>
     </div>
     <div class="rz-p-4">
@@ -138,19 +138,19 @@
                     <span class="date-cell">@filing.LatestActionDate?.ToString("MM/dd/yyyy")</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="LeadScore" Title="Predictive Score" Width="130px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="LeadScore" Title="Predictive Score" Width="160px">
                 <Template Context="filing">
                     @if (filing.LeadScore.HasValue)
                     {
-                        <div class="flex items-center imp-gap-1">
-                            @for(int i = 0; i < filing.LeadScore.Value; i++)
-                            {
-                                <span class="text-accent">🔥</span>
-                            }
-                            @if(filing.LeadScore.Value >= 4)
-                            {
-                                <span class="badge badge-danger">HOT</span>
-                            }
+                        var factorSummary = filing.LeadScoreBreakdown?.Factors?.Any() == true
+                            ? string.Join(" • ", filing.LeadScoreBreakdown.Factors.Select(f => f.Name))
+                            : $"Predictive lead score: {filing.LeadScore}/5";
+                        <div class="flex items-center imp-gap-1" title="@factorSummary" style="cursor: help;">
+                            <span style="font-weight: 700; color: #FFB400; font-size: 0.95rem;">@filing.LeadScore★</span>
+                            <span class="badge @(filing.LeadScore >= 4 ? "badge-danger" : (filing.LeadScore == 3 ? "badge-warning" : "badge-info"))"
+                                  style="font-size: 0.75rem; padding: 0.15rem 0.45rem; font-weight: 600;">
+                                @(filing.LeadScoreBreakdown?.Tier?.ToUpper() ?? (filing.LeadScore >= 4 ? "HOT" : "STANDARD"))
+                            </span>
                         </div>
                     }
                 </Template>

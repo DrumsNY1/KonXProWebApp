@@ -64,7 +64,9 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                     complaints311 = await PermitIntelService.Get311ComplaintsByBbl(bbl);
                     velocity = await PermitIntelService.Get311ComplaintVelocity(bbl);
                 }
-                filing.LeadScore = KonXProWebApp.Services.PermitIntelService.ScorePermit(filing, velocity, dobCount, hpdClassCCount);
+                var breakdown = KonXProWebApp.Services.PermitIntelService.ScorePermitDetailed(filing, velocity, dobCount, hpdClassCCount);
+                filing.LeadScoreBreakdown = breakdown;
+                filing.LeadScore = breakdown.TotalScore;
 
                 var userId = Security.User?.Id;
                 if (!string.IsNullOrEmpty(userId))

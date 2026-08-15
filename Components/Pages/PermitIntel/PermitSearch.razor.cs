@@ -133,15 +133,23 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             }
         }
 
+        protected async Task ExportClick(string format)
+        {
+            if (format == "csv")
+            {
+                await db_9f8bee_konxdevService.ExportDobjobFilingsToCSV(new Query { });
+            }
+            else if (format == "xlsx")
+            {
+                await db_9f8bee_konxdevService.ExportDobjobFilingsToExcel(new Query { });
+            }
+        }
+
         protected async Task ExportClick(RadzenSplitButtonItem args)
         {
-            if (args?.Value == "csv")
+            if (args?.Value != null)
             {
-                db_9f8bee_konxdevService.ExportDobjobFilingsToCSV(new Query { });
-            }
-            else if (args?.Value == "xlsx")
-            {
-                db_9f8bee_konxdevService.ExportDobjobFilingsToExcel(new Query { });
+                await ExportClick(args.Value);
             }
         }
 

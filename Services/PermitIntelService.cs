@@ -124,7 +124,9 @@ public partial class PermitIntelService
             var bbl = GetBblFromFiling(r);
             var velocity = await Get311ComplaintVelocity(bbl);
             var (dobCount, hpdCount, hpdClassCCount) = await GetViolationSummaryByBin(r.Bin);
-            r.LeadScore = ScorePermit(r, velocity, dobCount, hpdClassCCount);
+            var breakdown = ScorePermitDetailed(r, velocity, dobCount, hpdClassCCount);
+            r.LeadScoreBreakdown = breakdown;
+            r.LeadScore = breakdown.TotalScore;
         }
 
         return (results, totalCount);
@@ -132,9 +134,21 @@ public partial class PermitIntelService
 
     public async Task<DobjobFiling> GetPermitById(int id)
     {
-        return await context.DobjobFilings
+        var filing = await context.DobjobFilings
             .AsNoTracking()
             .FirstOrDefaultAsync(i => i.Id == id);
+
+        if (filing != null)
+        {
+            var bbl = GetBblFromFiling(filing);
+            var velocity = await Get311ComplaintVelocity(bbl);
+            var (dobCount, hpdCount, hpdClassCCount) = await GetViolationSummaryByBin(filing.Bin);
+            var breakdown = ScorePermitDetailed(filing, velocity, dobCount, hpdClassCCount);
+            filing.LeadScoreBreakdown = breakdown;
+            filing.LeadScore = breakdown.TotalScore;
+        }
+
+        return filing;
     }
 
     public async Task<IEnumerable<DobViolation>> GetDobViolationsByBin(string bin)
@@ -194,7 +208,9 @@ public partial class PermitIntelService
                 var bbl = GetBblFromFiling(lead.DobjobFiling);
                 var velocity = await Get311ComplaintVelocity(bbl);
                 var (dobCount, hpdCount, hpdClassCCount) = await GetViolationSummaryByBin(lead.DobjobFiling.Bin);
-                lead.DobjobFiling.LeadScore = ScorePermit(lead.DobjobFiling, velocity, dobCount, hpdClassCCount);
+                var breakdown = ScorePermitDetailed(lead.DobjobFiling, velocity, dobCount, hpdClassCCount);
+                lead.DobjobFiling.LeadScoreBreakdown = breakdown;
+                lead.DobjobFiling.LeadScore = breakdown.TotalScore;
             }
         }
 
@@ -408,59 +424,186 @@ public partial class PermitIntelService
             .ToListAsync();
     }
 
-    public static int ScorePermit(DobjobFiling filing, int complaintVelocity = 0, int activeDobViolations = 0, int hpdClassCCount = 0)
+    public static LeadScoreBreakdown ScorePermitDetailed(DobjobFiling filing, int complaintVelocity = 0, int activeDobViolations = 0, int hpdClassCCount = 0)
     {
-        int score = 0;
+        var breakdown = new LeadScoreBreakdown();
+        int rawScore = 0;
 
-        // +1 for cost > $10K
-        if (filing.InitialCost.HasValue && filing.InitialCost.Value > 10_000m)
-            score++;
-
-        // +1 for cost > $50K
+        // +1 for cost > $10K, +1 for cost > $50K
         if (filing.InitialCost.HasValue && filing.InitialCost.Value > 50_000m)
-            score++;
+        {
+            rawScore += 2;
+            breakdown.CostPoints = 2;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "High Estimated Job Cost",
+                Points = 2,
+                Description = $"Estimated job cost is {filing.InitialCost.Value:C0} (>$50,000)",
+                Category = "Cost",
+                BadgeStyle = "success"
+            });
+        }
+        else if (filing.InitialCost.HasValue && filing.InitialCost.Value > 10_000m)
+        {
+            rawScore += 1;
+            breakdown.CostPoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Moderate Estimated Job Cost",
+                Points = 1,
+                Description = $"Estimated job cost is {filing.InitialCost.Value:C0} (>$10,000)",
+                Category = "Cost",
+                BadgeStyle = "info"
+            });
+        }
 
         // +1 for major alteration or new building
         if (filing.JobType is "A1" or "NB")
-            score++;
+        {
+            rawScore += 1;
+            breakdown.JobTypePoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = filing.JobType == "NB" ? "New Building Construction" : "Major Alteration (A1)",
+                Points = 1,
+                Description = $"Filing category '{filing.JobType}' indicates major scope of work",
+                Category = "JobType",
+                BadgeStyle = "warning"
+            });
+        }
 
         // +1 for multiple trade flags
         var tradeCount = 0;
-        if (filing.Plumbing == "X") tradeCount++;
-        if (filing.Mechanical == "X") tradeCount++;
-        if (filing.Boiler == "X") tradeCount++;
-        if (filing.Sprinkler == "X") tradeCount++;
-        if (filing.FireAlarm == "X") tradeCount++;
-        if (filing.FireSuppression == "X") tradeCount++;
-        if (filing.Equipment == "X") tradeCount++;
-        if (filing.Standpipe == "X") tradeCount++;
-        if (tradeCount >= 2) score++;
+        var tradesList = new List<string>();
+        if (filing.Plumbing == "X") { tradeCount++; tradesList.Add("Plumbing"); }
+        if (filing.Mechanical == "X") { tradeCount++; tradesList.Add("Mechanical"); }
+        if (filing.Boiler == "X") { tradeCount++; tradesList.Add("Boiler"); }
+        if (filing.Sprinkler == "X") { tradeCount++; tradesList.Add("Sprinkler"); }
+        if (filing.FireAlarm == "X") { tradeCount++; tradesList.Add("Fire Alarm"); }
+        if (filing.FireSuppression == "X") { tradeCount++; tradesList.Add("Fire Suppression"); }
+        if (filing.Equipment == "X") { tradeCount++; tradesList.Add("Equipment"); }
+        if (filing.Standpipe == "X") { tradeCount++; tradesList.Add("Standpipe"); }
+
+        if (tradeCount >= 2)
+        {
+            rawScore += 1;
+            breakdown.TradePoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Multi-Trade Scope",
+                Points = 1,
+                Description = $"Includes {tradeCount} trade disciplines ({string.Join(", ", tradesList)})",
+                Category = "Trade",
+                BadgeStyle = "info"
+            });
+        }
 
         // Predictive Intel Boost (311 Complaints)
         if (complaintVelocity >= 3)
-            score += 2;
+        {
+            rawScore += 2;
+            breakdown.ComplaintPoints = 2;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "High 311 Complaint Velocity",
+                Points = 2,
+                Description = $"{complaintVelocity} complaints recorded at this BBL in past 90 days",
+                Category = "Complaint",
+                BadgeStyle = "danger"
+            });
+        }
         else if (complaintVelocity > 0)
-            score += 1;
+        {
+            rawScore += 1;
+            breakdown.ComplaintPoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Active 311 Complaints",
+                Points = 1,
+                Description = $"{complaintVelocity} complaint(s) recorded at this BBL in past 90 days",
+                Category = "Complaint",
+                BadgeStyle = "warning"
+            });
+        }
 
         // Violation Boosts:
-        // +1 for 1-2 active DOB/general violations, +2 for 3+
         if (activeDobViolations >= 3)
-            score += 2;
+        {
+            rawScore += 2;
+            breakdown.DobViolationPoints = 2;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Multiple Open DOB Violations",
+                Points = 2,
+                Description = $"{activeDobViolations} open DOB violations at BIN {filing.Bin}",
+                Category = "Violation",
+                BadgeStyle = "danger"
+            });
+        }
         else if (activeDobViolations > 0)
-            score += 1;
+        {
+            rawScore += 1;
+            breakdown.DobViolationPoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Open DOB Violation",
+                Points = 1,
+                Description = $"{activeDobViolations} open DOB violation(s) at BIN {filing.Bin}",
+                Category = "Violation",
+                BadgeStyle = "warning"
+            });
+        }
 
-        // Severe HPD Class C (Immediately Hazardous) Boost:
-        // +2 points for active Class C HPD violations
+        // Severe HPD Class C Boost
         if (hpdClassCCount > 0)
-            score += 2;
+        {
+            rawScore += 2;
+            breakdown.HpdViolationPoints = 2;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Class C HPD Violation (Hazardous)",
+                Points = 2,
+                Description = $"{hpdClassCCount} immediately hazardous Class C HPD violation(s)",
+                Category = "Violation",
+                BadgeStyle = "danger"
+            });
+        }
 
-        // +1 for expansion (more units proposed than existing)
+        // Expansion Boost
         if (int.TryParse(filing.ProposedDwellingUnits, out var proposed) &&
             int.TryParse(filing.ExistingDwellingUnits, out var existing) &&
             proposed > existing)
-            score++;
+        {
+            rawScore += 1;
+            breakdown.ExpansionPoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Unit Expansion Project",
+                Points = 1,
+                Description = $"Dwelling units increasing from {existing} to {proposed}",
+                Category = "Expansion",
+                BadgeStyle = "success"
+            });
+        }
 
-        return Math.Clamp(score, 1, 5);
+        breakdown.RawScore = rawScore;
+        var totalScore = Math.Clamp(rawScore, 1, 5);
+        breakdown.TotalScore = totalScore;
+
+        breakdown.Tier = totalScore switch
+        {
+            5 => "Hot",
+            4 => "High Priority",
+            3 => "Medium Priority",
+            _ => "Standard"
+        };
+
+        return breakdown;
+    }
+
+    public static int ScorePermit(DobjobFiling filing, int complaintVelocity = 0, int activeDobViolations = 0, int hpdClassCCount = 0)
+    {
+        return ScorePermitDetailed(filing, complaintVelocity, activeDobViolations, hpdClassCCount).TotalScore;
     }
 }
 
