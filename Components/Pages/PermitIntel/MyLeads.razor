@@ -7,36 +7,100 @@
 
 <!-- PAGE HEADER -->
 <div class="page-header">
-    <h1>My Leads</h1>
-    <p>@($"{leads?.Count() ?? 0} saved leads")</p>
+    <h1>My Leads Pipeline</h1>
+    <p>Track contractor leads, manage sales statuses, and export pipeline lists.</p>
+</div>
+
+<!-- PIPELINE KPI STATS BAR -->
+<div class="stats-row rz-mb-4">
+    <div class="stat-card">
+        <div class="stat-label-sm">📋 Total Saved Leads</div>
+        <div class="stat-value">@($"{totalLeadsCount:N0}")</div>
+        <div class="stat-change neutral">saved in pipeline</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">🔥 High Quality Hot Leads</div>
+        <div class="stat-value text-danger">@($"{hotLeadsCount:N0}")</div>
+        <div class="stat-change up">score 4+ stars</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">💰 Est. Pipeline Job Value</div>
+        <div class="stat-value text-success">@totalPipelineValue.ToString("C0")</div>
+        <div class="stat-change neutral">active construction</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label-sm">⚡ Active Opportunities</div>
+        <div class="stat-value">@($"{activeOpportunitiesCount:N0}")</div>
+        <div class="stat-change neutral">contacted / quoted</div>
+    </div>
 </div>
 
 <div class="card rz-mb-4">
     <div class="card-header">
         <div>
-            <div class="card-title">Saved Permits</div>
-            <div class="card-subtitle">Manage your pipeline</div>
+            <div class="card-title">Saved Permits Pipeline</div>
+            <div class="card-subtitle">Manage pipeline stage, take notes, and batch export</div>
         </div>
-        <div class="card-actions">
-            @* Status Filter Tabs *@
-            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem" Wrap="Radzen.FlexWrap.Wrap">
-                @foreach (var status in statusOptions)
-                {
-                    <RadzenButton Text="@($"{status} ({GetStatusCount(status)})")"
-                                  ButtonStyle="@(selectedStatus == status ? Radzen.ButtonStyle.Primary : Radzen.ButtonStyle.Light)"
-                                  Size="Radzen.ButtonSize.Small"
-                                  Click="@(() => FilterByStatus(status))" />
-                }
-            </RadzenStack>
+        <div class="card-actions flex gap-2">
+            <RadzenButton Text="Export CSV" Icon="download" ButtonStyle="Radzen.ButtonStyle.Secondary" Size="Radzen.ButtonSize.Small" Click="@ExportToCsv" />
         </div>
+    </div>
+
+    <!-- STATUS TABS & SEARCH TOOLBAR -->
+    <div class="rz-p-4" style="background: rgba(15, 31, 61, 0.4); border-bottom: 1px solid var(--border);">
+        <RadzenRow Gap="1rem" AlignItems="Radzen.AlignItems.Center">
+            <RadzenColumn Size="12" SizeMD="8">
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem" Wrap="Radzen.FlexWrap.Wrap">
+                    @foreach (var status in statusOptions)
+                    {
+                        <RadzenButton Text="@($"{status} ({GetStatusCount(status)})")"
+                                      ButtonStyle="@(selectedStatus == status ? Radzen.ButtonStyle.Primary : Radzen.ButtonStyle.Light)"
+                                      Size="Radzen.ButtonSize.Small"
+                                      Click="@(() => FilterByStatus(status))" />
+                    }
+                </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenTextBox @bind-Value="searchText" Placeholder="Search by address, borough, notes..."
+                               Style="width: 100%;" Change="@(args => ApplyFilter())" />
+            </RadzenColumn>
+        </RadzenRow>
+
+        @if (selectedLeads != null && selectedLeads.Any())
+        {
+            <div class="rz-mt-3 rz-p-2" style="background: var(--rz-primary-darker); border-radius: 6px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="font-size: 0.88rem; color: #ffffff;">
+                    <strong>@selectedLeads.Count</strong> lead(s) selected:
+                </div>
+                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
+                    <RadzenButton Text="Set Contacted" Size="Radzen.ButtonSize.ExtraSmall" ButtonStyle="Radzen.ButtonStyle.Info" Click="@(() => BulkSetStatus("Contacted"))" />
+                    <RadzenButton Text="Set Quoted" Size="Radzen.ButtonSize.ExtraSmall" ButtonStyle="Radzen.ButtonStyle.Warning" Click="@(() => BulkSetStatus("Quoted"))" />
+                    <RadzenButton Text="Set Won" Size="Radzen.ButtonSize.ExtraSmall" ButtonStyle="Radzen.ButtonStyle.Success" Click="@(() => BulkSetStatus("Won"))" />
+                    <RadzenButton Text="Set Lost" Size="Radzen.ButtonSize.ExtraSmall" ButtonStyle="Radzen.ButtonStyle.Secondary" Click="@(() => BulkSetStatus("Lost"))" />
+                    <RadzenButton Text="Delete Selected" Size="Radzen.ButtonSize.ExtraSmall" ButtonStyle="Radzen.ButtonStyle.Danger" Click="@BulkDeleteLeads" />
+                </RadzenStack>
+            </div>
+        }
     </div>
 
     @* Leads Grid *@
     <RadzenDataGrid @ref="grid0" Data="@filteredLeads" TItem="SavedLead"
                     AllowSorting="true" AllowPaging="true" PageSize="20"
                     ShowPagingSummary="true" ColumnWidth="160px"
-                    Style="border-top: 1px solid var(--border); border-left: none; border-right: none; border-bottom: none; border-radius: 0 0 var(--radius) var(--radius);">
+                    SelectionMode="Radzen.DataGridSelectionMode.Multiple"
+                    @bind-Value="@selectedLeads"
+                    Style="border-top: 1px solid var(--border);">
         <Columns>
+            <RadzenDataGridColumn TItem="SavedLead" Width="40px" Sortable="false" Filterable="false">
+                <HeaderTemplate>
+                    <RadzenCheckBox TValue="bool?" Value="@(selectedLeads != null && filteredLeads != null && selectedLeads.Count == filteredLeads.Count())"
+                                    Change="@((bool? args) => ToggleSelectAll(args))" />
+                </HeaderTemplate>
+                <Template Context="lead">
+                    <RadzenCheckBox TValue="bool?" Value="@(selectedLeads?.Contains(lead) == true)"
+                                    Change="@((bool? args) => ToggleSelect(lead, args))" />
+                </Template>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="SavedLead" Property="DobjobFiling.LeadScore" Title="Score" Width="130px" Sortable="true">
                 <Template Context="lead">
                     @if (lead.DobjobFiling != null && lead.DobjobFiling.LeadScore.HasValue)

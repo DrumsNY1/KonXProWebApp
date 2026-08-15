@@ -327,4 +327,59 @@ public class PermitIntelServiceTests : IDisposable
         Assert.Equal(10, count);
         Assert.Equal(5, results.Count());
     }
+
+    [Fact]
+    public async Task BulkUpdateLeadStatus_MultipleLeads_UpdatesAllStatuses()
+    {
+        var f1 = new DobjobFiling { JobType = "A1" };
+        var f2 = new DobjobFiling { JobType = "NB" };
+        _context.DobjobFilings.AddRange(f1, f2);
+        await _context.SaveChangesAsync();
+
+        var l1 = await _service.SaveLead("user1", f1.Id);
+        var l2 = await _service.SaveLead("user1", f2.Id);
+
+        await _service.BulkUpdateLeadStatus(new List<int> { l1.Id, l2.Id }, "Quoted");
+
+        var updated1 = await _context.SavedLeads.FindAsync(l1.Id);
+        var updated2 = await _context.SavedLeads.FindAsync(l2.Id);
+
+        Assert.Equal("Quoted", updated1.Status);
+        Assert.Equal("Quoted", updated2.Status);
+    }
+
+    [Fact]
+    public void ExportLeadsToCsv_ValidLeads_GeneratesCsvContent()
+    {
+        var leads = new List<SavedLead>
+        {
+            new SavedLead
+            {
+                Id = 10,
+                DobjobFilingId = 1,
+                Status = "Contacted",
+                Notes = "Called owner John",
+                SavedAt = DateTime.UtcNow,
+                DobjobFiling = new DobjobFiling
+                {
+                    JobNum = 123456789,
+                    HouseNum = "500",
+                    StreetName = "Grand St",
+                    Borough = "MANHATTAN",
+                    JobType = "NB",
+                    InitialCost = 150_000m,
+                    LeadScore = 4
+                }
+            }
+        };
+
+        var bytes = PermitIntelService.ExportLeadsToCsv(leads);
+        var csvText = System.Text.Encoding.UTF8.GetString(bytes);
+
+        Assert.Contains("500", csvText);
+        Assert.Contains("Grand St", csvText);
+        Assert.Contains("MANHATTAN", csvText);
+        Assert.Contains("Contacted", csvText);
+        Assert.Contains("Called owner John", csvText);
+    }
 }

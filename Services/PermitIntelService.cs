@@ -252,6 +252,55 @@ public partial class PermitIntelService
         await context.SaveChangesAsync();
     }
 
+    public async Task BulkUpdateLeadStatus(List<int> leadIds, string newStatus)
+    {
+        if (leadIds == null || !leadIds.Any()) return;
+
+        var leads = await context.SavedLeads
+            .Where(s => leadIds.Contains(s.Id))
+            .ToListAsync();
+
+        foreach (var lead in leads)
+        {
+            lead.Status = newStatus;
+            lead.UpdatedAt = DateTime.UtcNow;
+        }
+
+        await context.SaveChangesAsync();
+    }
+
+    public static byte[] ExportLeadsToCsv(IEnumerable<SavedLead> leads)
+    {
+        var builder = new System.Text.StringBuilder();
+        builder.AppendLine("Lead ID,Permit ID,Job Num,House Num,Street Name,Borough,Job Type,Est Cost,Lead Score,Lead Tier,Status,Notes,Saved At");
+
+        foreach (var lead in leads ?? Enumerable.Empty<SavedLead>())
+        {
+            var f = lead.DobjobFiling;
+            var jobNum = EscapeCsv(f?.JobNum?.ToString());
+            var houseNum = EscapeCsv(f?.HouseNum);
+            var streetName = EscapeCsv(f?.StreetName);
+            var borough = EscapeCsv(f?.Borough);
+            var jobType = EscapeCsv(f?.JobType);
+            var estCost = f?.InitialCost?.ToString("C0") ?? "N/A";
+            var score = f?.LeadScore ?? 1;
+            var tier = f?.LeadScoreBreakdown?.Tier ?? (score >= 4 ? "Hot" : "Standard");
+            var status = EscapeCsv(lead.Status);
+            var notes = EscapeCsv(lead.Notes);
+            var savedAt = lead.SavedAt.ToString("yyyy-MM-dd HH:mm:ss");
+
+            builder.AppendLine($"{lead.Id},{lead.DobjobFilingId},{jobNum},{houseNum},{streetName},{borough},{jobType},\"{estCost}\",{score},{tier},{status},{notes},{savedAt}");
+        }
+
+        return System.Text.Encoding.UTF8.GetBytes(builder.ToString());
+    }
+
+    private static string EscapeCsv(string val)
+    {
+        if (string.IsNullOrEmpty(val)) return "";
+        return $"\"{val.Replace("\"", "\"\"")}\"";
+    }
+
     public async Task DeleteLead(int leadId)
     {
         var lead = await context.SavedLeads.FindAsync(leadId);
