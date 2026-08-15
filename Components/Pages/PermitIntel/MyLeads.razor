@@ -37,14 +37,20 @@
                     ShowPagingSummary="true" ColumnWidth="160px"
                     Style="border-top: 1px solid var(--border); border-left: none; border-right: none; border-bottom: none; border-radius: 0 0 var(--radius) var(--radius);">
         <Columns>
-            <RadzenDataGridColumn TItem="SavedLead" Title="Score" Width="80px" Sortable="false">
+            <RadzenDataGridColumn TItem="SavedLead" Property="DobjobFiling.LeadScore" Title="Score" Width="130px" Sortable="true">
                 <Template Context="lead">
-                    @if (lead.DobjobFiling != null)
+                    @if (lead.DobjobFiling != null && lead.DobjobFiling.LeadScore.HasValue)
                     {
-                        @for (int i = 0; i < (lead.DobjobFiling.LeadScore ?? 1); i++)
-                        {
-                            <RadzenIcon Icon="star" Style="color: #FFB400; font-size: 14px;" />
-                        }
+                        var factorSummary = lead.DobjobFiling.LeadScoreBreakdown?.Factors?.Any() == true
+                            ? string.Join(" • ", lead.DobjobFiling.LeadScoreBreakdown.Factors.Select(f => f.Name))
+                            : $"Score: {lead.DobjobFiling.LeadScore}/5";
+                        <div class="flex items-center imp-gap-1" title="@factorSummary" style="cursor: help;">
+                            <span style="font-weight: 700; color: #FFB400; font-size: 0.9rem;">@lead.DobjobFiling.LeadScore★</span>
+                            <span class="badge @(lead.DobjobFiling.LeadScore >= 4 ? "badge-danger" : (lead.DobjobFiling.LeadScore == 3 ? "badge-warning" : "badge-info"))"
+                                  style="font-size: 0.7rem; padding: 0.1rem 0.35rem; font-weight: 600;">
+                                @(lead.DobjobFiling.LeadScoreBreakdown?.Tier?.ToUpper() ?? (lead.DobjobFiling.LeadScore >= 4 ? "HOT" : "STANDARD"))
+                            </span>
+                        </div>
                     }
                 </Template>
             </RadzenDataGridColumn>

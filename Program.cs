@@ -86,8 +86,21 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().Database.Migrate();
-    app.Services.CreateScope().ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>().SeedTenantsAdmin().Wait();
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogInformation("Attempting database migration and tenant seeding...");
+        var identityDb = scope.ServiceProvider.GetRequiredService<ApplicationIdentityDbContext>();
+        identityDb.Database.Migrate();
+        identityDb.SeedTenantsAdmin().Wait();
+    }
+    catch (Exception ex)
+    {
+        using var scope = app.Services.CreateScope();
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "An exception occurred while migrating or seeding the database on startup.");
+    }
 }
 
 //using (var scope = app.Services.CreateScope())

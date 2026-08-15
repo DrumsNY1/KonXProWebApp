@@ -83,6 +83,49 @@ public class PermitIntelServiceTests : IDisposable
         Assert.Equal(5, score);
     }
 
+    [Fact]
+    public void ScorePermitDetailed_IncludesFactorBreakdownAndTiers()
+    {
+        var filing = new DobjobFiling
+        {
+            JobType = "NB",
+            InitialCost = 75_000m,
+            Plumbing = "X",
+            Mechanical = "X"
+        };
+
+        var breakdown = PermitIntelService.ScorePermitDetailed(filing, complaintVelocity: 4, activeDobViolations: 1, hpdClassCCount: 1);
+
+        Assert.NotNull(breakdown);
+        Assert.Equal(5, breakdown.TotalScore);
+        Assert.Equal("Hot", breakdown.Tier);
+        Assert.Contains(breakdown.Factors, f => f.Category == "Cost" && f.Points == 2);
+        Assert.Contains(breakdown.Factors, f => f.Category == "JobType" && f.Points == 1);
+        Assert.Contains(breakdown.Factors, f => f.Category == "Trade" && f.Points == 1);
+        Assert.Contains(breakdown.Factors, f => f.Category == "Complaint" && f.Points == 2);
+        Assert.Contains(breakdown.Factors, f => f.Category == "Violation" && f.Name.Contains("Class C"));
+    }
+
+    [Fact]
+    public void ScorePermitDetailed_ClassCHpdViolation_AddsHazardousFactor()
+    {
+        var filing = new DobjobFiling { JobType = "A2" };
+        var breakdown = PermitIntelService.ScorePermitDetailed(filing, hpdClassCCount: 2);
+
+        Assert.True(breakdown.HpdViolationPoints == 2);
+        Assert.Contains(breakdown.Factors, f => f.Name.Contains("Class C HPD Violation") && f.BadgeStyle == "danger");
+    }
+
+    [Fact]
+    public void ScorePermitDetailed_High311ComplaintVelocity_AddsDangerFactor()
+    {
+        var filing = new DobjobFiling { JobType = "A2" };
+        var breakdown = PermitIntelService.ScorePermitDetailed(filing, complaintVelocity: 5);
+
+        Assert.True(breakdown.ComplaintPoints == 2);
+        Assert.Contains(breakdown.Factors, f => f.Name.Contains("High 311 Complaint Velocity") && f.BadgeStyle == "danger");
+    }
+
     // ── Saved Leads Tests ──
 
     [Fact]
