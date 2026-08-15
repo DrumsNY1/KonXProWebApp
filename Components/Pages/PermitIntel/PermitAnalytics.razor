@@ -1,0 +1,134 @@
+@page "/permit-intel/analytics"
+@attribute [Authorize]
+@using KonXProWebApp.Models.PermitIntel
+
+<PageTitle>Executive Analytics — NYC Permit Intel</PageTitle>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <h1>NYC Executive Construction Analytics</h1>
+    <p>Citywide construction volume, borough investment trends, and AI lead quality distributions.</p>
+</div>
+
+@if (summary == null)
+{
+    <RadzenRow class="rz-mx-auto rz-px-4" Style="max-width: 1440px;">
+        <RadzenColumn Size="12" Style="text-align: center; padding: 4rem 0;">
+            <RadzenProgressBarCircular ShowValue="false" Mode="Radzen.ProgressBarMode.Indeterminate" />
+        </RadzenColumn>
+    </RadzenRow>
+}
+else
+{
+    <!-- STATS CARDS BANNER -->
+    <div class="stats-row rz-mb-4">
+        <div class="stat-card">
+            <div class="stat-label-sm">📊 Tracked Job Filings</div>
+            <div class="stat-value">@($"{summary.TotalFilingsCount:N0}")</div>
+            <div class="stat-change neutral">Socrata Open Data</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label-sm">💰 Total NYC Job Volume</div>
+            <div class="stat-value text-success">@summary.TotalJobCost.ToString("C0")</div>
+            <div class="stat-change up">construction valuation</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label-sm">🏗️ Avg Cost per Project</div>
+            <div class="stat-value">@summary.AverageJobCost.ToString("C0")</div>
+            <div class="stat-change neutral">estimated cost</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label-sm">🔥 High Quality Lead Ratio</div>
+            <div class="stat-value text-danger">@($"{summary.HotLeadsPercentage}%")</div>
+            <div class="stat-change up">score 4+ stars</div>
+        </div>
+    </div>
+
+    <!-- CHARTS ROW 1 -->
+    <RadzenRow Gap="1.5rem" class="rz-mb-4">
+        <RadzenColumn Size="12" SizeMD="6">
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Construction Volume by Borough ($)</div>
+                        <div class="card-subtitle">Aggregated estimated initial job cost</div>
+                    </div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenChart Style="height: 320px;">
+                        <RadzenDonutSeries Data="@summary.BoroughMetrics" CategoryProperty="Borough" ValueProperty="TotalCost" Title="Total Investment">
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </RadzenDonutSeries>
+                    </RadzenChart>
+                </div>
+            </div>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Filings by Job Type</div>
+                        <div class="card-subtitle">Distribution of New Buildings vs Alteration Scopes</div>
+                    </div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenChart Style="height: 320px;">
+                        <RadzenBarSeries Data="@summary.JobTypeMetrics" CategoryProperty="JobType" ValueProperty="Count" Title="Permits Filed">
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </RadzenBarSeries>
+                    </RadzenChart>
+                </div>
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+
+    <!-- CHARTS ROW 2 -->
+    <RadzenRow Gap="1.5rem" class="rz-mb-4">
+        <RadzenColumn Size="12" SizeMD="6">
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">AI Lead Quality Tier Distribution</div>
+                        <div class="card-subtitle">Filings categorized by predictive lead scoring algorithm</div>
+                    </div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenChart Style="height: 320px;">
+                        <RadzenColumnSeries Data="@summary.ScoreMetrics" CategoryProperty="Tier" ValueProperty="Count" Title="Permit Filings">
+                            <RadzenSeriesDataLabels Visible="true" />
+                        </RadzenColumnSeries>
+                    </RadzenChart>
+                </div>
+            </div>
+        </RadzenColumn>
+
+        <RadzenColumn Size="12" SizeMD="6">
+            <div class="card" style="height: 100%;">
+                <div class="card-header">
+                    <div>
+                        <div class="card-title">Borough Summary Breakdown</div>
+                        <div class="card-subtitle">Permit counts and valuation totals per borough</div>
+                    </div>
+                </div>
+                <div class="rz-p-4">
+                    <RadzenDataGrid Data="@summary.BoroughMetrics" TItem="BoroughMetric" AllowSorting="true">
+                        <Columns>
+                            <RadzenDataGridColumn TItem="BoroughMetric" Property="Borough" Title="Borough" Width="140px">
+                                <Template Context="b">
+                                    <strong style="color: var(--rz-text-title-color);">@b.Borough</strong>
+                                </Template>
+                            </RadzenDataGridColumn>
+                            <RadzenDataGridColumn TItem="BoroughMetric" Property="Count" Title="Permits" Width="100px" />
+                            <RadzenDataGridColumn TItem="BoroughMetric" Property="TotalCost" Title="Total Investment" Width="140px">
+                                <Template Context="b">
+                                    <span class="value-cell">@b.TotalCost.ToString("C0")</span>
+                                </Template>
+                            </RadzenDataGridColumn>
+                        </Columns>
+                    </RadzenDataGrid>
+                </div>
+            </div>
+        </RadzenColumn>
+    </RadzenRow>
+}
