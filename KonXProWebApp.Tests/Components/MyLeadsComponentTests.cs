@@ -100,6 +100,7 @@ public class MyLeadsComponentTests : TestContext
     {
         var cut = RenderComponent<MyLeads>();
 
-        Assert.Contains("0 saved leads", cut.Markup);
+        Assert.Contains("My Leads Pipeline", cut.Markup);
+        Assert.Contains("All (0)", cut.Markup);
     }
 }
