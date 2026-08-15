@@ -4,6 +4,7 @@
     <NuGetAuditMode>direct</NuGetAuditMode>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Components\Pages\ClaudeDobFilings.razor.cs" />
