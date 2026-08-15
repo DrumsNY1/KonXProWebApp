@@ -104,4 +104,42 @@ public class AlertDispatchMatchingTests
         Assert.Contains("TOP 50", sql);
         Assert.Contains("ORDER BY d.LeadScore DESC", sql);
     }
+
+    [Fact]
+    public void BuildWhereClause_MinLeadScore_AddsCondition()
+    {
+        var user = new AlertDispatchFunction.AlertUser { MinLeadScore = 4 };
+        var (sql, parameters) = AlertDispatchFunction.BuildWhereClause(user);
+
+        Assert.Contains("LeadScore >= @minLeadScore", sql);
+        Assert.Contains(parameters, p => p.ParameterName == "@minLeadScore" && (int)p.Value! == 4);
+    }
+
+    [Fact]
+    public void BuildAlertDigestHtml_RendersScoreBadgesAndAddress()
+    {
+        var emailService = new KonXProWebApp.Functions.Services.EmailService(
+            new Microsoft.Extensions.Configuration.ConfigurationBuilder().Build(),
+            new Microsoft.Extensions.Logging.Abstractions.NullLogger<KonXProWebApp.Functions.Services.EmailService>());
+
+        var matches = new List<KonXProWebApp.Functions.Services.AlertPermitMatch>
+        {
+            new() { PermitId = 1, Address = "100 Broadway", Borough = "MANHATTAN", JobType = "NB", EstCost = "$500,000", Status = "Approved", LeadScore = 5, ScoreTier = "Hot", FactorSummary = "High Cost • Class C HPD Violation" }
+        };
+
+        var html = emailService.BuildAlertDigestHtml("Reggie", matches);
+
+        Assert.Contains("100 Broadway", html);
+        Assert.Contains("HOT", html);
+        Assert.Contains("High Cost • Class C HPD Violation", html);
+    }
+
+    [Fact]
+    public void BuildAlertSms_FormatsScoreStarAndTier()
+    {
+        var smsText = KonXProWebApp.Functions.Services.SmsService.BuildAlertSms(3, "500 Grand St", 4, "Hot");
+
+        Assert.Contains("🔥 NYC Permit Intel: 3 new permit lead(s)", smsText);
+        Assert.Contains("500 Grand St (4★ HOT)", smsText);
+    }
 }
