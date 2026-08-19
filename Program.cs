@@ -164,19 +164,19 @@ if (!app.Environment.IsEnvironment("Testing"))
         {
             @"CREATE OR ALTER VIEW dbo.vwFreeTierDashboard AS
               SELECT JobNum, Borough, ISNULL(HouseNum, '') + ' ' + ISNULL(StreetName, '') AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-              FROM konx_admin.DOBJobFilings;",
+              FROM dbo.DOBJobFilings;",
               
             @"CREATE OR ALTER VIEW dbo.vwBasicTierDashboard AS
               SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-              FROM konx_admin.DOBJobFilings;",
+              FROM dbo.DOBJobFilings;",
               
             @"CREATE OR ALTER VIEW dbo.vwMidTierDashboard AS
               SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-              FROM konx_admin.DOBJobFilings;",
+              FROM dbo.DOBJobFilings;",
               
             @"CREATE OR ALTER VIEW dbo.vwHighTierDashboard AS
               SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-              FROM konx_admin.DOBJobFilings;",
+              FROM dbo.DOBJobFilings;",
               
             @"CREATE OR ALTER VIEW dbo.vwDemoDisplay AS
               SELECT 'Sample Content' AS Content, 'Sample Summary' AS Summary, CAST(GETDATE() AS datetime2) AS CompletionDate;"

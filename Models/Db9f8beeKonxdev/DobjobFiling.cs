@@ -6,7 +6,7 @@ using KonXProWebApp.Models.PermitIntel;
 
 namespace KonXProWebApp.Models.db_9f8bee_konxdev
 {
-    [Table("DOBJobFilings", Schema = "konx_admin")]
+    [Table("DOBJobFilings", Schema = "dbo")]
     public partial class DobjobFiling
     {
         [Key]
