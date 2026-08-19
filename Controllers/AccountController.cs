@@ -95,15 +95,32 @@ namespace KonXProWebApp.Controllers
                 }
 
                 var isTestOrAdmin = userName == "tenantsadmin" || userName.ToLower().EndsWith("_test@konxpro.com") || userName.ToLower() == "admin";    
+                
+                if (isTestOrAdmin)
+                {
+                    var isPasswordValid = await userManager.CheckPasswordAsync(user, password);
+                    if (isPasswordValid)
+                    {
+                        var tenant = context.Tenants.Where(t => t.Id == user.TenantId).FirstOrDefault();
+                        if (tenant != null && !tenant.Hosts.Split(',').Where(h => h.Contains(this.HttpContext.Request.Host.Value)).Any())
+                        {
+                            return RedirectWithError("Invalid user or password", redirectUrl);
+                        }
+
+                        await signInManager.SignInAsync(user, isPersistent: false);
+                        return Redirect(redirectUrl);
+                    }
+                    return RedirectWithError("Invalid user or password", redirectUrl);
+                }
+
                 var isTwoFactor = await userManager.GetTwoFactorEnabledAsync(user);
-                if (!isTwoFactor && !isTestOrAdmin)
+                if (!isTwoFactor)
                 {
                     await userManager.SetTwoFactorEnabledAsync(user, true);
                 }
                 var result = await signInManager.PasswordSignInAsync(userName, password, false, false);
 
-
-                if (result.RequiresTwoFactor && !isTestOrAdmin)
+                if (result.RequiresTwoFactor)
                 {
                     var code = await userManager.GenerateTwoFactorTokenAsync(user, "Email");
 
@@ -118,7 +135,6 @@ If you didn't request this code, you can safely ignore this email. Someone else 
                 }
                 if (result.Succeeded)
                 {
-
                     if (user != null)
                     {
                         var tenant = context.Tenants.Where(t => t.Id == user.TenantId).FirstOrDefault();
@@ -483,25 +499,31 @@ If you didn't request this registration, you can safely ignore this email. Someo
 
         private async Task SendEmailAsync(string to, string subject, string body)
         {
-
-            var mailMessage = new System.Net.Mail.MailMessage();
-            mailMessage.From = new System.Net.Mail.MailAddress(configuration.GetValue<string>("Smtp:User"));
-            mailMessage.Body = body;
-            mailMessage.Subject = subject;
-            mailMessage.BodyEncoding = System.Text.Encoding.UTF8;
-            mailMessage.SubjectEncoding = System.Text.Encoding.UTF8;
-            mailMessage.IsBodyHtml = true;
-            mailMessage.To.Add(to);
-
-            var client = new System.Net.Mail.SmtpClient(configuration.GetValue<string>("Smtp:Host"))
+            try
             {
-                UseDefaultCredentials = false,
-                EnableSsl = configuration.GetValue<bool>("Smtp:Ssl"),
-                Port = configuration.GetValue<int>("Smtp:Port"),
-                Credentials = new System.Net.NetworkCredential(configuration.GetValue<string>("Smtp:User"), configuration.GetValue<string>("Smtp:Password"))
-            };
+                var mailMessage = new System.Net.Mail.MailMessage();
+                mailMessage.From = new System.Net.Mail.MailAddress(configuration.GetValue<string>("Smtp:User"));
+                mailMessage.Body = body;
+                mailMessage.Subject = subject;
+                mailMessage.BodyEncoding = System.Text.Encoding.UTF8;
+                mailMessage.SubjectEncoding = System.Text.Encoding.UTF8;
+                mailMessage.IsBodyHtml = true;
+                mailMessage.To.Add(to);
 
-            await client.SendMailAsync(mailMessage);
+                var client = new System.Net.Mail.SmtpClient(configuration.GetValue<string>("Smtp:Host"))
+                {
+                    UseDefaultCredentials = false,
+                    EnableSsl = configuration.GetValue<bool>("Smtp:Ssl"),
+                    Port = configuration.GetValue<int>("Smtp:Port"),
+                    Credentials = new System.Net.NetworkCredential(configuration.GetValue<string>("Smtp:User"), configuration.GetValue<string>("Smtp:Password"))
+                };
+
+                await client.SendMailAsync(mailMessage);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"[AccountController] Failed to send email to {to}: {ex.Message}");
+            }
         }
     }
 }
