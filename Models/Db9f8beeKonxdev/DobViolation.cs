@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KonXProWebApp.Models.db_9f8bee_konxdev
 {
-    [Table("DobBisViolations", Schema = "konx_admin")]
+    [Table("DobBisViolations", Schema = "dbo")]
     public partial class DobViolation
     {
         [Key]
