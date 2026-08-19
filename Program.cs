@@ -101,6 +101,63 @@ if (!app.Environment.IsEnvironment("Testing"))
         var permitDb = scope.ServiceProvider.GetRequiredService<KonXProWebApp.Data.db_9f8bee_konxdevContext>();
         logger.LogInformation("Ensuring permit intel database schema is created...");
         permitDb.Database.EnsureCreated();
+
+        var tableDdl = @"
+            IF OBJECT_ID('dbo.Subscriptions', 'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.Subscriptions (
+                    Id INT IDENTITY(1,1) PRIMARY KEY,
+                    UserId NVARCHAR(450) NOT NULL,
+                    StripeCustomerId NVARCHAR(255) NULL,
+                    StripeSubscriptionId NVARCHAR(255) NULL,
+                    Tier NVARCHAR(50) NOT NULL,
+                    Status NVARCHAR(50) NOT NULL,
+                    StartDate DATETIME2 NOT NULL,
+                    EndDate DATETIME2 NULL,
+                    TrialEndDate DATETIME2 NULL,
+                    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+                    UpdatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+                );
+                CREATE INDEX IX_Subscriptions_UserId ON dbo.Subscriptions(UserId);
+            END;
+            IF OBJECT_ID('dbo.SavedLeads', 'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.SavedLeads (
+                    Id INT IDENTITY(1,1) PRIMARY KEY,
+                    UserId NVARCHAR(450) NOT NULL,
+                    DobjobFilingId INT NOT NULL,
+                    Status NVARCHAR(50) NOT NULL DEFAULT 'New',
+                    Notes NVARCHAR(MAX) NULL,
+                    EstimatedValue DECIMAL(18,2) NULL,
+                    Tags NVARCHAR(500) NULL,
+                    SavedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+                    UpdatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+                );
+                CREATE INDEX IX_SavedLeads_UserId ON dbo.SavedLeads(UserId);
+            END;
+            IF OBJECT_ID('dbo.AlertPreferences', 'U') IS NULL
+            BEGIN
+                CREATE TABLE dbo.AlertPreferences (
+                    Id INT IDENTITY(1,1) PRIMARY KEY,
+                    UserId NVARCHAR(450) NOT NULL,
+                    Boroughs NVARCHAR(500) NULL,
+                    JobTypes NVARCHAR(500) NULL,
+                    Trades NVARCHAR(500) NULL,
+                    MinCost DECIMAL(18,2) NULL,
+                    MaxCost DECIMAL(18,2) NULL,
+                    ZipCodes NVARCHAR(500) NULL,
+                    EmailEnabled BIT NOT NULL DEFAULT 1,
+                    SmsEnabled BIT NOT NULL DEFAULT 0,
+                    PushEnabled BIT NOT NULL DEFAULT 1,
+                    Frequency NVARCHAR(50) NOT NULL DEFAULT 'Instant',
+                    PhoneNumber NVARCHAR(50) NULL,
+                    CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE()
+                );
+                CREATE INDEX IX_AlertPreferences_UserId ON dbo.AlertPreferences(UserId);
+            END;";
+
+        try { permitDb.Database.ExecuteSqlRaw(tableDdl); } catch (Exception exTbl) { logger.LogWarning(exTbl, "Table creation warning"); }
+
         identityDb.SeedTierTestUsersAsync(permitDb).Wait();
 
         var views = new[]
