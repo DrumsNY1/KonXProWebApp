@@ -45,6 +45,12 @@ public class SubscriptionAuthorizationHandler : AuthorizationHandler<Subscriptio
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context, SubscriptionRequirement requirement)
     {
+        if (context.User.IsInRole("Admin") || context.User.Identity?.Name == "tenantsadmin" || context.User.Identity?.Name == "admin")
+        {
+            context.Succeed(requirement);
+            return;
+        }
+
         var userId = context.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
             return;

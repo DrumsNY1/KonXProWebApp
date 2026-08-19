@@ -1,19 +1,16 @@
 @page "/"
 @layout KonXProWebApp.Components.Layout.LandingLayout
 
-
-
-
 <!-- HERO -->
 <div class="hero">
   <div class="hero-badge"><span></span> Live NYC permit data — updated daily</div>
   <h1>Find Your Next Job<br><em>Before Your Competition Does</em></h1>
   <p>KonXPro surfaces NYC building permit filings the moment they're filed — so you can reach property owners first and win more work.</p>
   <div class="hero-ctas">
-    <button class="btn-hero-primary">
+    <button type="button" class="btn-hero-primary" @onclick='() => NavigationManager.NavigateTo("Account/Register", true)'>
       ⚡ Start Free Trial
     </button>
-    <button class="btn-hero-secondary">
+    <button type="button" class="btn-hero-secondary" @onclick='() => NavigationManager.NavigateTo("#how")'>
       ▶ Watch Demo
     </button>
   </div>
@@ -229,7 +226,7 @@
         <li>Basic permit data</li>
         <li>7-day lead history</li>
       </ul>
-      <button class="btn-plan btn-plan-ghost">Get Started</button>
+      <button type="button" class="btn-plan btn-plan-ghost" @onclick='() => NavigationManager.NavigateTo("Account/Register", true)'>Get Started</button>
     </div>
     <div class="pricing-card featured">
       <div class="pricing-badge">Most Popular</div>
@@ -245,7 +242,7 @@
         <li>Trade map access</li>
         <li>30-day lead history</li>
       </ul>
-      <button class="btn-plan btn-plan-primary">Start Free Trial</button>
+      <button type="button" class="btn-plan btn-plan-primary" @onclick='() => NavigationManager.NavigateTo("Account/Register", true)'>Start Free Trial</button>
     </div>
     <div class="pricing-card">
       <div class="plan-name">Agency</div>
@@ -260,7 +257,7 @@
         <li>Dedicated account manager</li>
         <li>Full permit history</li>
       </ul>
-      <button class="btn-plan btn-plan-ghost">Contact Sales</button>
+      <button type="button" class="btn-plan btn-plan-ghost" @onclick='() => NavigationManager.NavigateTo("contact-us")'>Contact Sales</button>
     </div>
   </div>
 </section>
@@ -270,8 +267,8 @@
   <h2>Stop chasing jobs.<br>Start getting called first.</h2>
   <p>Join 8,500+ NYC contractors already using KonXPro to win more work.</p>
   <div class="flex justify-center flex-wrap imp-gap-4">
-    <button class="btn-hero-primary">⚡ Start Free Trial — No Credit Card</button>
-    <button class="btn-hero-secondary">Talk to Sales</button>
+    <button type="button" class="btn-hero-primary" @onclick='() => NavigationManager.NavigateTo("Account/Register", true)'>⚡ Start Free Trial — No Credit Card</button>
+    <button type="button" class="btn-hero-secondary" @onclick='() => NavigationManager.NavigateTo("contact-us")'>Talk to Sales</button>
   </div>
 </div>
 
