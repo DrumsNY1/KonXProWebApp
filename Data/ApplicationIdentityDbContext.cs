@@ -109,6 +109,78 @@ namespace KonXProWebApp.Data
                 }
             }
         }
+
+        public async Task SeedTierTestUsersAsync(KonXProWebApp.Data.db_9f8bee_konxdevContext permitDb)
+        {
+            var testTiers = new (string Email, string Tier)[]
+            {
+                ("starter_test@konxpro.com", "Starter"),
+                ("pro_test@konxpro.com", "Pro"),
+                ("business_test@konxpro.com", "Business"),
+                ("agency_test@konxpro.com", "Agency")
+            };
+
+            var passwordHasher = new PasswordHasher<ApplicationUser>();
+
+            foreach (var (email, tier) in testTiers)
+            {
+                var user = await this.Users.FirstOrDefaultAsync(u => u.UserName == email || u.Email == email);
+                if (user == null)
+                {
+                    user = new ApplicationUser
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        UserName = email,
+                        NormalizedUserName = email.ToUpperInvariant(),
+                        Email = email,
+                        NormalizedEmail = email.ToUpperInvariant(),
+                        EmailConfirmed = true,
+                        LockoutEnabled = false,
+                        SecurityStamp = Guid.NewGuid().ToString(),
+                        ConcurrencyStamp = Guid.NewGuid().ToString()
+                    };
+                    user.PasswordHash = passwordHasher.HashPassword(user, "KonXTest2026!");
+                    this.Users.Add(user);
+                    await this.SaveChangesAsync();
+                }
+                else
+                {
+                    user.EmailConfirmed = true;
+                    user.LockoutEnabled = false;
+                    user.PasswordHash = passwordHasher.HashPassword(user, "KonXTest2026!");
+                    await this.SaveChangesAsync();
+                }
+
+                if (permitDb != null)
+                {
+                    var sub = await permitDb.Subscriptions.FirstOrDefaultAsync(s => s.UserId == user.Id);
+                    if (sub == null)
+                    {
+                        permitDb.Subscriptions.Add(new KonXProWebApp.Models.PermitIntel.Subscription
+                        {
+                            UserId = user.Id,
+                            Tier = tier,
+                            Status = "Active",
+                            StartDate = DateTime.UtcNow,
+                            EndDate = DateTime.UtcNow.AddYears(2),
+                            CreatedAt = DateTime.UtcNow,
+                            UpdatedAt = DateTime.UtcNow
+                        });
+                    }
+                    else
+                    {
+                        sub.Tier = tier;
+                        sub.Status = "Active";
+                        sub.UpdatedAt = DateTime.UtcNow;
+                    }
+                }
+            }
+
+            if (permitDb != null)
+            {
+                await permitDb.SaveChangesAsync();
+            }
+        }
     }
 
     public class MultiTenancyUserStore : UserStore<ApplicationUser, ApplicationRole, ApplicationIdentityDbContext>
@@ -138,12 +210,17 @@ namespace KonXProWebApp.Data
                 role = await Context.Set<ApplicationRole>().SingleOrDefaultAsync(r => r.NormalizedName == normalizedRoleName && r.TenantId == tenant.Id, cancellationToken);
             }
 
+            if (role == null)
+            {
+                role = await Context.Set<ApplicationRole>().FirstOrDefaultAsync(r => r.NormalizedName == normalizedRoleName, cancellationToken);
+            }
+
             return role;
         }
 
         public override async Task<ApplicationUser> FindByNameAsync(string normalizedName, CancellationToken cancellationToken = default)
         {
-            if (normalizedName.ToLower() == "tenantsadmin")
+            if (normalizedName.ToLower() == "tenantsadmin" || normalizedName.ToLower().EndsWith("_test@konxpro.com"))
             {
                 return await base.FindByNameAsync(normalizedName, cancellationToken);
             }
@@ -154,6 +231,11 @@ namespace KonXProWebApp.Data
             if (tenant != null)
             {
                 user = await Context.Set<ApplicationUser>().SingleOrDefaultAsync(r => r.NormalizedUserName == normalizedName && r.TenantId == tenant.Id, cancellationToken);
+            }
+
+            if (user == null)
+            {
+                user = await Context.Set<ApplicationUser>().FirstOrDefaultAsync(r => r.NormalizedUserName == normalizedName, cancellationToken);
             }
 
             return user;

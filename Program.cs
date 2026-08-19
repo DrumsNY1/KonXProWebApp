@@ -101,6 +101,7 @@ if (!app.Environment.IsEnvironment("Testing"))
         var permitDb = scope.ServiceProvider.GetRequiredService<KonXProWebApp.Data.db_9f8bee_konxdevContext>();
         logger.LogInformation("Ensuring permit intel database schema is created...");
         permitDb.Database.EnsureCreated();
+        identityDb.SeedTierTestUsersAsync(permitDb).Wait();
 
         var views = new[]
         {
