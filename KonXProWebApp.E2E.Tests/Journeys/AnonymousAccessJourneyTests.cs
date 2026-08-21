@@ -16,7 +16,8 @@ public class AnonymousAccessJourneyTests
         await using var context = await _fixture.NewContextAsync();
         var page = await context.NewPageAsync();
 
-        await page.GotoAsync($"{_fixture.BaseUrl}/permit-intel/subscribe");
+        await page.GotoAsync($"{_fixture.BaseUrl}/permit-intel/subscribe", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1000);
 
         // StripeService.GetTierInfo() returns 6 tiers: Starter, Pro, Business, Agency,
         // ComplianceAlerts, LandlordCompliance.
@@ -37,10 +38,8 @@ public class AnonymousAccessJourneyTests
         var page = await context.NewPageAsync();
 
         await page.GotoAsync($"{_fixture.BaseUrl}/permit-intel/search");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await page.WaitForURLAsync(url => url.Contains("/login", StringComparison.OrdinalIgnoreCase) || url.Contains("/account/login", StringComparison.OrdinalIgnoreCase) || !url.Contains("/permit-intel/search", StringComparison.OrdinalIgnoreCase));
 
-        // [Authorize] on PermitSearch should bounce an anonymous visitor away from the search page
-        // itself (to a login or unauthorized page), not render the protected grid.
         Assert.DoesNotContain("/permit-intel/search", page.Url);
     }
 
@@ -51,7 +50,7 @@ public class AnonymousAccessJourneyTests
         var page = await context.NewPageAsync();
 
         await page.GotoAsync($"{_fixture.BaseUrl}/permit-intel/leads");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await page.WaitForURLAsync(url => url.Contains("/login", StringComparison.OrdinalIgnoreCase) || url.Contains("/account/login", StringComparison.OrdinalIgnoreCase) || !url.Contains("/permit-intel/leads", StringComparison.OrdinalIgnoreCase));
 
         Assert.DoesNotContain("/permit-intel/leads", page.Url);
     }

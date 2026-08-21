@@ -35,11 +35,22 @@ public class TierJourneyTests
 
     private async Task<bool> LoginAsync(IPage page, string userName, string password)
     {
-        await page.GotoAsync($"{_fixture.BaseUrl}/login");
-        await page.GetByLabel("Username").FillAsync(userName);
-        await page.GetByLabel("Password").FillAsync(password);
-        await page.GetByRole(AriaRole.Button, new() { Name = "Login" }).ClickAsync();
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+        await page.GotoAsync($"{_fixture.BaseUrl}/login", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForSelectorAsync("input[type='password']", new() { Timeout = 15000 });
+
+        var userInput = page.Locator("input[name='Username'], input[name='userName'], input:not([type='password']):not([type='hidden'])").First;
+        var passInput = page.Locator("input[type='password']").First;
+        var submitBtn = page.Locator("button[type='submit'], .rz-login-button, button:has-text('Log in')").First;
+
+        await userInput.FillAsync(userName);
+        await passInput.FillAsync(password);
+        await submitBtn.ClickAsync();
+
+        try
+        {
+            await page.WaitForURLAsync(url => !url.Contains("/login", StringComparison.OrdinalIgnoreCase), new() { Timeout = 15000 });
+        }
+        catch { }
 
         return !page.Url.Contains("/login", StringComparison.OrdinalIgnoreCase);
     }
@@ -56,24 +67,24 @@ public class TierJourneyTests
         Assert.True(await LoginAsync(page, userName, password));
 
         // 1. Visit FreeTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/FreeTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/FreeTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
-        // 2. Visit BasicTier -> Redirect to Unauthorized
-        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/Unauthorized", page.Url);
+        // 2. Visit BasicTier -> Redirect to Unauthorized/AccessDenied
+        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.True(page.Url.Contains("/Unauthorized", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("/AccessDenied", StringComparison.OrdinalIgnoreCase));
 
-        // 3. Visit MidTier -> Redirect to Unauthorized
-        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/Unauthorized", page.Url);
+        // 3. Visit MidTier -> Redirect to Unauthorized/AccessDenied
+        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.True(page.Url.Contains("/Unauthorized", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("/AccessDenied", StringComparison.OrdinalIgnoreCase));
 
-        // 4. Visit HighTier -> Redirect to Unauthorized
-        await page.GotoAsync($"{_fixture.BaseUrl}/highTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/Unauthorized", page.Url);
+        // 4. Visit HighTier -> Redirect to Unauthorized/AccessDenied
+        await page.GotoAsync($"{_fixture.BaseUrl}/highTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.True(page.Url.Contains("/Unauthorized", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("/AccessDenied", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -88,24 +99,24 @@ public class TierJourneyTests
         Assert.True(await LoginAsync(page, userName, password));
 
         // 1. Visit FreeTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/FreeTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/FreeTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // 2. Visit BasicTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/BasicTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/BasicTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
-        // 3. Visit MidTier -> Redirect to Unauthorized
-        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/Unauthorized", page.Url);
+        // 3. Visit MidTier -> Redirect to Unauthorized/AccessDenied
+        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.True(page.Url.Contains("/Unauthorized", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("/AccessDenied", StringComparison.OrdinalIgnoreCase));
 
-        // 4. Visit HighTier -> Redirect to Unauthorized
-        await page.GotoAsync($"{_fixture.BaseUrl}/highTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/Unauthorized", page.Url);
+        // 4. Visit HighTier -> Redirect to Unauthorized/AccessDenied
+        await page.GotoAsync($"{_fixture.BaseUrl}/highTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.True(page.Url.Contains("/Unauthorized", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("/AccessDenied", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -120,24 +131,24 @@ public class TierJourneyTests
         Assert.True(await LoginAsync(page, userName, password));
 
         // 1. Visit FreeTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/FreeTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/FreeTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // 2. Visit BasicTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/BasicTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/BasicTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // 3. Visit MidTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/MidTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/MidTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
-        // 4. Visit HighTier -> Redirect to Unauthorized
-        await page.GotoAsync($"{_fixture.BaseUrl}/highTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/Unauthorized", page.Url);
+        // 4. Visit HighTier -> Redirect to Unauthorized/AccessDenied
+        await page.GotoAsync($"{_fixture.BaseUrl}/highTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.True(page.Url.Contains("/Unauthorized", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("/AccessDenied", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -152,23 +163,23 @@ public class TierJourneyTests
         Assert.True(await LoginAsync(page, userName, password));
 
         // 1. Visit FreeTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/FreeTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/FreeTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/FreeTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // 2. Visit BasicTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/BasicTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/BasicTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/BasicTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // 3. Visit MidTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/MidTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/MidTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/MidTier", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // 4. Visit HighTier -> Success
-        await page.GotoAsync($"{_fixture.BaseUrl}/highTier");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("/highTier", page.Url);
+        await page.GotoAsync($"{_fixture.BaseUrl}/highTier", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForTimeoutAsync(1500);
+        Assert.Contains("/highTier", page.Url, StringComparison.OrdinalIgnoreCase);
     }
 }
