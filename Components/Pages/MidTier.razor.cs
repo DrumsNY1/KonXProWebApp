@@ -48,11 +48,11 @@ namespace KonXProWebApp.Components.Pages
 
             await grid0.GoToPage(0);
 
-            dVwMidTierDashboards = await db_9f8bee_konxdevService.GetVwMidTierDashboards(new Query { Filter = $@"i => i.Borough.Contains(@0) || i.HouseNum.Contains(@0) || i.Street.Contains(@0) || i.ProjectType.Contains(@0) || i.JobDescription.Contains(@0) || i.Neighborhood.Contains(@0)", FilterParameters = new object[] { search } });
+            dVwMidTierDashboards = await db_9f8bee_konxdevService.GetVwMidTierDashboards(new Query { Top = 24, Filter = $@"i => i.Borough.Contains(@0) || i.HouseNum.Contains(@0) || i.Street.Contains(@0) || i.ProjectType.Contains(@0) || i.JobDescription.Contains(@0) || i.Neighborhood.Contains(@0)", FilterParameters = new object[] { search } });
         }
         protected override async Task OnInitializedAsync()
         {
-            dVwMidTierDashboards = await db_9f8bee_konxdevService.GetVwMidTierDashboards(new Query { Filter = $@"i => i.Borough.Contains(@0) || i.HouseNum.Contains(@0) || i.Street.Contains(@0) || i.ProjectType.Contains(@0) || i.JobDescription.Contains(@0) || i.Neighborhood.Contains(@0)", FilterParameters = new object[] { search } });
+            dVwMidTierDashboards = await db_9f8bee_konxdevService.GetVwMidTierDashboards(new Query { Top = 24, Filter = $@"i => i.Borough.Contains(@0) || i.HouseNum.Contains(@0) || i.Street.Contains(@0) || i.ProjectType.Contains(@0) || i.JobDescription.Contains(@0) || i.Neighborhood.Contains(@0)", FilterParameters = new object[] { search } });
         }
 
         protected async Task ExportClick(RadzenSplitButtonItem args)
