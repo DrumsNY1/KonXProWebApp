@@ -183,7 +183,7 @@ public class AlertDispatchFunction
     /// </summary>
     internal static (string Sql, List<SqlParameter> Parameters) BuildWhereClause(AlertUser user)
     {
-        var conditions = new List<string> { "d.LatestActionDate >= DATEADD(day, -1, GETUTCDATE())" };
+        var conditions = new List<string> { "d.PreFilingDate >= DATEADD(day, -1, GETUTCDATE())" };
         var parameters = new List<SqlParameter>();
 
         if (!string.IsNullOrEmpty(user.Boroughs))

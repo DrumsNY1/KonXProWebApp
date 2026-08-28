@@ -133,7 +133,12 @@
                     <span class="value-cell">@filing.InitialCost?.ToString("C0")</span>
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Filed" Width="120px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="PreFilingDate" Title="Filed" Width="120px">
+                <Template Context="filing">
+                    <span class="date-cell">@filing.PreFilingDate?.ToString("MM/dd/yyyy")</span>
+                </Template>
+            </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Last Activity" Width="120px">
                 <Template Context="filing">
                     <span class="date-cell">@filing.LatestActionDate?.ToString("MM/dd/yyyy")</span>
                 </Template>
