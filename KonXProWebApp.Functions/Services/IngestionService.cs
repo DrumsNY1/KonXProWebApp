@@ -14,25 +14,52 @@ namespace KonXProWebApp.Functions.Services;
 public class IngestionService
 {
     private readonly string _connectionString;
+    private readonly string _stagingConnectionString;
     private readonly ILogger<IngestionService> _logger;
 
     public IngestionService(IConfiguration configuration, ILogger<IngestionService> logger)
     {
         _connectionString = configuration["SqlConnectionString"]
             ?? throw new InvalidOperationException("SqlConnectionString not configured");
+        _stagingConnectionString = configuration["StagingSqlConnectionString"];
         _logger = logger;
     }
 
     /// <summary>
     /// Upserts a batch of Socrata records into DOBJobFilings.
     /// Returns (inserted, updated, skipped) counts.
+    /// If a staging connection string is configured, also replicates to the staging database.
     /// </summary>
     public async Task<(int Inserted, int Updated, int Skipped)> UpsertPermits(
         IReadOnlyList<SocrataPermitRecord> records)
     {
+        var (inserted, updated, skipped) = await UpsertPermitsToDatabase(records, _connectionString);
+
+        // Replicate to staging database if configured
+        if (!string.IsNullOrEmpty(_stagingConnectionString))
+        {
+            try
+            {
+                var (sIns, sUpd, sSkip) = await UpsertPermitsToDatabase(records, _stagingConnectionString);
+                _logger.LogInformation(
+                    "Staging replication: +{Inserted} inserted, ~{Updated} updated, -{Skipped} skipped",
+                    sIns, sUpd, sSkip);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Staging replication failed — primary ingestion unaffected");
+            }
+        }
+
+        return (inserted, updated, skipped);
+    }
+
+    private async Task<(int Inserted, int Updated, int Skipped)> UpsertPermitsToDatabase(
+        IReadOnlyList<SocrataPermitRecord> records, string connectionString)
+    {
         int inserted = 0, updated = 0, skipped = 0;
 
-        await using var connection = new SqlConnection(_connectionString);
+        await using var connection = new SqlConnection(connectionString);
         await connection.OpenAsync();
 
         foreach (var record in records)
