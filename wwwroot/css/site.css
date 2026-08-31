@@ -350,7 +350,10 @@ h3 { font-size: var(--text-h3); font-weight: var(--weight-semibold); }
 .status-hot      { background: var(--color-danger-muted);  color: var(--color-danger);  border: 1px solid var(--color-danger-border); }
 .status-open     { background: var(--color-info-muted);    color: var(--color-primary-bright); border: 1px solid var(--color-info-border); }
 .status-reviewing{ background: var(--color-warning-muted); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
-
+.status-active   { background: var(--color-warning-muted); color: var(--color-warning); border: 1px solid var(--color-warning-border); }
+.status-permitted{ background: var(--color-success-muted); color: var(--color-success); border: 1px solid var(--color-success-border); }
+.status-closed   { background: rgba(255,255,255,0.05); color: var(--color-text-muted); border: 1px solid var(--color-border); opacity: 0.6; }
+.status-other    { background: var(--color-info-muted);    color: var(--color-primary-bright); border: 1px solid var(--color-info-border); }
 
 /* ── 9. TABLES ────────────────────────────────────────────────────── */
 table { width: 100%; border-collapse: collapse; }

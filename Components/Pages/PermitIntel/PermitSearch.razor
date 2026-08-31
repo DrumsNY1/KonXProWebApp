@@ -160,9 +160,12 @@
                     }
                 </Template>
             </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="100px">
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="140px">
                 <Template Context="filing">
-                    <span class="status-badge @(filing.JobStatusDescrp?.Contains("NEW") == true ? "status-new" : "status-hot")">@filing.JobStatusDescrp</span>
+                    @{
+                        var (label, cssClass) = GetStatusTier(filing.JobStatusDescrp);
+                    }
+                    <span class="status-badge @cssClass">@label</span>
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">

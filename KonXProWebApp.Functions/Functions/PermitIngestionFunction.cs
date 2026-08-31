@@ -68,15 +68,31 @@ public class PermitIngestionFunction
             const int batchSize = 500;
             int totalFiltered = 0;
 
-            // Only ingest permits filed recently (lead generation focus).
-            // DOB re-processes the entire 1.8M+ dataset with a single dobrundate,
-            // but pre__filing_date is a string field so we filter client-side.
-            // This ensures clients see permits at the START of the application process.
+            // ── Lead-quality filters ──────────────────────────────────────
+            // DOB re-processes the entire 1.8M+ dataset periodically. These
+            // client-side filters ensure we only ingest actionable leads.
             var filingDateCutoff = DateTime.UtcNow.AddDays(-90);
+            var fullyPermittedCutoff = DateTime.UtcNow.AddYears(-1);
 
             await foreach (var record in _socrataClient.GetPermitsSince(since))
             {
-                // Skip permits filed more than 90 days ago — stale leads
+                // 1. Skip completed/signed-off permits — work is finished
+                if (record.JobStatusDescription is "SIGNED OFF" or "COMPLETED")
+                {
+                    totalFiltered++;
+                    continue;
+                }
+
+                // 2. Skip permits fully issued over 1 year ago — contractor already chosen
+                if (!string.IsNullOrEmpty(record.FullyPermitted) &&
+                    DateTime.TryParse(record.FullyPermitted, out var permittedDate) &&
+                    permittedDate < fullyPermittedCutoff)
+                {
+                    totalFiltered++;
+                    continue;
+                }
+
+                // 3. Skip permits filed more than 90 days ago — stale leads
                 if (!string.IsNullOrEmpty(record.PreFilingDate) &&
                     DateTime.TryParse(record.PreFilingDate, out var filingDate) &&
                     filingDate < filingDateCutoff)

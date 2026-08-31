@@ -88,14 +88,14 @@ public partial class PermitIntelService
             items = items.Where(i => i.InitialCost <= query.MaxCost.Value);
         }
 
-        // Date range filter
+        // Date range filter (based on filing date, not last activity)
         if (query.DateFrom.HasValue)
         {
-            items = items.Where(i => i.LatestActionDate >= query.DateFrom.Value);
+            items = items.Where(i => i.PreFilingDate >= query.DateFrom.Value);
         }
         if (query.DateTo.HasValue)
         {
-            items = items.Where(i => i.LatestActionDate <= query.DateTo.Value);
+            items = items.Where(i => i.PreFilingDate <= query.DateTo.Value);
         }
 
         // Building type filter
@@ -107,10 +107,14 @@ public partial class PermitIntelService
         // Get total count before pagination
         var totalCount = await items.CountAsync();
 
-        // Apply ordering
+        // Apply ordering — default to newest filings first
         if (!string.IsNullOrWhiteSpace(query.OrderBy))
         {
             items = items.OrderBy(query.OrderBy);
+        }
+        else
+        {
+            items = items.OrderByDescending(i => i.PreFilingDate);
         }
 
         // Apply pagination

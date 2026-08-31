@@ -153,6 +153,34 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             }
         }
 
+        // Status tier mapping for lead quality display
+        private static (string Label, string CssClass) GetStatusTier(string statusDescription)
+        {
+            return statusDescription switch
+            {
+                "PRE-FILING" or
+                "APPLICATION PROCESSED - ENTIRE" or
+                "APPLICATION PROCESSED - NO PLAN EXAM" or
+                "APPLICATION PROCESSED-PART-NO PAYMENT" or
+                "APPLICATION PROCESSED - PAYMENT ONLY" => ("🔥 HOT", "status-hot"),
+
+                "APPLICATION ASSIGNED TO PLAN EXAMINER" or
+                "PLAN EXAM - IN PROCESS" or
+                "PLAN EXAM - DISAPPROVED" or
+                "PLAN EXAM - PARTIAL APPROVAL" => ("⚡ ACTIVE", "status-active"),
+
+                "PLAN EXAM - APPROVED" or
+                "PERMIT ISSUED - ENTIRE JOB/WORK" or
+                "PERMIT ISSUED - PARTIAL JOB" => ("✅ PERMITTED", "status-permitted"),
+
+                "SIGNED OFF" or
+                "COMPLETED" or
+                "SUSPENDED" => ("⬜ CLOSED", "status-closed"),
+
+                _ => ("📋 " + (statusDescription ?? "UNKNOWN"), "status-other"),
+            };
+        }
+
         // Helper classes
         public class TradeOption
         {
