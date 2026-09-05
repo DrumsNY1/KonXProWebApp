@@ -32,6 +32,7 @@ public partial class PermitIntelService
                 (i.HouseNum != null && i.HouseNum.Contains(search)) ||
                 (i.StreetName != null && i.StreetName.Contains(search)) ||
                 (i.JobDescription != null && i.JobDescription.Contains(search)) ||
+                (i.JobFilingNumber != null && i.JobFilingNumber.Contains(search)) ||
                 (i.Block != null && i.Block.Contains(search)) ||
                 (i.Lot != null && i.Lot.Contains(search)) ||
                 (i.Bin != null && i.Bin.Contains(search)));
@@ -102,6 +103,12 @@ public partial class PermitIntelService
         if (!string.IsNullOrWhiteSpace(query.BuildingType))
         {
             items = items.Where(i => i.BuildingType == query.BuildingType);
+        }
+
+        // Data source filter (DOBNOW, BIS, ALL)
+        if (!string.IsNullOrWhiteSpace(query.DataSource) && query.DataSource != "ALL")
+        {
+            items = items.Where(i => i.DataSource == query.DataSource);
         }
 
         // Get total count before pagination

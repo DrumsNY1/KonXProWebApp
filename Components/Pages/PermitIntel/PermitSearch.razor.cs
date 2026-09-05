@@ -48,6 +48,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected decimal? maxCost;
         protected DateTime? dateFrom;
         protected DateTime? dateTo;
+        protected string selectedSource = "ALL";
 
         // Filter options
         protected List<BoroughOption> boroughOptions = new()
@@ -99,6 +100,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 MaxCost = maxCost,
                 DateFrom = dateFrom,
                 DateTo = dateTo,
+                DataSource = selectedSource,
                 Take = 25
             };
 

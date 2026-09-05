@@ -19,7 +19,17 @@ else
         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
                 <h1>@filing.HouseNum @filing.StreetName, @filing.Borough</h1>
-                <p>Job #@filing.JobNum · @filing.JobStatusDescrp</p>
+                <p>
+                    Job #@(filing.JobFilingNumber ?? filing.JobNum?.ToString()) · @filing.JobStatusDescrp
+                    @if (filing.DataSource == "DOBNOW")
+                    {
+                        <span class="status-badge status-active" style="font-size: 0.7rem; margin-left: 0.5rem;">DOB NOW</span>
+                    }
+                    else
+                    {
+                        <span class="status-badge status-closed" style="font-size: 0.7rem; margin-left: 0.5rem;">BIS</span>
+                    }
+                </p>
             </div>
             <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
                 <RadzenButton Text="@(isLeadSaved ? "Saved ★" : "Save Lead")" Icon="@(isLeadSaved ? "star" : "star_border")"

@@ -139,7 +139,11 @@ else
                     <div class="rz-p-4">
                         <RadzenDataGrid Data="@permitFilings" TItem="DobjobFiling" AllowPaging="true" PageSize="10" AllowSorting="true">
                             <Columns>
-                                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="110px" />
+                                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
+                                    <Template Context="f">
+                                        <span>@(f.JobFilingNumber ?? f.JobNum?.ToString())</span>
+                                    </Template>
+                                </RadzenDataGridColumn>
                                 <RadzenDataGridColumn TItem="DobjobFiling" Property="HouseNum" Title="Address" Width="220px">
                                     <Template Context="f">
                                         <RadzenLink Path="@($"/permit-intel/detail/{f.Id}")" Text="@($"{f.HouseNum} {f.StreetName}")" />

@@ -234,5 +234,8 @@ namespace KonXProWebApp.Models.db_9f8bee_konxdev
 
         [NotMapped]
         public LeadScoreBreakdown LeadScoreBreakdown { get; set; }
+
+        [NotMapped]
+        public string DisplayJobNumber => !string.IsNullOrWhiteSpace(JobFilingNumber) ? JobFilingNumber : JobNum?.ToString();
     }
 }

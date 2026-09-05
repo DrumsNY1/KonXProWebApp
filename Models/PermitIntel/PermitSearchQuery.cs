@@ -24,6 +24,7 @@ public class PermitSearchQuery
     public DateTime? DateTo { get; set; }
 
     public string BuildingType { get; set; }
+    public string DataSource { get; set; }
 
     public int Skip { get; set; }
 

@@ -91,7 +91,7 @@
         </RadzenRow>
 
         <RadzenRow class="rz-mt-4" Gap="1rem">
-            <RadzenColumn Size="12">
+            <RadzenColumn Size="12" SizeMD="8">
                 <RadzenLabel Text="Trades" class="rz-mb-1 rz-display-block" />
                 <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
                     @foreach (var trade in tradeOptions)
@@ -101,6 +101,16 @@
                                              ToggleButtonStyle="Radzen.ButtonStyle.Light" />
                     }
                 </RadzenStack>
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Data Source" class="rz-mb-1 rz-display-block" />
+                <RadzenSelectBar @bind-Value="selectedSource" TValue="string" Size="Radzen.ButtonSize.Small">
+                    <Items>
+                        <RadzenSelectBarItem Text="All" Value="@("ALL")" />
+                        <RadzenSelectBarItem Text="DOB NOW" Value="@("DOBNOW")" />
+                        <RadzenSelectBarItem Text="BIS (Legacy)" Value="@("BIS")" />
+                    </Items>
+                </RadzenSelectBar>
             </RadzenColumn>
         </RadzenRow>
     </div>
@@ -114,7 +124,7 @@
         <Columns>
             <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
                 <Template Context="filing">
-                    <span class="permit-num">@filing.JobNum</span>
+                    <span class="permit-num">@(filing.JobFilingNumber ?? filing.JobNum?.ToString())</span>
                 </Template>
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="250px">

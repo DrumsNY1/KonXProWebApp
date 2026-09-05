@@ -401,4 +401,47 @@ public class PermitIntelServiceTests : IDisposable
         Assert.Contains(summary.BoroughMetrics, b => b.Borough == "BROOKLYN" && b.Count == 1);
         Assert.Equal(3, summary.JobTypeMetrics.Count);
     }
+
+    [Fact]
+    public async Task SearchPermits_DataSourceFilter_FiltersDobNowAndBisCorrectly()
+    {
+        _context.DobjobFilings.AddRange(
+            new DobjobFiling { JobNum = 1001, DataSource = "BIS", Borough = "BROOKLYN" },
+            new DobjobFiling { JobFilingNumber = "B00123456-I1", DataSource = "DOBNOW", Borough = "BROOKLYN" },
+            new DobjobFiling { JobFilingNumber = "M00987654-I1", DataSource = "DOBNOW", Borough = "MANHATTAN" }
+        );
+        await _context.SaveChangesAsync();
+
+        var (dobNowResults, dobNowCount) = await _service.SearchPermits(new PermitSearchQuery { DataSource = "DOBNOW" });
+        Assert.Equal(2, dobNowCount);
+        Assert.All(dobNowResults, r => Assert.Equal("DOBNOW", r.DataSource));
+
+        var (bisResults, bisCount) = await _service.SearchPermits(new PermitSearchQuery { DataSource = "BIS" });
+        Assert.Equal(1, bisCount);
+        Assert.All(bisResults, r => Assert.Equal("BIS", r.DataSource));
+    }
+
+    [Fact]
+    public async Task SearchPermits_SearchText_FindsByJobFilingNumber()
+    {
+        _context.DobjobFilings.AddRange(
+            new DobjobFiling { JobFilingNumber = "B00319790-I1", HouseNum = "100", StreetName = "Broadway", DataSource = "DOBNOW" },
+            new DobjobFiling { JobNum = 555555, HouseNum = "200", StreetName = "5th Ave", DataSource = "BIS" }
+        );
+        await _context.SaveChangesAsync();
+
+        var (results, count) = await _service.SearchPermits(new PermitSearchQuery { SearchText = "B00319790" });
+        Assert.Equal(1, count);
+        Assert.Equal("B00319790-I1", results.First().JobFilingNumber);
+    }
+
+    [Fact]
+    public void DisplayJobNumber_ReturnsJobFilingNumber_WhenPresent()
+    {
+        var dobNowFiling = new DobjobFiling { JobFilingNumber = "B00123456-I1", JobNum = null };
+        var bisFiling = new DobjobFiling { JobFilingNumber = null, JobNum = 123456789 };
+
+        Assert.Equal("B00123456-I1", dobNowFiling.DisplayJobNumber);
+        Assert.Equal("123456789", bisFiling.DisplayJobNumber);
+    }
 }
