@@ -37,18 +37,31 @@ public class DobNowIngestionFunction
     }
 
     [Function("DobNowIngestionHttp")]
-    public async Task<Microsoft.AspNetCore.Mvc.IActionResult> RunHttp(
+    public async Task RunHttp(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post")] Microsoft.AspNetCore.Http.HttpRequest req)
+    {
+        await RunInternal();
+    }
+
+    [Function("DobNowTestHttp")]
+    public async Task<string> RunTest(
+        [HttpTrigger(AuthorizationLevel.Function, "get")] Microsoft.AspNetCore.Http.HttpRequest req)
     {
         try
         {
-            await RunInternal();
-            return new Microsoft.AspNetCore.Mvc.OkObjectResult("DOB NOW ingestion completed successfully");
+            _logger.LogInformation("DobNowTestHttp: starting test...");
+            var since = DateTime.UtcNow.AddDays(-7);
+            int count = 0;
+            await foreach (var record in _socrataClient.GetDobNowFilingsSince(since))
+            {
+                count++;
+                if (count >= 3) break;
+            }
+            return $"OK: fetched {count} DOB NOW records from Socrata since {since:yyyy-MM-dd}";
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "DOB NOW HTTP trigger failed");
-            return new Microsoft.AspNetCore.Mvc.ObjectResult($"DOB NOW ingestion failed: {ex.Message}") { StatusCode = 500 };
+            return $"ERROR: {ex.GetType().Name}: {ex.Message}";
         }
     }
 
