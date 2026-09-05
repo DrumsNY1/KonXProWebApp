@@ -274,6 +274,7 @@ public class StripeService
                     "Everything in Pro",
                     "Unlimited leads",
                     "Map visualization",
+                    "1-Click Owner & Entity Lookup",
                     "Team sharing (up to 5)",
                     "Priority support",
                     "14-day free trial"
@@ -290,6 +291,7 @@ public class StripeService
                 {
                     "Everything in Business",
                     "Unlimited team members",
+                    "1-Click Owner & Entity Lookup",
                     "API access",
                     "Custom integrations",
                     "Dedicated support",

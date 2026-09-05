@@ -37,8 +37,13 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         [Inject]
         public KonXProWebApp.Services.PermitIntelService PermitIntelService { get; set; }
 
+        [Inject]
+        public KonXProWebApp.Services.SubscriptionTierService SubscriptionTierService { get; set; }
+
         protected DobjobFiling filing;
         protected bool isLeadSaved = false;
+        protected bool canAccessOwnerLookup = false;
+        protected string userTier = "Free";
         protected IEnumerable<HpdViolation> hpdViolations = Enumerable.Empty<HpdViolation>();
         protected IEnumerable<DobViolation> dobViolations = Enumerable.Empty<DobViolation>();
         protected IEnumerable<ServiceRequest311> complaints311 = Enumerable.Empty<ServiceRequest311>();
@@ -73,8 +78,37 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 {
                     var leads = await PermitIntelService.GetSavedLeads(userId);
                     isLeadSaved = leads.Any(l => l.DobjobFilingId == Id);
+
+                    userTier = await SubscriptionTierService.GetUserActiveTier(userId);
+                    canAccessOwnerLookup = KonXProWebApp.Services.SubscriptionTierService.CanAccessOwnerLookup(userTier);
+                }
+
+                // Admins or tenantsadmin have full access
+                if (Security.IsInRole("admin") || Security.IsInRole("Admin") || Security.User?.Name == "Admin" || Security.User?.Name == "tenantsadmin")
+                {
+                    canAccessOwnerLookup = true;
+                    if (userTier == "Free") userTier = "Admin";
                 }
             }
+        }
+
+        protected string GetOwnerSearchUrl()
+        {
+            if (filing == null) return "#";
+            var terms = new List<string>();
+            if (!string.IsNullOrWhiteSpace(filing.OwnersFirstName)) terms.Add(filing.OwnersFirstName);
+            if (!string.IsNullOrWhiteSpace(filing.OwnersLastName)) terms.Add(filing.OwnersLastName);
+            if (!string.IsNullOrWhiteSpace(filing.Borough)) terms.Add(filing.Borough);
+            terms.Add("real estate");
+
+            return $"https://www.google.com/search?q={Uri.EscapeDataString(string.Join(" ", terms))}";
+        }
+
+        protected string GetBusinessSearchUrl()
+        {
+            if (filing == null || string.IsNullOrWhiteSpace(filing.OwnersBusinessName)) return "#";
+            var query = $"{filing.OwnersBusinessName} {filing.Borough ?? "NYC"}";
+            return $"https://www.google.com/search?q={Uri.EscapeDataString(query)}";
         }
 
         protected async Task ToggleSaveLead()

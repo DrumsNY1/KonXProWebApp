@@ -73,7 +73,18 @@ public class SubscriptionTierService
             "PermitMap" => TierSatisfiesRequirement(tier, "Business"),
             "InstantAlerts" => TierSatisfiesRequirement(tier, "Pro"),
             "ContractorAnalytics" => TierSatisfiesRequirement(tier, "Starter"),
+            "OwnerLookup" => CanAccessOwnerLookup(tier),
             _ => true
         };
+    }
+
+    /// <summary>
+    /// Checks whether a subscription tier is eligible for 1-click Owner & Business lookup.
+    /// Restricted to the two highest priced tiers: Business ($149) and Agency ($299) (and LandlordCompliance $199).
+    /// </summary>
+    public static bool CanAccessOwnerLookup(string tier)
+    {
+        if (string.IsNullOrEmpty(tier)) return false;
+        return tier is "Business" or "Agency" or "LandlordCompliance";
     }
 }
