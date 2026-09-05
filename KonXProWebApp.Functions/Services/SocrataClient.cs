@@ -34,7 +34,9 @@ public class SocrataClient
     {
         // DOB NOW: Build – Job Application Filings
         // Uses filing_date as the watermark for incremental ingestion
-        return GetRecordsSince<SocrataDobNowRecord>("w9ak-ipjd.json", "filing_date", since, null, maxPages: 50);
+        // Exclude signed-off/withdrawn records server-side to reduce volume
+        string extraWhere = "filing_status NOT IN ('Signed-off', 'Withdrawn')";
+        return GetRecordsSince<SocrataDobNowRecord>("w9ak-ipjd.json", "filing_date", since, extraWhere, maxPages: 50);
     }
 
     public IAsyncEnumerable<SocrataDobViolationRecord> GetDobViolationsSince(DateTime? since)

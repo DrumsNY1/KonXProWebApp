@@ -54,10 +54,10 @@ public class DobNowIngestionFunction
 
         try
         {
-            // DOB NOW filings: look back 90 days for the initial load,
+            // DOB NOW filings: look back 30 days for the initial load,
             // then use the watermark for incremental loads
             var since = await _ingestionService.GetLastIngestionTimestamp();
-            var floor = DateTime.UtcNow.AddDays(-90);
+            var floor = DateTime.UtcNow.AddDays(-30);
             if (!since.HasValue || since.Value < floor)
             {
                 since = floor;
