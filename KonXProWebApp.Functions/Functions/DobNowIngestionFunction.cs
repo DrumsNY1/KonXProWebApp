@@ -31,16 +31,25 @@ public class DobNowIngestionFunction
     /// </summary>
     [Function("DobNowIngestionFunction")]
     public async Task Run(
-        [TimerTrigger("0 30 10 * * *")] TimerInfo timerInfo)
+        [TimerTrigger("0 10 10 * * *")] TimerInfo timerInfo)
     {
         await RunInternal();
     }
 
     [Function("DobNowIngestionHttp")]
-    public async Task RunHttp(
+    public async Task<Microsoft.AspNetCore.Mvc.IActionResult> RunHttp(
         [HttpTrigger(AuthorizationLevel.Function, "get", "post")] Microsoft.AspNetCore.Http.HttpRequest req)
     {
-        await RunInternal();
+        try
+        {
+            await RunInternal();
+            return new Microsoft.AspNetCore.Mvc.OkObjectResult("DOB NOW ingestion completed successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "DOB NOW HTTP trigger failed");
+            return new Microsoft.AspNetCore.Mvc.ObjectResult($"DOB NOW ingestion failed: {ex.Message}") { StatusCode = 500 };
+        }
     }
 
     private async Task RunInternal()
