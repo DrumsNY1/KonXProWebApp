@@ -168,6 +168,18 @@
                     <span class="status-badge @cssClass">@label</span>
                 </Template>
             </RadzenDataGridColumn>
+            <RadzenDataGridColumn TItem="DobjobFiling" Property="DataSource" Title="Source" Width="90px">
+                <Template Context="filing">
+                    @if (filing.DataSource == "DOBNOW")
+                    {
+                        <span class="status-badge status-active" style="font-size: 0.65rem;">DOB NOW</span>
+                    }
+                    else
+                    {
+                        <span class="status-badge status-closed" style="font-size: 0.65rem;">BIS</span>
+                    }
+                </Template>
+            </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">
                 <Template Context="filing">
                     <button class="action-btn" @onclick="() => SaveAsLead(filing)">⭐</button>

@@ -398,6 +398,250 @@ public class IngestionService
         return result as DateTime?;
     }
 
+    /// <summary>
+    /// Upserts a batch of DOB NOW records into DOBJobFilings.
+    /// Uses JobFilingNumber as the MERGE key and sets DataSource = 'DOBNOW'.
+    /// Returns (inserted, updated, skipped) counts.
+    /// </summary>
+    public async Task<(int Inserted, int Updated, int Skipped)> UpsertDobNowFilings(
+        IReadOnlyList<SocrataDobNowRecord> records)
+    {
+        var (inserted, updated, skipped) = await UpsertDobNowToDatabase(records, _connectionString);
+
+        // Replicate to staging database if configured
+        if (!string.IsNullOrEmpty(_stagingConnectionString))
+        {
+            try
+            {
+                var (sIns, sUpd, sSkip) = await UpsertDobNowToDatabase(records, _stagingConnectionString);
+                _logger.LogInformation(
+                    "DOB NOW staging replication: +{Inserted} inserted, ~{Updated} updated, -{Skipped} skipped",
+                    sIns, sUpd, sSkip);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "DOB NOW staging replication failed — primary ingestion unaffected");
+            }
+        }
+
+        return (inserted, updated, skipped);
+    }
+
+    private async Task<(int Inserted, int Updated, int Skipped)> UpsertDobNowToDatabase(
+        IReadOnlyList<SocrataDobNowRecord> records, string connectionString)
+    {
+        int inserted = 0, updated = 0, skipped = 0;
+
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+
+        foreach (var record in records)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(record.JobFilingNumber))
+                {
+                    skipped++;
+                    continue;
+                }
+
+                var result = await UpsertSingleDobNowFiling(connection, record);
+                if (result == UpsertResult.Inserted) inserted++;
+                else if (result == UpsertResult.Updated) updated++;
+                else skipped++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upsert DOB NOW record JobFilingNumber={JobFilingNumber}",
+                    record.JobFilingNumber);
+                skipped++;
+            }
+        }
+
+        return (inserted, updated, skipped);
+    }
+
+    private async Task<UpsertResult> UpsertSingleDobNowFiling(
+        SqlConnection connection, SocrataDobNowRecord record)
+    {
+        const string mergeSql = @"
+            MERGE DOBJobFilings AS target
+            USING (SELECT @JobFilingNumber AS JobFilingNumber) AS source
+            ON target.JobFilingNumber = source.JobFilingNumber
+            WHEN MATCHED THEN UPDATE SET
+                Borough = @Borough,
+                HouseNum = @HouseNum,
+                StreetName = @StreetName,
+                Block = @Block,
+                Lot = @Lot,
+                Bin = @Bin,
+                JobType = @JobType,
+                JobStatus = @JobStatus,
+                JobStatusDescrp = @JobStatusDescrp,
+                LatestActionDate = @LatestActionDate,
+                BuildingType = @BuildingType,
+                CommunityBoard = @CommunityBoard,
+                Plumbing = @Plumbing,
+                Mechanical = @Mechanical,
+                Boiler = @Boiler,
+                Standpipe = @Standpipe,
+                Sprinkler = @Sprinkler,
+                FireAlarm = @FireAlarm,
+                FireSuppression = @FireSuppression,
+                CurbCut = @CurbCut,
+                ApplicantsFirstName = @ApplicantFirstName,
+                ApplicantsLastName = @ApplicantLastName,
+                ApplicantProfessionalTitle = @ApplicantProfessionalTitle,
+                ApplicantLicenseNum = @ApplicantLicenseNum,
+                PreFilingDate = @PreFilingDate,
+                Approved = @Approved,
+                FullyPermitted = @FullyPermitted,
+                SIGNOFFDATE = @SignoffDate,
+                InitialCost = @InitialCost,
+                OwnerType = @OwnerType,
+                OwnersFirstName = @OwnerFirstName,
+                OwnersLastName = @OwnerLastName,
+                OwnersBusinessName = @OwnerBusinessName,
+                City = @City,
+                State = @State,
+                Zip = @Zip,
+                JobDescription = @JobDescription,
+                TOTALCONSTRUCTIONFLOORAREA = @TotalConstructionFloorArea,
+                ExistingDwellingUnits = @ExistingDwellingUnits,
+                ProposedDwellingUnits = @ProposedDwellingUnits,
+                GISLATITUDE = @GisLatitude,
+                GISLONGITUDE = @GisLongitude,
+                GISCOUNCILDISTRICT = @GisCouncilDistrict,
+                GISCENSUSTRACT = @GisCensusTract,
+                GISNTANAME = @GisNtaName,
+                DataSource = 'DOBNOW',
+                LeadScore = @LeadScore
+            WHEN NOT MATCHED THEN INSERT (
+                JobFilingNumber, Borough, HouseNum, StreetName, Block, Lot, Bin,
+                JobType, JobStatus, JobStatusDescrp, LatestActionDate, BuildingType,
+                CommunityBoard, Plumbing, Mechanical, Boiler, Standpipe, Sprinkler,
+                FireAlarm, FireSuppression, CurbCut,
+                ApplicantsFirstName, ApplicantsLastName, ApplicantProfessionalTitle,
+                ApplicantLicenseNum, PreFilingDate, Approved, FullyPermitted, SIGNOFFDATE,
+                InitialCost, OwnerType, OwnersFirstName, OwnersLastName, OwnersBusinessName,
+                City, State, Zip, JobDescription, TOTALCONSTRUCTIONFLOORAREA,
+                ExistingDwellingUnits, ProposedDwellingUnits,
+                GISLATITUDE, GISLONGITUDE, GISCOUNCILDISTRICT, GISCENSUSTRACT, GISNTANAME,
+                DataSource, LeadScore
+            ) VALUES (
+                @JobFilingNumber, @Borough, @HouseNum, @StreetName, @Block, @Lot, @Bin,
+                @JobType, @JobStatus, @JobStatusDescrp, @LatestActionDate, @BuildingType,
+                @CommunityBoard, @Plumbing, @Mechanical, @Boiler, @Standpipe, @Sprinkler,
+                @FireAlarm, @FireSuppression, @CurbCut,
+                @ApplicantFirstName, @ApplicantLastName, @ApplicantProfessionalTitle,
+                @ApplicantLicenseNum, @PreFilingDate, @Approved, @FullyPermitted, @SignoffDate,
+                @InitialCost, @OwnerType, @OwnerFirstName, @OwnerLastName, @OwnerBusinessName,
+                @City, @State, @Zip, @JobDescription, @TotalConstructionFloorArea,
+                @ExistingDwellingUnits, @ProposedDwellingUnits,
+                @GisLatitude, @GisLongitude, @GisCouncilDistrict, @GisCensusTract, @GisNtaName,
+                'DOBNOW', @LeadScore
+            )
+            OUTPUT $action;";
+
+        await using var cmd = new SqlCommand(mergeSql, connection);
+        AddDobNowParameters(cmd, record);
+
+        var action = (string)await cmd.ExecuteScalarAsync();
+        return action switch
+        {
+            "INSERT" => UpsertResult.Inserted,
+            "UPDATE" => UpsertResult.Updated,
+            _ => UpsertResult.Skipped
+        };
+    }
+
+    private void AddDobNowParameters(SqlCommand cmd, SocrataDobNowRecord r)
+    {
+        // Normalize borough to uppercase for consistency with BIS data
+        var borough = r.Borough?.ToUpperInvariant() switch
+        {
+            "BROOKLYN" => "BROOKLYN",
+            "MANHATTAN" => "MANHATTAN",
+            "QUEENS" => "QUEENS",
+            "BRONX" => "BRONX",
+            "STATEN ISLAND" => "STATEN ISLAND",
+            _ => r.Borough?.ToUpperInvariant()
+        };
+
+        // Convert YES/NO trade flags to X/null matching BIS convention
+        static object TradeFlag(string val) =>
+            string.Equals(val, "YES", StringComparison.OrdinalIgnoreCase) ? (object)"X" : DBNull.Value;
+
+        cmd.Parameters.AddWithValue("@JobFilingNumber", r.JobFilingNumber);
+        cmd.Parameters.AddWithValue("@Borough", (object)borough ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@HouseNum", (object)r.HouseNumber ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@StreetName", (object)r.StreetName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@Block", (object)r.Block ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@Lot", (object)r.Lot ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@Bin", (object)r.Bin ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@JobType", (object)r.JobType ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@JobStatus", (object)r.FilingStatus ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@JobStatusDescrp", (object)r.FilingStatus ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@LatestActionDate", (object)ParseIsoDate(r.CurrentStatusDate) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@BuildingType", (object)r.BuildingType ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@CommunityBoard", (object)r.CommunityBoard ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@Plumbing", TradeFlag(r.Plumbing));
+        cmd.Parameters.AddWithValue("@Mechanical", TradeFlag(r.Mechanical));
+        cmd.Parameters.AddWithValue("@Boiler", TradeFlag(r.Boiler));
+        cmd.Parameters.AddWithValue("@Standpipe", TradeFlag(r.Standpipe));
+        cmd.Parameters.AddWithValue("@Sprinkler", TradeFlag(r.Sprinkler));
+        cmd.Parameters.AddWithValue("@FireAlarm", TradeFlag(r.FireAlarm));
+        cmd.Parameters.AddWithValue("@FireSuppression", TradeFlag(r.FireSuppression));
+        cmd.Parameters.AddWithValue("@CurbCut", TradeFlag(r.CurbCut));
+        cmd.Parameters.AddWithValue("@ApplicantFirstName", (object)r.ApplicantFirstName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ApplicantLastName", (object)r.ApplicantLastName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ApplicantProfessionalTitle", (object)r.ApplicantProfessionalTitle ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ApplicantLicenseNum", (object)r.ApplicantLicense ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@PreFilingDate", (object)ParseIsoDate(r.FilingDate) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@Approved", (object)ParseIsoDate(r.ApprovedDate) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@FullyPermitted", (object)ParseIsoDate(r.FirstPermitDate) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@SignoffDate", (object)ParseIsoDate(r.SignoffDate) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@InitialCost", (object)ParseCurrency(r.InitialCost) ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@OwnerType", (object)r.OwnerType ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@OwnerFirstName", (object)r.OwnerFirstName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@OwnerLastName", (object)r.OwnerLastName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@OwnerBusinessName", (object)r.OwnerBusinessName ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@City", (object)r.City ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@State", (object)r.State ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@Zip", (object)r.Zip ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@JobDescription", (object)r.JobDescription ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@TotalConstructionFloorArea", (object)r.TotalConstructionFloorArea ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ExistingDwellingUnits", (object)r.ExistingDwellingUnits ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@ProposedDwellingUnits", (object)r.ProposedDwellingUnits ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@GisLatitude", (object)r.Latitude ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@GisLongitude", (object)r.Longitude ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@GisCouncilDistrict", (object)r.CouncilDistrict ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@GisCensusTract", (object)r.CensusTract ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@GisNtaName", (object)r.Nta ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("@LeadScore", ComputeDobNowLeadScore(r));
+    }
+
+    private static int ComputeDobNowLeadScore(SocrataDobNowRecord r)
+    {
+        int score = 2; // Base score for DOB NOW (newer data = higher baseline)
+
+        // Boost for estimated cost
+        if (decimal.TryParse(r.InitialCost, out var cost))
+        {
+            if (cost >= 100_000) score += 2;
+            else if (cost >= 25_000) score += 1;
+        }
+
+        // Boost for active status (not yet signed off)
+        if (r.FilingStatus is not null &&
+            !r.FilingStatus.Contains("Signed", StringComparison.OrdinalIgnoreCase))
+        {
+            score += 1;
+        }
+
+        return Math.Min(score, 5);
+    }
+
     public async Task<(int Inserted, int Updated, int Skipped)> UpsertDobViolations(IReadOnlyList<SocrataDobViolationRecord> records)
     {
         int inserted = 0, updated = 0, skipped = 0;

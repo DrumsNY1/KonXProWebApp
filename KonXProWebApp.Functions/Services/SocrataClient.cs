@@ -30,6 +30,13 @@ public class SocrataClient
         return GetRecordsSince<SocrataPermitRecord>("ic3t-wcy2.json", "dobrundate", since, null, maxPages: 50);
     }
 
+    public IAsyncEnumerable<SocrataDobNowRecord> GetDobNowFilingsSince(DateTime? since)
+    {
+        // DOB NOW: Build – Job Application Filings
+        // Uses filing_date as the watermark for incremental ingestion
+        return GetRecordsSince<SocrataDobNowRecord>("w9ak-ipjd.json", "filing_date", since, null, maxPages: 50);
+    }
+
     public IAsyncEnumerable<SocrataDobViolationRecord> GetDobViolationsSince(DateTime? since)
     {
         // Issue Date for DOB Violations

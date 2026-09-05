@@ -153,31 +153,51 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             }
         }
 
-        // Status tier mapping for lead quality display
+        // Status tier mapping for lead quality display (BIS + DOB NOW statuses)
         private static (string Label, string CssClass) GetStatusTier(string statusDescription)
         {
-            return statusDescription switch
+            if (string.IsNullOrEmpty(statusDescription))
+                return ("📋 UNKNOWN", "status-other");
+
+            // Normalize for case-insensitive matching (DOB NOW uses mixed case)
+            var upper = statusDescription.ToUpperInvariant();
+
+            return upper switch
             {
+                // HOT — earliest stage, owner just started
                 "PRE-FILING" or
                 "APPLICATION PROCESSED - ENTIRE" or
                 "APPLICATION PROCESSED - NO PLAN EXAM" or
                 "APPLICATION PROCESSED-PART-NO PAYMENT" or
-                "APPLICATION PROCESSED - PAYMENT ONLY" => ("🔥 HOT", "status-hot"),
+                "APPLICATION PROCESSED - PAYMENT ONLY" or
+                "IN PROCESS" or                          // DOB NOW filing status
+                "INCOMPLETE" => ("🔥 HOT", "status-hot"),
 
+                // ACTIVE — plan review in progress
                 "APPLICATION ASSIGNED TO PLAN EXAMINER" or
                 "PLAN EXAM - IN PROCESS" or
                 "PLAN EXAM - DISAPPROVED" or
-                "PLAN EXAM - PARTIAL APPROVAL" => ("⚡ ACTIVE", "status-active"),
+                "PLAN EXAM - PARTIAL APPROVAL" or
+                "DISAPPROVED" or                         // DOB NOW filing status
+                "OBJECTIONS" or                          // DOB NOW filing status
+                "PAA APPROVAL" => ("⚡ ACTIVE", "status-active"),
 
+                // PERMITTED — approved or issued
                 "PLAN EXAM - APPROVED" or
                 "PERMIT ISSUED - ENTIRE JOB/WORK" or
-                "PERMIT ISSUED - PARTIAL JOB" => ("✅ PERMITTED", "status-permitted"),
+                "PERMIT ISSUED - PARTIAL JOB" or
+                "APPROVED" or                            // DOB NOW filing status
+                "PERMIT ISSUED" or                       // DOB NOW filing status
+                "LOC ISSUED" => ("✅ PERMITTED", "status-permitted"),
 
+                // CLOSED — work complete
                 "SIGNED OFF" or
+                "SIGNED-OFF" or                          // DOB NOW uses hyphenated form
                 "COMPLETED" or
-                "SUSPENDED" => ("⬜ CLOSED", "status-closed"),
+                "SUSPENDED" or
+                "WITHDRAWN" => ("⬜ CLOSED", "status-closed"),
 
-                _ => ("📋 " + (statusDescription ?? "UNKNOWN"), "status-other"),
+                _ => ("📋 " + statusDescription, "status-other"),
             };
         }
 
