@@ -60,7 +60,7 @@ public class HpdViolationIngestionFunction
             {
                 // Manual windowed run — use the exact since date provided
                 since = sinceOverride.Value;
-                _logger.LogInformation("HPD windowed run: {Since} → {Until}", since.ToString("o"),
+                _logger.LogInformation("HPD windowed run: {Since} to {Until}", since.ToString("o"),
                     untilOverride?.ToString("o") ?? "now");
             }
             else
