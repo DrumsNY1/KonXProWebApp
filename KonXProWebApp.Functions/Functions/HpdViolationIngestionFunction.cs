@@ -23,16 +23,28 @@ public class HpdViolationIngestionFunction
     [Function("HpdViolationIngestionFunction")]
     public async Task Run([TimerTrigger("0 30 10 * * *")] TimerInfo timerInfo)
     {
-        await RunInternal();
+        await RunInternal(null, null);
     }
 
     [Function("HpdViolationIngestionHttp")]
     public async Task RunHttp([HttpTrigger(AuthorizationLevel.Function, "get", "post")] Microsoft.AspNetCore.Http.HttpRequest req)
     {
-        await RunInternal();
+        // Optional ?since=2026-08-01&until=2026-08-22 for windowed manual backfills
+        DateTime? sinceOverride = null;
+        DateTime? untilOverride = null;
+
+        if (req.Query.TryGetValue("since", out var sinceStr) &&
+            DateTime.TryParse(sinceStr, out var parsedSince))
+            sinceOverride = parsedSince;
+
+        if (req.Query.TryGetValue("until", out var untilStr) &&
+            DateTime.TryParse(untilStr, out var parsedUntil))
+            untilOverride = parsedUntil;
+
+        await RunInternal(sinceOverride, untilOverride);
     }
 
-    private async Task RunInternal()
+    private async Task RunInternal(DateTime? sinceOverride, DateTime? untilOverride)
     {
         _logger.LogInformation("HpdViolationIngestionFunction started at {Time}", DateTime.UtcNow);
 
@@ -43,18 +55,27 @@ public class HpdViolationIngestionFunction
 
         try
         {
-            // Use per-type watermark so this function tracks independently from permits.
-            // Fall back to 45-day window on first run or after a long gap.
-            var lastRun = await _ingestionService.GetLastIngestionTimestampByType("HPDViolation");
-            var fallback = DateTime.UtcNow.AddDays(-45);
-            var since = (lastRun.HasValue && lastRun.Value > fallback) ? lastRun.Value : fallback;
-
-            _logger.LogInformation("HPD delta load since: {Since}", since.ToString("o"));
+            DateTime since;
+            if (sinceOverride.HasValue)
+            {
+                // Manual windowed run — use the exact since date provided
+                since = sinceOverride.Value;
+                _logger.LogInformation("HPD windowed run: {Since} to {Until}", since.ToString("o"),
+                    untilOverride?.ToString("o") ?? "now");
+            }
+            else
+            {
+                // Timer run — use per-type watermark with 45-day fallback
+                var lastRun = await _ingestionService.GetLastIngestionTimestampByType("HPDViolation");
+                var fallback = DateTime.UtcNow.AddDays(-45);
+                since = (lastRun.HasValue && lastRun.Value > fallback) ? lastRun.Value : fallback;
+                _logger.LogInformation("HPD delta load since: {Since}", since.ToString("o"));
+            }
 
             var batch = new List<Models.SocrataHpdViolationRecord>();
             const int batchSize = 500;
 
-            await foreach (var record in _socrataClient.GetHpdViolationsSince(since))
+            await foreach (var record in _socrataClient.GetHpdViolationsSince(since, untilOverride))
             {
                 batch.Add(record);
 

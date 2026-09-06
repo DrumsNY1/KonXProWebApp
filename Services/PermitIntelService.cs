@@ -130,11 +130,65 @@ public partial class PermitIntelService
             .Take(query.Take)
             .ToListAsync();
 
+        // ── Batched enrichment (replaces per-row awaited DB calls that caused the
+        //    "second operation started on this context" concurrency exception) ──
+
+        // Collect all distinct BINs and BBLs up front
+        var allBins = results
+            .Where(r => !string.IsNullOrWhiteSpace(r.Bin))
+            .Select(r => r.Bin!.Trim())
+            .Distinct()
+            .ToList();
+
+        var allBbls = results
+            .Select(GetBblFromFiling)
+            .Where(b => b != null)
+            .Distinct()
+            .ToList();
+
+        var cutoff = DateTime.UtcNow.AddDays(-90);
+
+        // Single batched query: 311 complaint velocity per BBL
+        var complaintVelocityByBbl = await context.ServiceRequests311
+            .Where(s => allBbls.Contains(s.Bbl) && s.CreatedDate >= cutoff)
+            .GroupBy(s => s.Bbl)
+            .Select(g => new { Bbl = g.Key, Count = g.Count() })
+            .AsNoTracking()
+            .ToDictionaryAsync(g => g.Bbl!, g => g.Count);
+
+        // Single batched query: DOB violation count per BIN
+        var dobCountByBin = await context.DobViolations
+            .Where(v => allBins.Contains(v.Bin.Trim()))
+            .GroupBy(v => v.Bin.Trim())
+            .Select(g => new { Bin = g.Key, Count = g.Count() })
+            .AsNoTracking()
+            .ToDictionaryAsync(g => g.Bin, g => g.Count);
+
+        // Single batched query: HPD violations per BIN (need Class for Class-C count)
+        var hpdByBin = await context.HpdViolations
+            .Where(v => allBins.Contains(v.Bin.Trim()))
+            .Select(v => new { Bin = v.Bin.Trim(), v.Class })
+            .AsNoTracking()
+            .ToListAsync();
+
+        var hpdCountByBin = hpdByBin
+            .GroupBy(v => v.Bin)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var hpdClassCCountByBin = hpdByBin
+            .GroupBy(v => v.Bin)
+            .ToDictionary(g => g.Key, g => g.Count(v => v.Class == "C"));
+
+        // Score all results in memory — no further DB calls needed
         foreach (var r in results)
         {
             var bbl = GetBblFromFiling(r);
-            var velocity = await Get311ComplaintVelocity(bbl);
-            var (dobCount, hpdCount, hpdClassCCount) = await GetViolationSummaryByBin(r.Bin);
+            var bin = r.Bin?.Trim() ?? string.Empty;
+
+            var velocity = bbl != null && complaintVelocityByBbl.TryGetValue(bbl, out var v) ? v : 0;
+            var dobCount = dobCountByBin.TryGetValue(bin, out var d) ? d : 0;
+            var hpdClassCCount = hpdClassCCountByBin.TryGetValue(bin, out var h) ? h : 0;
+
             var breakdown = ScorePermitDetailed(r, velocity, dobCount, hpdClassCCount);
             r.LeadScoreBreakdown = breakdown;
             r.LeadScore = breakdown.TotalScore;

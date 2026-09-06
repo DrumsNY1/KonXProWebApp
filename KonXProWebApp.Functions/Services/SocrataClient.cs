@@ -45,9 +45,12 @@ public class SocrataClient
         return GetRecordsSince<SocrataDobViolationRecord>("cepu-5g8r.json", "issue_date", since, null);
     }
 
-    public IAsyncEnumerable<SocrataHpdViolationRecord> GetHpdViolationsSince(DateTime? since)
+    public IAsyncEnumerable<SocrataHpdViolationRecord> GetHpdViolationsSince(DateTime? since, DateTime? until = null)
     {
-        return GetRecordsSince<SocrataHpdViolationRecord>("csn4-vhvf.json", "inspectiondate", since, null);
+        string extraWhere = until.HasValue
+            ? $"inspectiondate<='{until.Value:yyyy-MM-ddTHH:mm:ss.000}'"
+            : null;
+        return GetRecordsSince<SocrataHpdViolationRecord>("csn4-vhvf.json", "inspectiondate", since, extraWhere);
     }
 
     public IAsyncEnumerable<SocrataServiceRequest311> GetBuilding311ComplaintsSince(DateTime? since)
