@@ -38,14 +38,18 @@ public class DobViolationIngestionFunction
 
         int totalInserted = 0, totalUpdated = 0, totalSkipped = 0;
         DateTime? lastTimestamp = null;
-        string status = "Success";
+        string status = "DOBViolation_Success";
         string errorMessage = null;
 
         try
         {
-            // Just doing a full sync for the last 30 days to keep it simple, or based on watermark
-            // For now let's say we pull the last 30 days of issue_date
-            var since = DateTime.UtcNow.AddDays(-30);
+            // Use per-type watermark so DOB Violations track independently.
+            // Fall back to 45-day window on first run or after a long gap.
+            var lastRun = await _ingestionService.GetLastIngestionTimestampByType("DOBViolation");
+            var fallback = DateTime.UtcNow.AddDays(-45);
+            var since = (lastRun.HasValue && lastRun.Value > fallback) ? lastRun.Value : fallback;
+
+            _logger.LogInformation("DOB Violation delta load since: {Since}", since.ToString("o"));
 
             var batch = new List<Models.SocrataDobViolationRecord>();
             const int batchSize = 500;
@@ -67,6 +71,7 @@ public class DobViolationIngestionFunction
                     totalInserted += ins;
                     totalUpdated += upd;
                     totalSkipped += skip;
+                    _logger.LogInformation("Batch: +{Ins} inserted, ~{Upd} updated, -{Skip} skipped", ins, upd, skip);
                     batch.Clear();
                 }
             }
@@ -78,20 +83,25 @@ public class DobViolationIngestionFunction
                 totalUpdated += upd;
                 totalSkipped += skip;
             }
+
+            _logger.LogInformation(
+                "DOB Violation ingestion complete: {Inserted} inserted, {Updated} updated, {Skipped} skipped",
+                totalInserted, totalUpdated, totalSkipped);
         }
         catch (Exception ex)
         {
-            status = "Failed";
+            status = "DOBViolation_Failed";
             errorMessage = ex.Message;
-            _logger.LogError(ex, "Ingestion failed");
+            _logger.LogError(ex, "DOB violation ingestion failed");
         }
 
-        if (lastTimestamp == null && status == "Success")
+        if (lastTimestamp == null && status == "DOBViolation_Success")
         {
             _logger.LogInformation("No new DOB violations found. Watermark not advanced.");
         }
+
         await _ingestionService.LogIngestionRun(
             totalInserted, totalUpdated, totalSkipped,
-            "DOBViolation_" + status, errorMessage, lastTimestamp);
+            status, errorMessage, lastTimestamp);
     }
 }

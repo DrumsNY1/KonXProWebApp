@@ -399,6 +399,27 @@ public class IngestionService
     }
 
     /// <summary>
+    /// Gets the last successful ingestion timestamp for a specific ingestion type.
+    /// statusPrefix examples: "DOBViolation", "HPDViolation", "ServiceRequest311", "DobNow"
+    /// </summary>
+    public async Task<DateTime?> GetLastIngestionTimestampByType(string statusPrefix)
+    {
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        const string sql = @"
+            SELECT TOP 1 LastSocrataTimestamp
+            FROM IngestionLogs
+            WHERE Status LIKE @StatusPattern AND LastSocrataTimestamp IS NOT NULL
+            ORDER BY RunDate DESC";
+
+        await using var cmd = new SqlCommand(sql, connection);
+        cmd.Parameters.AddWithValue("@StatusPattern", statusPrefix + "%");
+        var result = await cmd.ExecuteScalarAsync();
+        return result as DateTime?;
+    }
+
+    /// <summary>
     /// Upserts a batch of DOB NOW records into DOBJobFilings.
     /// Uses JobFilingNumber as the MERGE key and sets DataSource = 'DOBNOW'.
     /// Returns (inserted, updated, skipped) counts.
@@ -640,6 +661,67 @@ public class IngestionService
         }
 
         return Math.Min(score, 5);
+    }
+
+    /// <summary>
+    /// Upserts a batch of 311 Service Request records into ServiceRequests311.
+    /// Uses UniqueKey as the MERGE key to avoid duplicates.
+    /// Returns (inserted, updated, skipped) counts.
+    /// </summary>
+    public async Task<(int Inserted, int Updated, int Skipped)> UpsertServiceRequests311(IReadOnlyList<SocrataServiceRequest311> records)
+    {
+        int inserted = 0, updated = 0, skipped = 0;
+        await using var connection = new SqlConnection(_connectionString);
+        await connection.OpenAsync();
+
+        foreach (var record in records)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(record.UniqueKey)) { skipped++; continue; }
+
+                const string mergeSql = @"
+                    MERGE ServiceRequests311 AS target
+                    USING (SELECT @UniqueKey AS UniqueKey) AS source
+                    ON target.UniqueKey = source.UniqueKey
+                    WHEN MATCHED THEN UPDATE SET
+                        CreatedDate = @CreatedDate, ClosedDate = @ClosedDate, Agency = @Agency,
+                        ComplaintType = @ComplaintType, Descriptor = @Descriptor,
+                        IncidentZip = @IncidentZip, IncidentAddress = @IncidentAddress,
+                        Borough = @Borough, Bbl = @Bbl, Status = @Status
+                    WHEN NOT MATCHED THEN INSERT (
+                        UniqueKey, CreatedDate, ClosedDate, Agency, ComplaintType,
+                        Descriptor, IncidentZip, IncidentAddress, Borough, Bbl, Status
+                    ) VALUES (
+                        @UniqueKey, @CreatedDate, @ClosedDate, @Agency, @ComplaintType,
+                        @Descriptor, @IncidentZip, @IncidentAddress, @Borough, @Bbl, @Status
+                    ) OUTPUT $action;";
+
+                await using var cmd = new SqlCommand(mergeSql, connection);
+                cmd.Parameters.AddWithValue("@UniqueKey", record.UniqueKey);
+                cmd.Parameters.AddWithValue("@CreatedDate", (object)record.CreatedDate ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ClosedDate", (object)record.ClosedDate ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Agency", (object)record.Agency ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@ComplaintType", (object)record.ComplaintType ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Descriptor", (object)record.Descriptor ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IncidentZip", (object)record.IncidentZip ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IncidentAddress", (object)record.IncidentAddress ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Borough", (object)record.Borough ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Bbl", (object)record.Bbl ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Status", (object)record.Status ?? DBNull.Value);
+
+                var action = (string)await cmd.ExecuteScalarAsync();
+                if (action == "INSERT") inserted++;
+                else if (action == "UPDATE") updated++;
+                else skipped++;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to upsert 311 request {UniqueKey}", record.UniqueKey);
+                skipped++;
+            }
+        }
+        return (inserted, updated, skipped);
     }
 
     public async Task<(int Inserted, int Updated, int Skipped)> UpsertDobViolations(IReadOnlyList<SocrataDobViolationRecord> records)

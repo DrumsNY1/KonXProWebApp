@@ -38,13 +38,18 @@ public class HpdViolationIngestionFunction
 
         int totalInserted = 0, totalUpdated = 0, totalSkipped = 0;
         DateTime? lastTimestamp = null;
-        string status = "Success";
+        string status = "HPDViolation_Success";
         string errorMessage = null;
 
         try
         {
-            // Pull violations created/updated in the last 30 days
-            var since = DateTime.UtcNow.AddDays(-30);
+            // Use per-type watermark so this function tracks independently from permits.
+            // Fall back to 45-day window on first run or after a long gap.
+            var lastRun = await _ingestionService.GetLastIngestionTimestampByType("HPDViolation");
+            var fallback = DateTime.UtcNow.AddDays(-45);
+            var since = (lastRun.HasValue && lastRun.Value > fallback) ? lastRun.Value : fallback;
+
+            _logger.LogInformation("HPD delta load since: {Since}", since.ToString("o"));
 
             var batch = new List<Models.SocrataHpdViolationRecord>();
             const int batchSize = 500;
@@ -66,6 +71,7 @@ public class HpdViolationIngestionFunction
                     totalInserted += ins;
                     totalUpdated += upd;
                     totalSkipped += skip;
+                    _logger.LogInformation("Batch: +{Ins} inserted, ~{Upd} updated, -{Skip} skipped", ins, upd, skip);
                     batch.Clear();
                 }
             }
@@ -77,20 +83,25 @@ public class HpdViolationIngestionFunction
                 totalUpdated += upd;
                 totalSkipped += skip;
             }
+
+            _logger.LogInformation(
+                "HPD ingestion complete: {Inserted} inserted, {Updated} updated, {Skipped} skipped",
+                totalInserted, totalUpdated, totalSkipped);
         }
         catch (Exception ex)
         {
-            status = "Failed";
+            status = "HPDViolation_Failed";
             errorMessage = ex.Message;
-            _logger.LogError(ex, "Ingestion failed");
+            _logger.LogError(ex, "HPD violation ingestion failed");
         }
 
-        if (lastTimestamp == null && status == "Success")
+        if (lastTimestamp == null && status == "HPDViolation_Success")
         {
             _logger.LogInformation("No new HPD violations found. Watermark not advanced.");
         }
+
         await _ingestionService.LogIngestionRun(
             totalInserted, totalUpdated, totalSkipped,
-            "HPDViolation_" + status, errorMessage, lastTimestamp);
+            status, errorMessage, lastTimestamp);
     }
 }
