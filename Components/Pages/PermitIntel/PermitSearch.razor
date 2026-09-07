@@ -16,21 +16,21 @@
     <div class="stat-card">
         <div class="stat-label-sm">⚡ New Leads Today</div>
         <div class="stat-value">@($"{totalCount:N0}")</div>
-        <div class="stat-change up">↑ +12 vs yesterday</div>
+        <div class="stat-change neutral">matching your criteria</div>
     </div>
     <div class="stat-card">
         <div class="stat-label-sm">📋 Active Permits</div>
-        <div class="stat-value">1,284</div>
-        <div class="stat-change up">↑ +89 this week</div>
+        <div class="stat-value">@($"{activePermitsCount:N0}")</div>
+        <div class="stat-change neutral">in database</div>
     </div>
     <div class="stat-card">
         <div class="stat-label-sm">💰 Est. Job Value</div>
-        <div class="stat-value text-h2">$8.4M</div>
-        <div class="stat-change up">↑ in active permits</div>
+        <div class="stat-value text-h2">@FormatCurrency(totalJobValue)</div>
+        <div class="stat-change neutral">across all permits</div>
     </div>
     <div class="stat-card">
         <div class="stat-label-sm">📌 My Pipeline</div>
-        <div class="stat-value">12</div>
+        <div class="stat-value">@($"{savedLeadCount:N0}")</div>
         <div class="stat-change neutral">leads being tracked</div>
     </div>
 </div>
