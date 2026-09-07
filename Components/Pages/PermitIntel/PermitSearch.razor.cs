@@ -41,6 +41,9 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected IEnumerable<DobjobFiling> permits;
         protected RadzenDataGrid<DobjobFiling> grid0;
         protected int totalCount = 0;
+        protected int activePermitsCount = 0;
+        protected decimal totalJobValue = 0m;
+        protected int savedLeadCount = 0;
 
         // Filter state
         protected string searchText = "";
@@ -86,6 +89,19 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         {
             // dateFrom = DateTime.Today.AddDays(-30); // Commented out to allow older test data to load
             await SearchPermits();
+            await LoadHeaderStats();
+        }
+
+        private async Task LoadHeaderStats()
+        {
+            var summary = await PermitIntelService.GetAnalyticsSummary();
+            activePermitsCount = summary.TotalFilingsCount;
+            totalJobValue = summary.TotalJobCost;
+
+            var userId = Security.User?.Id;
+            savedLeadCount = !string.IsNullOrEmpty(userId)
+                ? await PermitIntelService.GetSavedLeadCount(userId)
+                : 0;
         }
 
         protected async Task SearchPermits()
@@ -127,6 +143,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
                 var userId = Security.User.Id;
                 await PermitIntelService.SaveLead(userId, filing.Id);
+                savedLeadCount = await PermitIntelService.GetSavedLeadCount(userId);
                 NotificationService.Notify(NotificationSeverity.Success, "Lead Saved", $"{filing.HouseNum} {filing.StreetName} added to your leads.");
             }
             catch (Exception ex)
@@ -201,6 +218,18 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
                 _ => ("📋 " + statusDescription, "status-other"),
             };
+        }
+
+        // Currency formatting for stat cards (e.g. $8.4M, $450K, $1,200)
+        private static string FormatCurrency(decimal value)
+        {
+            if (value >= 1_000_000_000m)
+                return $"${value / 1_000_000_000m:0.#}B";
+            if (value >= 1_000_000m)
+                return $"${value / 1_000_000m:0.#}M";
+            if (value >= 1_000m)
+                return $"${value / 1_000m:0.#}K";
+            return value.ToString("C0");
         }
 
         // Helper classes
