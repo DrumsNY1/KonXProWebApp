@@ -95,4 +95,80 @@ public class PermitSearchComponentTests : TestContext
         Assert.Equal(NotificationSeverity.Warning, captured!.Severity);
         Assert.Equal(0, _context.SavedLeads.Count());
     }
+
+    [Fact]
+    public void FilterSummaryBar_HiddenWhenNoFiltersActive()
+    {
+        var cut = RenderComponent<PermitSearch>();
+
+        // No filters active → bar should not be in the DOM
+        Assert.DoesNotContain("filter-summary-bar", cut.Markup);
+        Assert.DoesNotContain("Clear All", cut.Markup);
+    }
+
+    [Fact]
+    public void FilterSummaryBar_ShowsCountAndResultsWhenFiltersActive()
+    {
+        _context.DobjobFilings.Add(new DobjobFiling
+        {
+            JobNum = 700010,
+            Borough = "BROOKLYN",
+            HouseNum = "100",
+            StreetName = "FILTER TEST ST",
+            JobType = "A1",
+            LatestActionDate = DateTime.UtcNow
+        });
+        _context.SaveChanges();
+
+        var cut = RenderComponent<PermitSearch>();
+
+        // Programmatically toggle a borough filter
+        var instance = cut.Instance;
+        var brooklynOption = instance.GetType()
+            .GetField("boroughOptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!
+            .GetValue(instance) as System.Collections.IList;
+        dynamic option = brooklynOption![1]; // "BROOKLYN"
+        option.Selected = true;
+
+        // Re-render after filter change
+        cut.Render();
+
+        Assert.Contains("filter-summary-bar", cut.Markup);
+        Assert.Contains("1 filter active", cut.Markup);
+        Assert.Contains("BROOKLYN", cut.Markup);
+        Assert.Contains("Clear All", cut.Markup);
+    }
+
+    [Fact]
+    public void ClearAllFilters_ResetsAllOptionsAndHidesBar()
+    {
+        var cut = RenderComponent<PermitSearch>();
+
+        // Select a few filters via reflection
+        var instance = cut.Instance;
+        var boroughField = instance.GetType()
+            .GetField("boroughOptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        var boroughs = boroughField.GetValue(instance) as System.Collections.IList;
+        dynamic manhattan = boroughs![0];
+        manhattan.Selected = true;
+
+        var tradeField = instance.GetType()
+            .GetField("tradeOptions", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)!;
+        var trades = tradeField.GetValue(instance) as System.Collections.IList;
+        dynamic plumbing = trades![0];
+        plumbing.Selected = true;
+
+        cut.Render();
+
+        // Bar should be visible with 2 filters
+        Assert.Contains("filter-summary-bar", cut.Markup);
+        Assert.Contains("2 filters active", cut.Markup);
+
+        // Click Clear All
+        var clearBtn = cut.Find("button.filter-clear-all");
+        clearBtn.Click();
+
+        // After clear, bar should disappear
+        Assert.DoesNotContain("filter-summary-bar", cut.Markup);
+    }
 }

@@ -115,6 +115,56 @@
         </RadzenRow>
     </div>
 
+    @* ── Filter Summary Bar (visible only when filters are active) ── *@
+    @if (ActiveFilterCount > 0)
+    {
+        <div class="filter-summary-bar">
+            <div class="filter-summary-info">
+                <span class="filter-summary-badge">@ActiveFilterCount filter@(ActiveFilterCount != 1 ? "s" : "") active</span>
+                <span class="filter-summary-sep">·</span>
+                <span class="filter-summary-results">@($"{totalCount:N0}") results</span>
+            </div>
+            <div class="filter-summary-pills">
+                @foreach (var b in boroughOptions.Where(x => x.Selected))
+                {
+                    var captured = b;
+                    <button class="filter-pill" @onclick="() => RemoveFilter(captured)" aria-label="@($"Remove {b.Name} filter")">@b.Name ×</button>
+                }
+                @foreach (var j in jobTypeOptions.Where(x => x.Selected))
+                {
+                    var captured = j;
+                    <button class="filter-pill" @onclick="() => RemoveFilter(captured)" aria-label="@($"Remove {j.Name} filter")">@j.Name ×</button>
+                }
+                @foreach (var t in tradeOptions.Where(x => x.Selected))
+                {
+                    var captured = t;
+                    <button class="filter-pill" @onclick="() => RemoveFilter(captured)" aria-label="@($"Remove {t.Name} filter")">@t.Name ×</button>
+                }
+                @if (dateFrom.HasValue)
+                {
+                    <button class="filter-pill" @onclick="RemoveDateFrom" aria-label="Remove date-from filter">From @dateFrom.Value.ToString("M/d/yy") ×</button>
+                }
+                @if (dateTo.HasValue)
+                {
+                    <button class="filter-pill" @onclick="RemoveDateTo" aria-label="Remove date-to filter">To @dateTo.Value.ToString("M/d/yy") ×</button>
+                }
+                @if (minCost.HasValue)
+                {
+                    <button class="filter-pill" @onclick="RemoveMinCost" aria-label="Remove minimum cost filter">Min $@minCost.Value.ToString("N0") ×</button>
+                }
+                @if (maxCost.HasValue)
+                {
+                    <button class="filter-pill" @onclick="RemoveMaxCost" aria-label="Remove maximum cost filter">Max $@maxCost.Value.ToString("N0") ×</button>
+                }
+                @if (selectedSource != "ALL")
+                {
+                    <button class="filter-pill" @onclick="RemoveSource" aria-label="Remove data source filter">@selectedSource ×</button>
+                }
+            </div>
+            <button class="filter-clear-all" @onclick="ClearAllFilters">✕ Clear All</button>
+        </div>
+    }
+
     @* ── Desktop: Data Grid (hidden below 768px) ── *@
     <div class="desktop-grid">
         <RadzenDataGrid @ref="grid0" Data="@permits" TItem="DobjobFiling"

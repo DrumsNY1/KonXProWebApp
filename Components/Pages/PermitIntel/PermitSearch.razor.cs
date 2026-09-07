@@ -277,5 +277,77 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             public string Text { get; set; }
             public string Value { get; set; }
         }
+
+        // ── Filter Summary Bar ──────────────────────────────────────────
+        protected int ActiveFilterCount =>
+            boroughOptions.Count(b => b.Selected)
+            + jobTypeOptions.Count(j => j.Selected)
+            + tradeOptions.Count(t => t.Selected)
+            + (dateFrom.HasValue ? 1 : 0)
+            + (dateTo.HasValue ? 1 : 0)
+            + (minCost.HasValue ? 1 : 0)
+            + (maxCost.HasValue ? 1 : 0)
+            + (selectedSource != "ALL" ? 1 : 0);
+
+        protected async Task ClearAllFilters()
+        {
+            foreach (var b in boroughOptions) b.Selected = false;
+            foreach (var j in jobTypeOptions) j.Selected = false;
+            foreach (var t in tradeOptions) t.Selected = false;
+            dateFrom = null;
+            dateTo = null;
+            minCost = null;
+            maxCost = null;
+            selectedSource = "ALL";
+            await SearchPermits();
+        }
+
+        protected async Task RemoveFilter(BoroughOption option)
+        {
+            option.Selected = false;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveFilter(JobTypeOption option)
+        {
+            option.Selected = false;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveFilter(TradeOption option)
+        {
+            option.Selected = false;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveDateFrom()
+        {
+            dateFrom = null;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveDateTo()
+        {
+            dateTo = null;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveMinCost()
+        {
+            minCost = null;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveMaxCost()
+        {
+            maxCost = null;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveSource()
+        {
+            selectedSource = "ALL";
+            await SearchPermits();
+        }
     }
 }
