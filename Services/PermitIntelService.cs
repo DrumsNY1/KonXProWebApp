@@ -612,50 +612,94 @@ public partial class PermitIntelService
         var breakdown = new LeadScoreBreakdown();
         int rawScore = 0;
 
-        // +1 for cost > $10K, +1 for cost > $50K
-        if (filing.InitialCost.HasValue && filing.InitialCost.Value > 50_000m)
+        // ── Cost tiers: $5K / $25K / $100K / $500K ──
+        if (filing.InitialCost.HasValue)
         {
-            rawScore += 2;
-            breakdown.CostPoints = 2;
-            breakdown.Factors.Add(new LeadScoreFactor
+            var cost = filing.InitialCost.Value;
+            int costPoints = 0;
+
+            if (cost > 500_000m)
             {
-                Name = "High Estimated Job Cost",
-                Points = 2,
-                Description = $"Estimated job cost is {filing.InitialCost.Value:C0} (>$50,000)",
-                Category = "Cost",
-                BadgeStyle = "success"
-            });
-        }
-        else if (filing.InitialCost.HasValue && filing.InitialCost.Value > 10_000m)
-        {
-            rawScore += 1;
-            breakdown.CostPoints = 1;
-            breakdown.Factors.Add(new LeadScoreFactor
+                costPoints = 4;
+                breakdown.Factors.Add(new LeadScoreFactor
+                {
+                    Name = "Major Construction Cost",
+                    Points = 4,
+                    Description = $"Estimated job cost is {cost:C0} (>$500,000)",
+                    Category = "Cost",
+                    BadgeStyle = "danger"
+                });
+            }
+            else if (cost > 100_000m)
             {
-                Name = "Moderate Estimated Job Cost",
-                Points = 1,
-                Description = $"Estimated job cost is {filing.InitialCost.Value:C0} (>$10,000)",
-                Category = "Cost",
-                BadgeStyle = "info"
-            });
+                costPoints = 3;
+                breakdown.Factors.Add(new LeadScoreFactor
+                {
+                    Name = "High Estimated Job Cost",
+                    Points = 3,
+                    Description = $"Estimated job cost is {cost:C0} (>$100,000)",
+                    Category = "Cost",
+                    BadgeStyle = "success"
+                });
+            }
+            else if (cost > 25_000m)
+            {
+                costPoints = 2;
+                breakdown.Factors.Add(new LeadScoreFactor
+                {
+                    Name = "Moderate Estimated Job Cost",
+                    Points = 2,
+                    Description = $"Estimated job cost is {cost:C0} (>$25,000)",
+                    Category = "Cost",
+                    BadgeStyle = "info"
+                });
+            }
+            else if (cost > 5_000m)
+            {
+                costPoints = 1;
+                breakdown.Factors.Add(new LeadScoreFactor
+                {
+                    Name = "Notable Job Cost",
+                    Points = 1,
+                    Description = $"Estimated job cost is {cost:C0} (>$5,000)",
+                    Category = "Cost",
+                    BadgeStyle = "info"
+                });
+            }
+
+            rawScore += costPoints;
+            breakdown.CostPoints = costPoints;
         }
 
-        // +1 for major alteration or new building
+        // ── Job type: NB/A1 = +2, A2 = +1 ──
         if (filing.JobType is "A1" or "NB")
         {
-            rawScore += 1;
-            breakdown.JobTypePoints = 1;
+            rawScore += 2;
+            breakdown.JobTypePoints = 2;
             breakdown.Factors.Add(new LeadScoreFactor
             {
                 Name = filing.JobType == "NB" ? "New Building Construction" : "Major Alteration (A1)",
-                Points = 1,
+                Points = 2,
                 Description = $"Filing category '{filing.JobType}' indicates major scope of work",
                 Category = "JobType",
                 BadgeStyle = "warning"
             });
         }
+        else if (filing.JobType == "A2")
+        {
+            rawScore += 1;
+            breakdown.JobTypePoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Minor Alteration (A2)",
+                Points = 1,
+                Description = "Filing category 'A2' indicates meaningful alteration scope",
+                Category = "JobType",
+                BadgeStyle = "info"
+            });
+        }
 
-        // +1 for multiple trade flags
+        // ── Multi-trade scope: ≥2 = +1, ≥4 = +1 bonus ──
         var tradeCount = 0;
         var tradesList = new List<string>();
         if (filing.Plumbing == "X") { tradeCount++; tradesList.Add("Plumbing"); }
@@ -667,7 +711,20 @@ public partial class PermitIntelService
         if (filing.Equipment == "X") { tradeCount++; tradesList.Add("Equipment"); }
         if (filing.Standpipe == "X") { tradeCount++; tradesList.Add("Standpipe"); }
 
-        if (tradeCount >= 2)
+        if (tradeCount >= 4)
+        {
+            rawScore += 2;
+            breakdown.TradePoints = 2;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Complex Multi-Trade Scope",
+                Points = 2,
+                Description = $"Includes {tradeCount} trade disciplines ({string.Join(", ", tradesList)})",
+                Category = "Trade",
+                BadgeStyle = "warning"
+            });
+        }
+        else if (tradeCount >= 2)
         {
             rawScore += 1;
             breakdown.TradePoints = 1;
@@ -681,7 +738,7 @@ public partial class PermitIntelService
             });
         }
 
-        // Predictive Intel Boost (311 Complaints)
+        // ── Predictive Intel Boost (311 Complaints) ──
         if (complaintVelocity >= 3)
         {
             rawScore += 2;
@@ -709,7 +766,7 @@ public partial class PermitIntelService
             });
         }
 
-        // Violation Boosts:
+        // ── DOB Violation Boosts ──
         if (activeDobViolations >= 3)
         {
             rawScore += 2;
@@ -737,7 +794,7 @@ public partial class PermitIntelService
             });
         }
 
-        // Severe HPD Class C Boost
+        // ── Severe HPD Class C Boost ──
         if (hpdClassCCount > 0)
         {
             rawScore += 2;
@@ -752,7 +809,7 @@ public partial class PermitIntelService
             });
         }
 
-        // Expansion Boost
+        // ── Expansion Boost ──
         if (int.TryParse(filing.ProposedDwellingUnits, out var proposed) &&
             int.TryParse(filing.ExistingDwellingUnits, out var existing) &&
             proposed > existing)
@@ -769,11 +826,50 @@ public partial class PermitIntelService
             });
         }
 
-        breakdown.RawScore = rawScore;
-        var totalScore = Math.Clamp(rawScore, 1, 5);
-        breakdown.TotalScore = totalScore;
+        // ── Building Size Boost (≥10 stories) ──
+        if (int.TryParse(filing.ExistingNoofStories, out var stories) && stories >= 10)
+        {
+            rawScore += 1;
+            breakdown.BuildingSizePoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Large Building",
+                Points = 1,
+                Description = $"Existing building is {stories} stories (≥10)",
+                Category = "BuildingSize",
+                BadgeStyle = "info"
+            });
+        }
 
-        breakdown.Tier = totalScore switch
+        // ── Active Filing Status Boost ──
+        if (!string.IsNullOrWhiteSpace(filing.JobStatus) &&
+            (filing.JobStatus.Contains("Approved", StringComparison.OrdinalIgnoreCase) ||
+             filing.JobStatus.Contains("In Process", StringComparison.OrdinalIgnoreCase)))
+        {
+            rawScore += 1;
+            breakdown.FilingStatusPoints = 1;
+            breakdown.Factors.Add(new LeadScoreFactor
+            {
+                Name = "Active Filing Status",
+                Points = 1,
+                Description = $"Filing status '{filing.JobStatus}' indicates an active opportunity",
+                Category = "FilingStatus",
+                BadgeStyle = "success"
+            });
+        }
+
+        // ── Threshold-based tier mapping (replaces Math.Clamp) ──
+        breakdown.RawScore = rawScore;
+        breakdown.TotalScore = rawScore switch
+        {
+            >= 8 => 5,  // 🔥 Hot Lead
+            >= 5 => 4,  // ⚡ High Priority
+            >= 3 => 3,  // 📊 Medium Priority
+            >= 1 => 2,  // 📋 Standard
+            _    => 1   // 📋 Low Priority
+        };
+
+        breakdown.Tier = breakdown.TotalScore switch
         {
             5 => "Hot",
             4 => "High Priority",

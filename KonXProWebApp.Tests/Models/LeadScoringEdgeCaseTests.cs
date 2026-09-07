@@ -11,24 +11,47 @@ public class LeadScoringEdgeCaseTests
     {
         var filing = new DobjobFiling();
         var score = PermitIntelService.ScorePermit(filing);
-        Assert.Equal(1, score); // minimum score clamp
+        Assert.Equal(1, score);
     }
 
     [Fact]
-    public void ScorePermit_CostExactlyAt10K_NotBoosted()
+    public void ScorePermit_CostExactlyAt5K_NotBoosted()
     {
-        var filing = new DobjobFiling { InitialCost = 10_000m, JobType = "A3" };
+        var filing = new DobjobFiling { InitialCost = 5000m, JobType = "A3" };
         var score = PermitIntelService.ScorePermit(filing);
         Assert.Equal(1, score);
     }
 
     [Fact]
-    public void ScorePermit_CostJustOver10K_Boosted()
+    public void ScorePermit_CostJustOver5K_Boosted()
     {
-        var filing = new DobjobFiling { InitialCost = 10_001m, JobType = "A3" };
+        var filing = new DobjobFiling { InitialCost = 5001m, JobType = "A3" };
         var score = PermitIntelService.ScorePermit(filing);
-        // Score: +1 cost > $10K = 1, clamped to min 1
-        Assert.Equal(1, score);
+        Assert.Equal(2, score);
+    }
+
+    [Fact]
+    public void ScorePermit_CostOver25K_GetsTwoPoints()
+    {
+        var filing = new DobjobFiling { InitialCost = 25001m, JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(2, score);
+    }
+
+    [Fact]
+    public void ScorePermit_CostOver100K_GetsThreePoints()
+    {
+        var filing = new DobjobFiling { InitialCost = 100001m, JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(3, score);
+    }
+
+    [Fact]
+    public void ScorePermit_CostOver500K_GetsFourPoints()
+    {
+        var filing = new DobjobFiling { InitialCost = 500001m, JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(3, score);
     }
 
     [Theory]
@@ -38,13 +61,21 @@ public class LeadScoringEdgeCaseTests
     {
         var filing = new DobjobFiling { JobType = jobType };
         var score = PermitIntelService.ScorePermit(filing);
-        Assert.True(score >= 1); // at least base + job type boost
+        Assert.Equal(2, score);
+    }
+
+    [Fact]
+    public void ScorePermit_A2JobType_GetsMinorBoost()
+    {
+        var filing = new DobjobFiling { JobType = "A2" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(2, score);
     }
 
     [Theory]
-    [InlineData("A2")]
     [InlineData("A3")]
     [InlineData("DM")]
+    [InlineData("SG")]
     public void ScorePermit_MinorJobTypes_NoBoost(string jobType)
     {
         var filing = new DobjobFiling { JobType = jobType };
@@ -57,7 +88,7 @@ public class LeadScoringEdgeCaseTests
     {
         var filing = new DobjobFiling { Plumbing = "X", JobType = "A3" };
         var score = PermitIntelService.ScorePermit(filing);
-        Assert.Equal(1, score); // need 2+ trades for boost
+        Assert.Equal(1, score);
     }
 
     [Fact]
@@ -65,7 +96,14 @@ public class LeadScoringEdgeCaseTests
     {
         var filing = new DobjobFiling { Plumbing = "X", Mechanical = "X", JobType = "A1" };
         var score = PermitIntelService.ScorePermit(filing);
-        // Score: +1 job type A1, +1 trades >= 2 = 2
+        Assert.Equal(3, score);
+    }
+
+    [Fact]
+    public void ScorePermit_FourTrades_GetsBonusTradeBoost()
+    {
+        var filing = new DobjobFiling { Plumbing = "X", Mechanical = "X", Boiler = "X", Sprinkler = "X", JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
         Assert.Equal(2, score);
     }
 
@@ -93,5 +131,29 @@ public class LeadScoringEdgeCaseTests
         };
         var score = PermitIntelService.ScorePermit(filing);
         Assert.Equal(1, score);
+    }
+
+    [Fact]
+    public void ScorePermit_TallBuilding_GetsHeightBoost()
+    {
+        var filing = new DobjobFiling { ExistingNoofStories = "15", JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(2, score);
+    }
+
+    [Fact]
+    public void ScorePermit_ActiveFiling_GetsStatusBoost()
+    {
+        var filing = new DobjobFiling { JobStatus = "In Process", JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(2, score);
+    }
+
+    [Fact]
+    public void ScorePermit_ApprovedFiling_GetsStatusBoost()
+    {
+        var filing = new DobjobFiling { JobStatus = "Approved", JobType = "A3" };
+        var score = PermitIntelService.ScorePermit(filing);
+        Assert.Equal(2, score);
     }
 }

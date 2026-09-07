@@ -125,7 +125,7 @@ public class IngestionParsingTests
     }
 
     [Fact]
-    public void ComputeLeadScore_HighCostNewBuildingWithTradesAndExpansion_ClampedAtFive()
+    public void ComputeLeadScore_HighCostNewBuildingWithTradesAndExpansion_ScoresFourOrFive()
     {
         var record = new SocrataPermitRecord
         {
@@ -134,23 +134,27 @@ public class IngestionParsingTests
             Plumbing = "X",
             Mechanical = "X",
             ExistingDwellingUnits = "1",
-            ProposedDwellingUnits = "20"
+            ProposedDwellingUnits = "20",
+            ExistingNoOfStories = "15",
+            JobStatus = "Approved"
         };
+        // raw: 3(cost>5K,>25K,>100K) + 2(NB) + 1(trades>=2) + 1(expansion) + 1(stories) + 1(status) = 9 → 5★
         Assert.Equal(5, IngestionService.ComputeLeadScore(record));
     }
 
     [Fact]
-    public void ComputeLeadScore_CostOver10KAndMajorAlteration_ReturnsTwo()
+    public void ComputeLeadScore_CostOver5KAndMajorAlteration_ReturnsThree()
     {
         var record = new SocrataPermitRecord { JobType = "A1", InitialCost = "$15,000" };
-        // +1 cost > $10K, +1 job type A1 = 2
-        Assert.Equal(2, IngestionService.ComputeLeadScore(record));
+        // raw: 1(cost>5K) + 2(A1) = 3 → 3★
+        Assert.Equal(3, IngestionService.ComputeLeadScore(record));
     }
 
     [Fact]
-    public void ComputeLeadScore_CostBelow10K_ClampedAtOne()
+    public void ComputeLeadScore_CostExactly5K_ReturnsOne()
     {
         var record = new SocrataPermitRecord { JobType = "A3", InitialCost = "$5,000" };
+        // raw: 0 (cost not > $5K) → 1★
         Assert.Equal(1, IngestionService.ComputeLeadScore(record));
     }
 }

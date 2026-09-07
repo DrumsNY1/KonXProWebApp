@@ -25,4 +25,6 @@ public class LeadScoreBreakdown
     public int DobViolationPoints { get; set; }
     public int HpdViolationPoints { get; set; }
     public int ExpansionPoints { get; set; }
+    public int BuildingSizePoints { get; set; }
+    public int FilingStatusPoints { get; set; }
 }
