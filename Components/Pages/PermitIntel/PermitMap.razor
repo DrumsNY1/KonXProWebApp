@@ -31,7 +31,7 @@
     <div class="stat-card">
         <div class="stat-label-sm">🏙️ Borough Focus</div>
         <div class="stat-value">@(string.IsNullOrEmpty(selectedBorough) ? "ALL NYC" : selectedBorough)</div>
-        <div class="stat-change neutral">geographic filter</div>
+        <div class="stat-change neutral">@(string.IsNullOrEmpty(selectedTrade) ? "geographic filter" : $"{selectedTrade} trade")</div>
     </div>
 </div>
 
@@ -50,15 +50,21 @@
     <!-- FILTER TOOLBAR -->
     <div class="rz-p-4" style="background: rgba(15, 31, 61, 0.4); border-bottom: 1px solid var(--border);">
         <RadzenRow Gap="1rem" AlignItems="Radzen.AlignItems.Center">
-            <RadzenColumn Size="12" SizeMD="3">
+            <RadzenColumn Size="12" SizeMD="2">
                 <RadzenLabel Text="Search Location / BIN" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
-                <RadzenTextBox @bind-Value="searchText" Placeholder="Address, street, BIN..." Style="width: 100%;" Change="@(args => LoadMapData())" />
+                <RadzenTextBox @bind-Value="searchText" Placeholder="Address, BIN..." Style="width: 100%;" Change="@(args => LoadMapData())" />
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="2">
                 <RadzenLabel Text="Borough" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
                 <RadzenDropDown @bind-Value="selectedBorough" Data="boroughOptions"
                                 Placeholder="All Boroughs" Style="width: 100%;"
                                 Change="@OnBoroughChanged" AllowClear="true" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="2">
+                <RadzenLabel Text="Trade" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
+                <RadzenDropDown @bind-Value="selectedTrade" Data="tradeOptions" ValueProperty="Key" TextProperty="Value"
+                                Placeholder="All Trades" Style="width: 100%;"
+                                Change="@(args => LoadMapData())" AllowClear="true" />
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="2">
                 <RadzenLabel Text="Job Type" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
@@ -72,7 +78,7 @@
                                 Placeholder="All Scores" Style="width: 100%;"
                                 Change="@(args => LoadMapData())" AllowClear="true" />
             </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="3">
+            <RadzenColumn Size="12" SizeMD="2">
                 <RadzenLabel Text="Min Est. Value" class="rz-mb-1 rz-display-block rz-text-tertiary-color" />
                 <RadzenDropDown @bind-Value="selectedMinCost" Data="costOptions" ValueProperty="Key" TextProperty="Value"
                                 Placeholder="Any Cost" Style="width: 100%;"
