@@ -115,87 +115,147 @@
         </RadzenRow>
     </div>
 
-    @* Results Grid *@
-    <RadzenDataGrid @ref="grid0" Data="@permits" TItem="DobjobFiling"
-                    AllowSorting="true" AllowPaging="true" PageSize="25"
-                    ShowPagingSummary="true" PagerHorizontalAlign="Radzen.HorizontalAlign.Center"
-                    AllowColumnResize="true" ColumnWidth="180px"
-                    Style="min-height: 400px;" class="rz-border-top">
-        <Columns>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
-                <Template Context="filing">
-                    <span class="permit-num">@(filing.JobFilingNumber ?? filing.JobNum?.ToString())</span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="250px">
-                <Template Context="filing">
-                    <span class="permit-addr">@filing.HouseNum @filing.StreetName<span class="text-truncate">@filing.JobDescription</span></span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobType" Title="Trade" Width="100px">
-                <Template Context="filing">
-                    <span class="trade-tag trade-plumb">@filing.JobType</span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="InitialCost" Title="Est. Value" Width="110px">
-                <Template Context="filing">
-                    <span class="value-cell">@filing.InitialCost?.ToString("C0")</span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="PreFilingDate" Title="Filed" Width="120px">
-                <Template Context="filing">
-                    <span class="date-cell">@filing.PreFilingDate?.ToString("MM/dd/yyyy")</span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Last Activity" Width="120px">
-                <Template Context="filing">
-                    <span class="date-cell">@filing.LatestActionDate?.ToString("MM/dd/yyyy")</span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="LeadScore" Title="Predictive Score" Width="160px">
-                <Template Context="filing">
-                    @if (filing.LeadScore.HasValue)
-                    {
-                        var factorSummary = filing.LeadScoreBreakdown?.Factors?.Any() == true
-                            ? string.Join(" • ", filing.LeadScoreBreakdown.Factors.Select(f => f.Name))
-                            : $"Predictive lead score: {filing.LeadScore}/5";
-                        <div class="flex items-center imp-gap-1" title="@factorSummary" style="cursor: help;">
-                            <span style="font-weight: 700; color: #FFB400; font-size: 0.95rem;">@filing.LeadScore★</span>
-                            <span class="badge @(filing.LeadScore >= 4 ? "badge-danger" : (filing.LeadScore == 3 ? "badge-warning" : "badge-info"))"
-                                  style="font-size: 0.75rem; padding: 0.15rem 0.45rem; font-weight: 600;">
-                                @(filing.LeadScoreBreakdown?.Tier?.ToUpper() ?? (filing.LeadScore >= 4 ? "HOT" : "STANDARD"))
-                            </span>
+    @* ── Desktop: Data Grid (hidden below 768px) ── *@
+    <div class="desktop-grid">
+        <RadzenDataGrid @ref="grid0" Data="@permits" TItem="DobjobFiling"
+                        AllowSorting="true" AllowPaging="true" PageSize="25"
+                        ShowPagingSummary="true" PagerHorizontalAlign="Radzen.HorizontalAlign.Center"
+                        AllowColumnResize="true" ColumnWidth="180px"
+                        Style="min-height: 400px;" class="rz-border-top">
+            <Columns>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
+                    <Template Context="filing">
+                        <span class="permit-num">@(filing.JobFilingNumber ?? filing.JobNum?.ToString())</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="250px">
+                    <Template Context="filing">
+                        <span class="permit-addr">@filing.HouseNum @filing.StreetName<span class="text-truncate">@filing.JobDescription</span></span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobType" Title="Trade" Width="100px">
+                    <Template Context="filing">
+                        <span class="trade-tag trade-plumb">@filing.JobType</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="InitialCost" Title="Est. Value" Width="110px">
+                    <Template Context="filing">
+                        <span class="value-cell">@filing.InitialCost?.ToString("C0")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="PreFilingDate" Title="Filed" Width="120px">
+                    <Template Context="filing">
+                        <span class="date-cell">@filing.PreFilingDate?.ToString("MM/dd/yyyy")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Last Activity" Width="120px">
+                    <Template Context="filing">
+                        <span class="date-cell">@filing.LatestActionDate?.ToString("MM/dd/yyyy")</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="LeadScore" Title="Predictive Score" Width="160px">
+                    <Template Context="filing">
+                        @if (filing.LeadScore.HasValue)
+                        {
+                            var factorSummary = filing.LeadScoreBreakdown?.Factors?.Any() == true
+                                ? string.Join(" • ", filing.LeadScoreBreakdown.Factors.Select(f => f.Name))
+                                : $"Predictive lead score: {filing.LeadScore}/5";
+                            <div class="flex items-center imp-gap-1" title="@factorSummary" style="cursor: help;">
+                                <span style="font-weight: 700; color: #FFB400; font-size: 0.95rem;">@filing.LeadScore★</span>
+                                <span class="badge @(filing.LeadScore >= 4 ? "badge-danger" : (filing.LeadScore == 3 ? "badge-warning" : "badge-info"))"
+                                      style="font-size: 0.75rem; padding: 0.15rem 0.45rem; font-weight: 600;">
+                                    @(filing.LeadScoreBreakdown?.Tier?.ToUpper() ?? (filing.LeadScore >= 4 ? "HOT" : "STANDARD"))
+                                </span>
+                            </div>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="140px">
+                    <Template Context="filing">
+                        @{
+                            var (label, cssClass) = GetStatusTier(filing.JobStatusDescrp);
+                        }
+                        <span class="status-badge @cssClass">@label</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="DataSource" Title="Source" Width="90px">
+                    <Template Context="filing">
+                        @if (filing.DataSource == "DOBNOW")
+                        {
+                            <span class="status-badge status-active" style="font-size: 0.65rem;">DOB NOW</span>
+                        }
+                        else
+                        {
+                            <span class="status-badge status-closed" style="font-size: 0.65rem;">BIS</span>
+                        }
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">
+                    <Template Context="filing">
+                        <button class="action-btn" @onclick="() => SaveAsLead(filing)">⭐</button>
+                        <button class="action-btn" @onclick="() => ViewDetail(filing)">→</button>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+        </RadzenDataGrid>
+    </div>
+
+    @* ── Mobile: Card List (hidden above 768px) ── *@
+    <div class="mobile-cards">
+        @if (permits != null)
+        {
+            var mobilePermits = permits.Take(mobilePageSize).ToList();
+            @foreach (var filing in mobilePermits)
+            {
+                var (statusLabel, statusCss) = GetStatusTier(filing.JobStatusDescrp);
+                <div class="mobile-card" @onclick="() => ViewDetail(filing)">
+                    <div class="mobile-card-row-top">
+                        <div class="mobile-card-address">@filing.HouseNum @filing.StreetName</div>
+                        <div class="mobile-card-actions">
+                            <button class="action-btn" @onclick="() => SaveAsLead(filing)" @onclick:stopPropagation="true" aria-label="Save as lead">⭐</button>
+                            <button class="action-btn" @onclick="() => ViewDetail(filing)" @onclick:stopPropagation="true" aria-label="View details">→</button>
                         </div>
-                    }
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="140px">
-                <Template Context="filing">
-                    @{
-                        var (label, cssClass) = GetStatusTier(filing.JobStatusDescrp);
-                    }
-                    <span class="status-badge @cssClass">@label</span>
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Property="DataSource" Title="Source" Width="90px">
-                <Template Context="filing">
-                    @if (filing.DataSource == "DOBNOW")
+                    </div>
+                    <div class="mobile-card-meta">
+                        <span>@filing.Borough</span>
+                        <span class="mobile-card-sep">·</span>
+                        <span class="trade-tag trade-plumb">@filing.JobType</span>
+                    </div>
+                    <div class="mobile-card-values">
+                        <span class="value-cell">@filing.InitialCost?.ToString("C0")</span>
+                        <span class="status-badge @statusCss">@statusLabel</span>
+                    </div>
+                    <div class="mobile-card-footer">
+                        <span class="date-cell">Filed @filing.PreFilingDate?.ToString("MM/dd/yyyy")</span>
+                        @if (filing.LeadScore.HasValue)
+                        {
+                            <span class="mobile-card-score">
+                                <span style="color: #FFB400; font-weight: 700;">@filing.LeadScore★</span>
+                                <span class="badge @(filing.LeadScore >= 4 ? "badge-danger" : (filing.LeadScore == 3 ? "badge-warning" : "badge-info"))"
+                                      style="font-size: 0.7rem; padding: 0.1rem 0.35rem; font-weight: 600;">
+                                    @(filing.LeadScoreBreakdown?.Tier?.ToUpper() ?? (filing.LeadScore >= 4 ? "HOT" : "STANDARD"))
+                                </span>
+                            </span>
+                        }
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(filing.JobDescription))
                     {
-                        <span class="status-badge status-active" style="font-size: 0.65rem;">DOB NOW</span>
+                        <div class="mobile-card-desc">@filing.JobDescription</div>
                     }
-                    else
-                    {
-                        <span class="status-badge status-closed" style="font-size: 0.65rem;">BIS</span>
-                    }
-                </Template>
-            </RadzenDataGridColumn>
-            <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">
-                <Template Context="filing">
-                    <button class="action-btn" @onclick="() => SaveAsLead(filing)">⭐</button>
-                    <button class="action-btn" @onclick="() => ViewDetail(filing)">→</button>
-                </Template>
-            </RadzenDataGridColumn>
-        </Columns>
-    </RadzenDataGrid>
+                </div>
+            }
+            @if (totalCount > mobilePageSize)
+            {
+                <div class="mobile-cards-pager">
+                    <span class="mobile-cards-showing">Showing @mobilePermits.Count of @totalCount permits</span>
+                    <button class="btn-load-more" @onclick="LoadMoreMobile">Load More</button>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="mobile-cards-empty">Loading permits…</div>
+        }
+    </div>
 </div>

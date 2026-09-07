@@ -45,6 +45,10 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected decimal totalJobValue = 0m;
         protected int savedLeadCount = 0;
 
+        // Mobile card layout uses a smaller page size for faster loading on cellular
+        private const int MobilePageIncrement = 10;
+        protected int mobilePageSize = MobilePageIncrement;
+
         // Filter state
         protected string searchText = "";
         protected decimal? minCost;
@@ -106,6 +110,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         protected async Task SearchPermits()
         {
+            mobilePageSize = MobilePageIncrement;
             var query = new PermitSearchQuery
             {
                 SearchText = searchText,
@@ -128,6 +133,11 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected void ViewDetail(DobjobFiling filing)
         {
             NavigationManager.NavigateTo($"/permit-intel/detail/{filing.Id}");
+        }
+
+        protected void LoadMoreMobile()
+        {
+            mobilePageSize += MobilePageIncrement;
         }
 
         protected async Task SaveAsLead(DobjobFiling filing)
