@@ -461,7 +461,7 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
 .logo-text { font-size: var(--text-body-lg); font-weight: var(--weight-bold); color: var(--text-primary); letter-spacing: -0.5px; }
 .logo-text span { color: var(--color-primary-light); }
 
-.sidebar-nav { flex: 1; padding: var(--space-4) var(--space-3); overflow-y: auto; }
+.sidebar-nav { flex: 1; min-height: 0; padding: var(--space-4) var(--space-3); padding-bottom: var(--space-4); overflow-y: auto; }
 .nav-section-label {
   font-size: var(--text-overline); font-weight: var(--weight-semibold);
   text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
@@ -489,6 +489,7 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
 .nav-badge.badge-red { background: var(--color-danger); }
 
 .sidebar-upgrade {
+  flex-shrink: 0;
   margin: var(--space-3); padding: var(--space-4);
   background: linear-gradient(135deg, var(--color-primary-muted), var(--color-primary-ghost));
   border: 1px solid var(--border-strong); border-radius: var(--radius-lg);
@@ -503,6 +504,7 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
 .btn-upgrade:hover { background: var(--color-primary-hover); }
 
 .sidebar-user {
+  flex-shrink: 0;
   padding: 14px var(--space-4); border-top: 1px solid var(--border-default);
   display: flex; align-items: center; gap: var(--space-3); cursor: pointer;
 }
