@@ -64,6 +64,12 @@
   </div>
   </div>
 
+  @* Backdrop overlay for mobile — tap outside sidebar to close *@
+  @if (isSidebarOpen)
+  {
+    <div class="sidebar-backdrop" @onclick="CloseSidebar"></div>
+  }
+
   <div class="main">
     <!-- TOP BAR -->
     <header class="topbar">

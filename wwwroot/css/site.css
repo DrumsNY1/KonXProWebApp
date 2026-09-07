@@ -563,6 +563,7 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
+    transition: transform 0.25s ease-out;
   }
   .sidebar-collapsed .sidebar {
     transform: translateX(-100%);
@@ -581,6 +582,22 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
   }
   .sidebar-open .main {
     margin-left: 0 !important;
+  }
+}
+
+/* Sidebar backdrop overlay — mobile only */
+.sidebar-backdrop {
+  display: none;
+}
+@media (max-width: 768px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    cursor: pointer;
   }
 }
 .topbar-search {
