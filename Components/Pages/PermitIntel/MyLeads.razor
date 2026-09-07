@@ -90,6 +90,19 @@
                     SelectionMode="Radzen.DataGridSelectionMode.Multiple"
                     @bind-Value="@selectedLeads"
                     Style="border-top: 1px solid var(--border);">
+        <EmptyTemplate>
+            <div class="empty-state">
+                <div class="empty-state-icon">⭐</div>
+                <h3 class="empty-state-title">No saved leads yet</h3>
+                <p class="empty-state-description">
+                    Browse the Permit Feed to discover new filings, then click
+                    <strong>"Save Lead"</strong> on any permit detail page to add it to your pipeline.
+                </p>
+                <a href="/permit-intel/search" class="empty-state-cta">
+                    <span class="empty-state-cta-icon">📋</span> Go to Permit Feed
+                </a>
+            </div>
+        </EmptyTemplate>
         <Columns>
             <RadzenDataGridColumn TItem="SavedLead" Width="40px" Sortable="false" Filterable="false">
                 <HeaderTemplate>
