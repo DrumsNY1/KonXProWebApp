@@ -30,5 +30,7 @@ public class PermitSearchQuery
 
     public int Take { get; set; } = 25;
 
+    public bool RequireGisCoordinates { get; set; } = false;
+
     public string OrderBy { get; set; } = "LatestActionDate desc";
 }

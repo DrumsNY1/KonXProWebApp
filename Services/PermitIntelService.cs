@@ -56,27 +56,35 @@ public partial class PermitIntelService
             items = items.Where(i => query.JobStatuses.Contains(i.JobStatus));
         }
 
-        // Trade filter — check boolean flag columns
+        // Trade filter — check boolean flag columns (match ANY selected trade)
         if (query.Trades?.Any() == true)
         {
-            foreach (var trade in query.Trades)
+            var normalizedTrades = query.Trades
+                .Where(t => !string.IsNullOrWhiteSpace(t))
+                .Select(t => t.Replace(" ", "").Trim())
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (normalizedTrades.Any())
             {
-                items = trade switch
-                {
-                    "Plumbing" => items.Where(i => i.Plumbing == "X"),
-                    "Mechanical" => items.Where(i => i.Mechanical == "X"),
-                    "Boiler" => items.Where(i => i.Boiler == "X"),
-                    "FuelBurning" => items.Where(i => i.FuelBurning == "X"),
-                    "FuelStorage" => items.Where(i => i.FuelStorage == "X"),
-                    "Standpipe" => items.Where(i => i.Standpipe == "X"),
-                    "Sprinkler" => items.Where(i => i.Sprinkler == "X"),
-                    "FireAlarm" => items.Where(i => i.FireAlarm == "X"),
-                    "Equipment" => items.Where(i => i.Equipment == "X"),
-                    "FireSuppression" => items.Where(i => i.FireSuppression == "X"),
-                    "CurbCut" => items.Where(i => i.CurbCut == "X"),
-                    _ => items
-                };
+                items = items.Where(i =>
+                    (normalizedTrades.Contains("Plumbing") && i.Plumbing == "X") ||
+                    (normalizedTrades.Contains("Mechanical") && i.Mechanical == "X") ||
+                    (normalizedTrades.Contains("Boiler") && i.Boiler == "X") ||
+                    (normalizedTrades.Contains("FuelBurning") && i.FuelBurning == "X") ||
+                    (normalizedTrades.Contains("FuelStorage") && i.FuelStorage == "X") ||
+                    (normalizedTrades.Contains("Standpipe") && i.Standpipe == "X") ||
+                    (normalizedTrades.Contains("Sprinkler") && i.Sprinkler == "X") ||
+                    (normalizedTrades.Contains("FireAlarm") && i.FireAlarm == "X") ||
+                    (normalizedTrades.Contains("Equipment") && i.Equipment == "X") ||
+                    (normalizedTrades.Contains("FireSuppression") && i.FireSuppression == "X") ||
+                    (normalizedTrades.Contains("CurbCut") && i.CurbCut == "X"));
             }
+        }
+
+        // Require GIS coordinates (used for map view)
+        if (query.RequireGisCoordinates)
+        {
+            items = items.Where(i => i.Gislatitude != null && i.Gislatitude != "" && i.Gislongitude != null && i.Gislongitude != "");
         }
 
         // Cost range filter
