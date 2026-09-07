@@ -644,24 +644,60 @@ public class IngestionService
 
     private static int ComputeDobNowLeadScore(SocrataDobNowRecord r)
     {
-        int score = 2; // Base score for DOB NOW (newer data = higher baseline)
+        int rawScore = 0;
 
-        // Boost for estimated cost
+        // Cost tiers: $5K / $25K / $100K / $500K
         if (decimal.TryParse(r.InitialCost, out var cost))
         {
-            if (cost >= 100_000) score += 2;
-            else if (cost >= 25_000) score += 1;
+            if (cost > 500_000m) rawScore += 4;
+            else if (cost > 100_000m) rawScore += 3;
+            else if (cost > 25_000m) rawScore += 2;
+            else if (cost > 5_000m) rawScore += 1;
         }
 
-        // Boost for active status (not yet signed off)
+        // Job type: NB/A1 = +2, A2 = +1
+        if (r.JobType is "A1" or "NB") rawScore += 2;
+        else if (r.JobType == "A2") rawScore += 1;
+
+        // Multi-trade scope (DOB NOW uses YES/NO or X)
+        int tradeCount = 0;
+        if (IsTradeActive(r.Plumbing)) tradeCount++;
+        if (IsTradeActive(r.Mechanical)) tradeCount++;
+        if (IsTradeActive(r.Boiler)) tradeCount++;
+        if (IsTradeActive(r.Sprinkler)) tradeCount++;
+        if (IsTradeActive(r.FireAlarm)) tradeCount++;
+        if (IsTradeActive(r.FireSuppression)) tradeCount++;
+        if (IsTradeActive(r.Standpipe)) tradeCount++;
+        if (tradeCount >= 4) rawScore += 2;
+        else if (tradeCount >= 2) rawScore += 1;
+
+        // Expansion boost
+        if (int.TryParse(r.ProposedDwellingUnits, out var proposed) &&
+            int.TryParse(r.ExistingDwellingUnits, out var existing) &&
+            proposed > existing)
+            rawScore++;
+
+        // Active filing status boost (DOB NOW: not signed off = active)
         if (r.FilingStatus is not null &&
             !r.FilingStatus.Contains("Signed", StringComparison.OrdinalIgnoreCase))
         {
-            score += 1;
+            rawScore += 1;
         }
 
-        return Math.Min(score, 5);
+        // Threshold-based tier mapping (matches ScorePermitDetailed)
+        return rawScore switch
+        {
+            >= 8 => 5,
+            >= 5 => 4,
+            >= 3 => 3,
+            >= 1 => 2,
+            _    => 1
+        };
     }
+
+    private static bool IsTradeActive(string value) =>
+        value is "X" or "YES" ||
+        (value != null && value.Equals("true", StringComparison.OrdinalIgnoreCase));
 
     /// <summary>
     /// Upserts a batch of 311 Service Request records into ServiceRequests311.
@@ -976,13 +1012,20 @@ public class IngestionService
 
     internal static int ComputeLeadScore(SocrataPermitRecord r)
     {
-        int score = 0;
+        int rawScore = 0;
         var cost = ParseCurrency(r.InitialCost);
 
-        if (cost.HasValue && cost.Value > 10_000m) score++;
-        if (cost.HasValue && cost.Value > 50_000m) score++;
-        if (r.JobType is "A1" or "NB") score++;
+        // Cost tiers: $5K / $25K / $100K / $500K
+        if (cost.HasValue && cost.Value > 500_000m) rawScore += 4;
+        else if (cost.HasValue && cost.Value > 100_000m) rawScore += 3;
+        else if (cost.HasValue && cost.Value > 25_000m) rawScore += 2;
+        else if (cost.HasValue && cost.Value > 5_000m) rawScore += 1;
 
+        // Job type: NB/A1 = +2, A2 = +1
+        if (r.JobType is "A1" or "NB") rawScore += 2;
+        else if (r.JobType == "A2") rawScore += 1;
+
+        // Multi-trade scope: ≥2 = +1, ≥4 = +1 bonus
         int tradeCount = 0;
         if (r.Plumbing == "X") tradeCount++;
         if (r.Mechanical == "X") tradeCount++;
@@ -992,14 +1035,34 @@ public class IngestionService
         if (r.FireSuppression == "X") tradeCount++;
         if (r.Equipment == "X") tradeCount++;
         if (r.Standpipe == "X") tradeCount++;
-        if (tradeCount >= 2) score++;
+        if (tradeCount >= 4) rawScore += 2;
+        else if (tradeCount >= 2) rawScore += 1;
 
+        // Expansion boost
         if (int.TryParse(r.ProposedDwellingUnits, out var proposed) &&
             int.TryParse(r.ExistingDwellingUnits, out var existing) &&
             proposed > existing)
-            score++;
+            rawScore++;
 
-        return Math.Clamp(score, 1, 5);
+        // Building size boost (≥10 stories)
+        if (int.TryParse(r.ExistingNoOfStories, out var stories) && stories >= 10)
+            rawScore++;
+
+        // Active filing status boost
+        if (!string.IsNullOrWhiteSpace(r.JobStatus) &&
+            (r.JobStatus.Contains("Approved", StringComparison.OrdinalIgnoreCase) ||
+             r.JobStatus.Contains("In Process", StringComparison.OrdinalIgnoreCase)))
+            rawScore++;
+
+        // Threshold-based tier mapping (matches ScorePermitDetailed)
+        return rawScore switch
+        {
+            >= 8 => 5,
+            >= 5 => 4,
+            >= 3 => 3,
+            >= 1 => 2,
+            _    => 1
+        };
     }
 
     private enum UpsertResult { Inserted, Updated, Skipped }

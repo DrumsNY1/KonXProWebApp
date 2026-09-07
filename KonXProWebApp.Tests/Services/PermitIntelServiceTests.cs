@@ -48,6 +48,7 @@ public class PermitIntelServiceTests : IDisposable
             Mechanical = "X"
         };
         var score = PermitIntelService.ScorePermit(filing);
+        // raw: 2(cost>5K,>25K) + 2(A1) + 1(trades>=2) = 5 → 4★
         Assert.True(score >= 4, $"Expected score >= 4, got {score}");
     }
 
@@ -62,6 +63,7 @@ public class PermitIntelServiceTests : IDisposable
             ProposedDwellingUnits = "10"
         };
         var score = PermitIntelService.ScorePermit(filing);
+        // raw: 2(cost>5K,>25K) + 2(NB) + 1(expansion) = 5 → 4★
         Assert.True(score >= 4, $"Expected score >= 4, got {score}");
     }
 
@@ -77,9 +79,12 @@ public class PermitIntelServiceTests : IDisposable
             Boiler = "X",
             Sprinkler = "X",
             ExistingDwellingUnits = "1",
-            ProposedDwellingUnits = "50"
+            ProposedDwellingUnits = "50",
+            ExistingNoofStories = "15",
+            JobStatus = "Approved"
         };
         var score = PermitIntelService.ScorePermit(filing);
+        // raw: 3(cost>5K,>25K,>100K) + 2(NB) + 2(trades>=4) + 1(expansion) + 1(building) + 1(status) = 10 → 5★
         Assert.Equal(5, score);
     }
 
@@ -97,10 +102,11 @@ public class PermitIntelServiceTests : IDisposable
         var breakdown = PermitIntelService.ScorePermitDetailed(filing, complaintVelocity: 4, activeDobViolations: 1, hpdClassCCount: 1);
 
         Assert.NotNull(breakdown);
+        // raw: 2(cost>5K,>25K) + 2(NB) + 1(trades) + 2(complaint>=3) + 1(dob) + 2(hpdC) = 10 → 5★
         Assert.Equal(5, breakdown.TotalScore);
         Assert.Equal("Hot", breakdown.Tier);
         Assert.Contains(breakdown.Factors, f => f.Category == "Cost" && f.Points == 2);
-        Assert.Contains(breakdown.Factors, f => f.Category == "JobType" && f.Points == 1);
+        Assert.Contains(breakdown.Factors, f => f.Category == "JobType" && f.Points == 2);
         Assert.Contains(breakdown.Factors, f => f.Category == "Trade" && f.Points == 1);
         Assert.Contains(breakdown.Factors, f => f.Category == "Complaint" && f.Points == 2);
         Assert.Contains(breakdown.Factors, f => f.Category == "Violation" && f.Name.Contains("Class C"));
