@@ -129,7 +129,14 @@ else
                     </div>
                     <div class="rz-p-4">
                         <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-mb-4">
-                            <strong>Description:</strong> @(string.IsNullOrEmpty(filing.JobDescription) ? "No description provided." : filing.JobDescription)
+                            <div class="desc-summary">@KonXProWebApp.Services.DescriptionHelper.Summarize(filing)</div>
+                            @if (!string.IsNullOrEmpty(filing.JobDescription))
+                            {
+                                <details class="desc-full">
+                                    <summary>Full Filing Narrative</summary>
+                                    <p>@filing.JobDescription</p>
+                                </details>
+                            }
                         </RadzenText>
                         <RadzenRow Gap="1rem">
                             <RadzenColumn Size="6">

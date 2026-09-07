@@ -33,7 +33,12 @@
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard" Property="ProjectType" Title="Project Type">
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard" Property="JobDescription" Title="Job Description">
+                <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard" Property="JobDescription" Title="Job Description" Width="280px">
+                    <Template Context="item">
+                        <span class="desc-cell" title="@item.JobDescription">
+                            @KonXProWebApp.Services.DescriptionHelper.Truncate(item.JobDescription, 80)
+                        </span>
+                    </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard" Property="Neighborhood" Title="Neighborhood">
                 </RadzenDataGridColumn>

@@ -128,9 +128,16 @@
                         <span class="permit-num">@(filing.JobFilingNumber ?? filing.JobNum?.ToString())</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="250px">
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="180px">
                     <Template Context="filing">
-                        <span class="permit-addr">@filing.HouseNum @filing.StreetName<span class="text-truncate">@filing.JobDescription</span></span>
+                        <span class="permit-addr">@filing.HouseNum @filing.StreetName</span>
+                    </Template>
+                </RadzenDataGridColumn>
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobDescription" Title="Description" Width="280px">
+                    <Template Context="filing">
+                        <span class="desc-cell" title="@filing.JobDescription">
+                            @KonXProWebApp.Services.DescriptionHelper.Summarize(filing)
+                        </span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
@@ -241,7 +248,20 @@
                     </div>
                     @if (!string.IsNullOrWhiteSpace(filing.JobDescription))
                     {
-                        <div class="mobile-card-desc">@filing.JobDescription</div>
+                        <div class="mobile-card-desc" @onclick="() => ToggleDesc(filing.Id)" @onclick:stopPropagation="true">
+                            @if (expandedDescIds.Contains(filing.Id))
+                            {
+                                <span>@filing.JobDescription</span>
+                            }
+                            else
+                            {
+                                <span>@KonXProWebApp.Services.DescriptionHelper.Summarize(filing)</span>
+                                @if (filing.JobDescription.Length > 80)
+                                {
+                                    <span class="desc-expand-hint">tap to expand</span>
+                                }
+                            }
+                        </div>
                     }
                 </div>
             }

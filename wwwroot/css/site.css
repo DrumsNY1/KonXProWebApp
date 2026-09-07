@@ -1189,3 +1189,57 @@ body,
     box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
   }
 }
+
+/* ================================================================
+   DESCRIPTION CELL — Truncation, Summary & Expand
+   ================================================================ */
+
+/* Desktop grid: single line with ellipsis + hover tooltip */
+.desc-cell {
+  max-width: 280px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  cursor: help;
+}
+
+/* Detail page: structured summary one-liner */
+.desc-summary {
+  font-weight: var(--weight-medium);
+  color: var(--text-primary);
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* Detail page: collapsible full narrative */
+.desc-full {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+.desc-full summary {
+  cursor: pointer;
+  color: var(--color-primary-bright);
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  user-select: none;
+}
+.desc-full summary:hover {
+  text-decoration: underline;
+}
+.desc-full p {
+  margin: 8px 0 0;
+  padding: 8px 0 0;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+/* Mobile cards: expand hint */
+.desc-expand-hint {
+  display: inline;
+  font-size: 11px;
+  color: var(--color-primary-bright);
+  margin-left: 4px;
+  opacity: 0.7;
+}

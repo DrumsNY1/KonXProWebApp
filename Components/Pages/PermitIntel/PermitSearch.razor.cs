@@ -263,6 +263,15 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             public bool Selected { get; set; }
         }
 
+        // Mobile description expand state
+        protected HashSet<int> expandedDescIds = new();
+
+        protected void ToggleDesc(int filingId)
+        {
+            if (!expandedDescIds.Remove(filingId))
+                expandedDescIds.Add(filingId);
+        }
+
         public class DropDownItem
         {
             public string Text { get; set; }
