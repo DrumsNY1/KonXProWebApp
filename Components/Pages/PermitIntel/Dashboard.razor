@@ -12,27 +12,35 @@
 
 @if (stats != null)
 {
-    <!-- STATS CARDS -->
+    <!-- STATS STRIP -->
     <div class="stats-row">
         <div class="stat-card">
-            <div class="stat-label-sm">📋 Permits (30 Days)</div>
-            <div class="stat-value">@stats.TotalPermitsLast30Days.ToString("N0")</div>
-            <div class="stat-change up">↑ active tracking</div>
+            <span style="font-size:22px">📋</span>
+            <div class="stat-card-text">
+                <div class="stat-label-sm">Permits (30d)</div>
+                <div class="stat-value">@stats.TotalPermitsLast30Days.ToString("N0")</div>
+            </div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-sm">🔖 Saved Leads</div>
-            <div class="stat-value">@stats.SavedLeadsCount</div>
-            <div class="stat-change neutral">in pipeline</div>
+            <span style="font-size:22px">🔖</span>
+            <div class="stat-card-text">
+                <div class="stat-label-sm">Saved Leads</div>
+                <div class="stat-value">@stats.SavedLeadsCount</div>
+            </div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-sm">🏆 Won Leads</div>
-            <div class="stat-value">@stats.WonLeadsCount</div>
-            <div class="stat-change up">↑ successful deals</div>
+            <span style="font-size:22px">🏆</span>
+            <div class="stat-card-text">
+                <div class="stat-label-sm">Won Leads</div>
+                <div class="stat-value">@stats.WonLeadsCount</div>
+            </div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-sm">📈 Win Rate</div>
-            <div class="stat-value">@winRate%</div>
-            <div class="stat-change neutral">conversion rate</div>
+            <span style="font-size:22px">📈</span>
+            <div class="stat-card-text">
+                <div class="stat-label-sm">Win Rate</div>
+                <div class="stat-value">@winRate%</div>
+            </div>
         </div>
     </div>
 
