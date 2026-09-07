@@ -647,20 +647,23 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
 .page-header p  { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
 
-/* ── 14. STAT CARDS ───────────────────────────────────────────────── */
-.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-@media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px)  { .stats-row { grid-template-columns: 1fr; } }
+/* ── 14. STAT CARDS (compact strip) ───────────────────────────────── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: var(--space-4); }
+@media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 640px)  { .stats-row { grid-template-columns: repeat(2, 1fr); } }
 
 .stat-card {
   background: var(--surface-raised); border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg); padding: 18px var(--space-5);
+  border-radius: var(--radius-md); padding: 10px 16px;
   transition: border-color var(--transition-fast);
+  display: flex; align-items: center; gap: 14px;
+  min-height: 0;
 }
 .stat-card:hover { border-color: var(--color-primary); }
-.stat-label-sm { font-size: var(--text-caption); font-weight: var(--weight-medium); color: var(--text-muted); margin-bottom: var(--space-2); display: flex; align-items: center; gap: var(--space-2); }
-.stat-value { font-size: 28px; font-weight: var(--weight-extrabold); color: var(--text-primary); letter-spacing: -1px; line-height: 1; margin-bottom: var(--space-2); }
-.stat-change { font-size: var(--text-caption); font-weight: var(--weight-medium); display: flex; align-items: center; gap: var(--space-1); }
+.stat-card-text { flex: 1; min-width: 0; }
+.stat-label-sm { font-size: 11px; font-weight: var(--weight-medium); color: var(--text-muted); margin-bottom: 2px; display: flex; align-items: center; gap: var(--space-1); white-space: nowrap; }
+.stat-value { font-size: 20px; font-weight: var(--weight-extrabold); color: var(--text-primary); letter-spacing: -0.5px; line-height: 1.1; }
+.stat-change { font-size: 10px; font-weight: var(--weight-medium); color: var(--text-muted); margin-top: 1px; }
 .stat-change.up { color: var(--color-success); }
 .stat-change.neutral { color: var(--text-muted); }
 
