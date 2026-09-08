@@ -388,8 +388,16 @@ tbody tr:hover td { background: var(--color-primary-ghost); }
   background: none; border: none; color: var(--text-muted); cursor: pointer;
   padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm);
   font-size: 13px; transition: all var(--transition-fast);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 36px; min-height: 36px;
 }
 .action-btn:hover { background: var(--color-primary-muted); color: var(--color-primary-bright); }
+.action-btn:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+  background: var(--color-primary-muted);
+  color: var(--color-primary-bright);
+}
 
 .mock-table { width: 100%; border-collapse: collapse; }
 .mock-table th {
@@ -1385,6 +1393,137 @@ body,
   outline: 2px solid var(--color-danger); outline-offset: 2px;
 }
 
+/* ── Accessible Filter Chips & Feed Controls ────────────────────────── */
+.filter-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+  align-items: center;
+}
+
+.filter-chip {
+  background: var(--surface-overlay);
+  border: 1px solid var(--border-default);
+  color: var(--text-secondary);
+  border-radius: var(--radius-full, 9999px);
+  padding: 6px 14px;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+}
+
+.filter-chip:hover {
+  border-color: var(--color-primary-bright);
+  color: var(--text-primary);
+  background: var(--color-primary-muted);
+}
+
+.filter-chip.is-selected,
+.filter-chip[aria-pressed="true"],
+.filter-chip[aria-checked="true"] {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: var(--weight-semibold);
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.3);
+}
+
+.filter-chip:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+}
+
+/* Accessible Sortable Header Button */
+.grid-sort-header-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  border-radius: var(--radius-sm);
+  width: 100%;
+  text-align: left;
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+
+.grid-sort-header-btn:hover {
+  color: var(--color-primary-bright);
+}
+
+.grid-sort-header-btn:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+  background: var(--color-primary-muted);
+}
+
+.grid-sort-header-btn .sort-indicator {
+  display: inline-block;
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+/* Mobile Card Accessibility Enhancements */
+.mobile-cards { display: none; }
+@media (max-width: 768px) {
+  .desktop-grid { display: none !important; }
+  .mobile-cards { display: flex !important; flex-direction: column; gap: 12px; }
+}
+
+.mobile-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.mobile-card:hover {
+  border-color: var(--color-primary);
+}
+
+.mobile-card:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+}
+
+.mobile-card-desc {
+  background: transparent;
+  border: none;
+  font: inherit;
+  font-size: var(--text-body-sm);
+  color: var(--text-muted);
+  line-height: 1.4;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+
+.mobile-card-desc:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+}
+
 
 /* ── 20. AUTH & LOGIN STYLES ──────────────────────────────────────── */
 .auth-layout {
@@ -1458,6 +1597,59 @@ body,
 }
 
 /* Auth card Radzen overrides */
+/* Auth card accessible form controls */
+.auth-form-group {
+  margin-bottom: var(--space-4);
+  text-align: left;
+}
+
+.auth-input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.auth-input {
+  width: 100%;
+}
+
+.auth-submit-btn {
+  width: 100%;
+  background: var(--color-primary);
+  border: 1px solid var(--color-primary);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-semibold);
+  height: 44px;
+  font-size: var(--text-body-sm);
+  transition: all var(--transition-fast);
+  margin-top: var(--space-3);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-submit-btn:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+}
+
+.auth-submit-btn:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+}
+
+.auth-submit-btn:active {
+  background: var(--color-primary-active);
+  transform: translateY(0);
+}
+
 .auth-card .rz-login {
   width: 100%;
 }
