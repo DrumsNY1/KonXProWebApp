@@ -1044,6 +1044,8 @@ footer {
   --rz-input-color: var(--text-secondary);
   --rz-input-font-size: var(--text-body-sm);
   --rz-input-placeholder-color: var(--text-muted);
+  --rz-form-field-filled-background-color: var(--surface-overlay);
+  --rz-form-field-background-color: var(--surface-overlay);
 
   /* Dropdowns */
   --rz-dropdown-background-color: var(--surface-overlay);
@@ -1382,3 +1384,192 @@ body,
 .filter-clear-all:focus-visible {
   outline: 2px solid var(--color-danger); outline-offset: 2px;
 }
+
+
+/* ── 20. AUTH & LOGIN STYLES ──────────────────────────────────────── */
+.auth-layout {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--surface-base);
+  background-image: radial-gradient(circle at 50% 12%, rgba(37, 99, 235, 0.1) 0%, transparent 55%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  box-sizing: border-box;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  transition: border-color var(--transition-fast);
+}
+
+.auth-card:hover {
+  border-color: var(--border-strong);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+  text-decoration: none;
+}
+
+.auth-logo .logo-icon {
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  border-radius: var(--radius-md);
+}
+
+.auth-logo .logo-text {
+  font-size: 24px;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.auth-header h1 {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin-bottom: var(--space-1);
+}
+
+.auth-header p {
+  font-size: var(--text-body-sm);
+  color: var(--text-muted);
+  line-height: var(--leading-normal);
+}
+
+/* Auth card Radzen overrides */
+.auth-card .rz-login {
+  width: 100%;
+}
+
+.auth-card .rz-form-field {
+  width: 100%;
+  margin-bottom: var(--space-4);
+}
+
+.auth-card .rz-form-field-filled,
+.auth-card .rz-form-field-outlined,
+.auth-card .rz-textbox,
+.auth-card input.rz-inputtext,
+.auth-card .rz-password {
+  background-color: var(--surface-overlay) !important;
+  color: var(--text-primary) !important;
+  border-color: var(--border-default) !important;
+}
+
+.auth-card .rz-form-field-filled .rz-form-field-content,
+.auth-card .rz-form-field-outlined .rz-form-field-content {
+  background-color: var(--surface-overlay) !important;
+}
+
+.auth-card .rz-textbox:focus,
+.auth-card input.rz-inputtext:focus,
+.auth-card .rz-state-focus {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
+}
+
+.auth-card .rz-form-field-label,
+.auth-card .rz-login-label {
+  color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  font-weight: var(--weight-medium) !important;
+}
+
+.auth-card .rz-login-button,
+.auth-card button[type="submit"].rz-button {
+  width: 100%;
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: #ffffff !important;
+  border-radius: var(--radius-md) !important;
+  font-weight: var(--weight-semibold) !important;
+  height: 44px;
+  font-size: var(--text-body-sm) !important;
+  transition: all var(--transition-fast) !important;
+  margin-top: var(--space-3);
+  box-shadow: var(--shadow-sm);
+}
+
+.auth-card .rz-login-button:hover,
+.auth-card button[type="submit"].rz-button:hover {
+  background: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4) !important;
+}
+
+.auth-card .rz-login-button:active,
+.auth-card button[type="submit"].rz-button:active {
+  background: var(--color-primary-active) !important;
+  transform: translateY(0);
+}
+
+.auth-card .rz-chkbox-box {
+  background: var(--surface-overlay) !important;
+  border-color: var(--border-default) !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+.auth-card .rz-chkbox-box.rz-state-active {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.auth-card .rz-chkbox-label {
+  color: var(--text-secondary) !important;
+  font-size: 13px !important;
+}
+
+.auth-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-4);
+  padding: 0 var(--space-1);
+}
+
+.auth-link {
+  color: var(--color-primary-bright);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.auth-link:hover {
+  color: var(--text-primary);
+  text-decoration: underline;
+}
+
+.auth-footer {
+  margin-top: var(--space-6);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-caption);
+  width: 100%;
+  max-width: 440px;
+  line-height: var(--leading-normal);
+}
+
