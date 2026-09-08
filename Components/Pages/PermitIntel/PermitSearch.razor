@@ -50,67 +50,80 @@
         <RadzenRow Gap="1rem">
             <RadzenColumn Size="12" SizeMD="6">
                 <RadzenLabel Text="Boroughs" class="rz-mb-1 rz-display-block" />
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                <div class="filter-chip-group" role="group" aria-label="Borough options">
                     @foreach (var b in boroughOptions)
                     {
-                        <RadzenToggleButton @bind-Value="b.Selected" Text="@b.Name"
-                                             ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
-                                             ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                        <button type="button" class="filter-chip @(b.Selected ? "is-selected" : "")"
+                                aria-pressed="@(b.Selected.ToString().ToLower())"
+                                aria-label="@($"Filter by {b.Name}")"
+                                @onclick="() => b.Selected = !b.Selected">
+                            @b.Name
+                        </button>
                     }
-                </RadzenStack>
+                </div>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="6">
                 <RadzenLabel Text="Job Types" class="rz-mb-1 rz-display-block" />
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                <div class="filter-chip-group" role="group" aria-label="Job type options">
                     @foreach (var j in jobTypeOptions)
                     {
-                        <RadzenToggleButton @bind-Value="j.Selected" Text="@j.Name"
-                                             ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
-                                             ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                        <button type="button" class="filter-chip @(j.Selected ? "is-selected" : "")"
+                                aria-pressed="@(j.Selected.ToString().ToLower())"
+                                aria-label="@($"Filter by {j.Name}")"
+                                @onclick="() => j.Selected = !j.Selected">
+                            @j.Name
+                        </button>
                     }
-                </RadzenStack>
+                </div>
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow class="rz-mt-4" Gap="1rem">
             <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Date From" class="rz-mb-1 rz-display-block" />
-                <input type="date" class="native-date-picker" @bind-value="dateFrom" />
+                <label for="dateFromInput" class="rz-mb-1 rz-display-block rz-label">Date From</label>
+                <input id="dateFromInput" type="date" class="native-date-picker" @bind-value="dateFrom" aria-label="Filter from date" />
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Date To" class="rz-mb-1 rz-display-block" />
-                <input type="date" class="native-date-picker" @bind-value="dateTo" />
+                <label for="dateToInput" class="rz-mb-1 rz-display-block rz-label">Date To</label>
+                <input id="dateToInput" type="date" class="native-date-picker" @bind-value="dateTo" aria-label="Filter to date" />
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Min Cost ($)" class="rz-mb-1 rz-display-block" />
-                <RadzenNumeric @bind-Value="minCost" Style="width: 100%;" Name="numMin" Placeholder="0" Format="N0" />
+                <label for="minCostInput" class="rz-mb-1 rz-display-block rz-label">Min Cost ($)</label>
+                <RadzenNumeric @bind-Value="minCost" Style="width: 100%;" Name="numMin" Placeholder="0" Format="N0" aria-label="Minimum cost in dollars" />
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="3">
-                <RadzenLabel Text="Max Cost ($)" class="rz-mb-1 rz-display-block" />
-                <RadzenNumeric @bind-Value="maxCost" Style="width: 100%;" Name="numMax" Placeholder="No limit" Format="N0" />
+                <label for="maxCostInput" class="rz-mb-1 rz-display-block rz-label">Max Cost ($)</label>
+                <RadzenNumeric @bind-Value="maxCost" Style="width: 100%;" Name="numMax" Placeholder="No limit" Format="N0" aria-label="Maximum cost in dollars" />
             </RadzenColumn>
         </RadzenRow>
 
         <RadzenRow class="rz-mt-4" Gap="1rem">
             <RadzenColumn Size="12" SizeMD="8">
                 <RadzenLabel Text="Trades" class="rz-mb-1 rz-display-block" />
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Wrap="Radzen.FlexWrap.Wrap" Gap="0.5rem">
+                <div class="filter-chip-group" role="group" aria-label="Trade options">
                     @foreach (var trade in tradeOptions)
                     {
-                        <RadzenToggleButton @bind-Value="trade.Selected" Text="@trade.Name"
-                                             ButtonStyle="Radzen.ButtonStyle.Info" Size="Radzen.ButtonSize.Small"
-                                             ToggleButtonStyle="Radzen.ButtonStyle.Light" />
+                        <button type="button" class="filter-chip @(trade.Selected ? "is-selected" : "")"
+                                aria-pressed="@(trade.Selected.ToString().ToLower())"
+                                aria-label="@($"Filter by {trade.Name}")"
+                                @onclick="() => trade.Selected = !trade.Selected">
+                            @trade.Name
+                        </button>
                     }
-                </RadzenStack>
+                </div>
             </RadzenColumn>
             <RadzenColumn Size="12" SizeMD="4">
                 <RadzenLabel Text="Data Source" class="rz-mb-1 rz-display-block" />
-                <RadzenSelectBar @bind-Value="selectedSource" TValue="string" Size="Radzen.ButtonSize.Small">
-                    <Items>
-                        <RadzenSelectBarItem Text="All" Value="@("ALL")" />
-                        <RadzenSelectBarItem Text="DOB NOW" Value="@("DOBNOW")" />
-                        <RadzenSelectBarItem Text="BIS (Legacy)" Value="@("BIS")" />
-                    </Items>
-                </RadzenSelectBar>
+                <div class="filter-chip-group" role="radiogroup" aria-label="Data Source">
+                    <button type="button" role="radio" aria-checked="@(selectedSource == "ALL" ? "true" : "false")"
+                            class="filter-chip @(selectedSource == "ALL" ? "is-selected" : "")"
+                            @onclick='() => selectedSource = "ALL"'>All</button>
+                    <button type="button" role="radio" aria-checked="@(selectedSource == "DOBNOW" ? "true" : "false")"
+                            class="filter-chip @(selectedSource == "DOBNOW" ? "is-selected" : "")"
+                            @onclick='() => selectedSource = "DOBNOW"'>DOB NOW</button>
+                    <button type="button" role="radio" aria-checked="@(selectedSource == "BIS" ? "true" : "false")"
+                            class="filter-chip @(selectedSource == "BIS" ? "is-selected" : "")"
+                            @onclick='() => selectedSource = "BIS"'>BIS (Legacy)</button>
+                </div>
             </RadzenColumn>
         </RadzenRow>
     </div>
@@ -174,44 +187,117 @@
                         Style="min-height: 400px;" class="rz-border-top">
             <Columns>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.JobNum))"
+                                aria-label="@GetSortAriaLabel("Permit Number", nameof(DobjobFiling.JobNum))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.JobNum))">
+                            <span>Permit #</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.JobNum))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         <span class="permit-num">@(filing.JobFilingNumber ?? filing.JobNum?.ToString())</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="180px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.StreetName))"
+                                aria-label="@GetSortAriaLabel("Address", nameof(DobjobFiling.StreetName))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.StreetName))">
+                            <span>Address</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.StreetName))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         <span class="permit-addr">@filing.HouseNum @filing.StreetName</span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobDescription" Title="Description" Width="280px">
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobDescription" Title="Description" Width="280px" Sortable="false">
                     <Template Context="filing">
                         <span class="desc-cell" title="@filing.JobDescription">
                             @KonXProWebApp.Services.DescriptionHelper.Summarize(filing)
                         </span>
                     </Template>
                 </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px" />
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="Borough" Title="Borough" Width="100px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.Borough))"
+                                aria-label="@GetSortAriaLabel("Borough", nameof(DobjobFiling.Borough))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.Borough))">
+                            <span>Borough</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.Borough))</span>
+                        </button>
+                    </HeaderTemplate>
+                </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="JobType" Title="Trade" Width="100px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.JobType))"
+                                aria-label="@GetSortAriaLabel("Trade", nameof(DobjobFiling.JobType))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.JobType))">
+                            <span>Trade</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.JobType))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         <span class="trade-tag trade-plumb">@filing.JobType</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="InitialCost" Title="Est. Value" Width="110px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.InitialCost))"
+                                aria-label="@GetSortAriaLabel("Estimated Value", nameof(DobjobFiling.InitialCost))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.InitialCost))">
+                            <span>Est. Value</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.InitialCost))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         <span class="value-cell">@filing.InitialCost?.ToString("C0")</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="PreFilingDate" Title="Filed" Width="120px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.PreFilingDate))"
+                                aria-label="@GetSortAriaLabel("Filing Date", nameof(DobjobFiling.PreFilingDate))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.PreFilingDate))">
+                            <span>Filed</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.PreFilingDate))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         <span class="date-cell">@filing.PreFilingDate?.ToString("MM/dd/yyyy")</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="LatestActionDate" Title="Last Activity" Width="120px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.LatestActionDate))"
+                                aria-label="@GetSortAriaLabel("Last Activity Date", nameof(DobjobFiling.LatestActionDate))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.LatestActionDate))">
+                            <span>Last Activity</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.LatestActionDate))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         <span class="date-cell">@filing.LatestActionDate?.ToString("MM/dd/yyyy")</span>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="LeadScore" Title="Predictive Score" Width="160px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.LeadScore))"
+                                aria-label="@GetSortAriaLabel("Predictive Score", nameof(DobjobFiling.LeadScore))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.LeadScore))">
+                            <span>Predictive Score</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.LeadScore))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         @if (filing.LeadScore.HasValue)
                         {
@@ -229,6 +315,15 @@
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="JobStatusDescrp" Title="Status" Width="140px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.JobStatusDescrp))"
+                                aria-label="@GetSortAriaLabel("Status", nameof(DobjobFiling.JobStatusDescrp))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.JobStatusDescrp))">
+                            <span>Status</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.JobStatusDescrp))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         @{
                             var (label, cssClass) = GetStatusTier(filing.JobStatusDescrp);
@@ -237,6 +332,15 @@
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="DataSource" Title="Source" Width="90px">
+                    <HeaderTemplate>
+                        <button type="button" class="grid-sort-header-btn"
+                                @onclick="() => SortByColumn(nameof(DobjobFiling.DataSource))"
+                                aria-label="@GetSortAriaLabel("Data Source", nameof(DobjobFiling.DataSource))"
+                                aria-sort="@GetAriaSort(nameof(DobjobFiling.DataSource))">
+                            <span>Source</span>
+                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.DataSource))</span>
+                        </button>
+                    </HeaderTemplate>
                     <Template Context="filing">
                         @if (filing.DataSource == "DOBNOW")
                         {
@@ -250,8 +354,17 @@
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">
                     <Template Context="filing">
-                        <button class="action-btn" @onclick="() => SaveAsLead(filing)" aria-label="Save as lead" title="Save as lead"><RadzenIcon Icon="star" Style="font-size: 16px;" /></button>
-                        <button class="action-btn" @onclick="() => ViewDetail(filing)" aria-label="View details" title="View details">→</button>
+                        <button type="button" class="action-btn" @onclick="() => SaveAsLead(filing)"
+                                aria-label="@($"Save as lead: {filing.HouseNum} {filing.StreetName}")"
+                                aria-pressed="@(savedFilingIds.Contains(filing.Id) ? "true" : "false")"
+                                title="Save as lead">
+                            <RadzenIcon Icon="star" Style="font-size: 16px;" aria-hidden="true" />
+                        </button>
+                        <button type="button" class="action-btn" @onclick="() => ViewDetail(filing)"
+                                aria-label="@($"View details for {filing.HouseNum} {filing.StreetName}")"
+                                title="View details">
+                            <span aria-hidden="true">→</span>
+                        </button>
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -259,19 +372,31 @@
     </div>
 
     @* ── Mobile: Card List (hidden above 768px) ── *@
-    <div class="mobile-cards">
+    <div class="mobile-cards" role="region" aria-label="Permit feed cards">
         @if (permits != null)
         {
             var mobilePermits = permits.Take(mobilePageSize).ToList();
             @foreach (var filing in mobilePermits)
             {
                 var (statusLabel, statusCss) = GetStatusTier(filing.JobStatusDescrp);
-                <div class="mobile-card" @onclick="() => ViewDetail(filing)">
+                <div class="mobile-card" tabindex="0" role="button"
+                     aria-label="@($"Permit {filing.JobFilingNumber ?? filing.JobNum?.ToString()} at {filing.HouseNum} {filing.StreetName}")"
+                     @onclick="() => ViewDetail(filing)"
+                     @onkeydown="e => HandleCardKeyDown(e, filing)">
                     <div class="mobile-card-row-top">
                         <div class="mobile-card-address">@filing.HouseNum @filing.StreetName</div>
                         <div class="mobile-card-actions">
-                            <button class="action-btn" @onclick="() => SaveAsLead(filing)" @onclick:stopPropagation="true" aria-label="Save as lead" title="Save as lead"><RadzenIcon Icon="star" Style="font-size: 16px;" /></button>
-                            <button class="action-btn" @onclick="() => ViewDetail(filing)" @onclick:stopPropagation="true" aria-label="View details" title="View details">→</button>
+                            <button type="button" class="action-btn" @onclick="() => SaveAsLead(filing)" @onclick:stopPropagation="true"
+                                    aria-label="@($"Save as lead: {filing.HouseNum} {filing.StreetName}")"
+                                    aria-pressed="@(savedFilingIds.Contains(filing.Id) ? "true" : "false")"
+                                    title="Save as lead">
+                                <RadzenIcon Icon="star" Style="font-size: 16px;" aria-hidden="true" />
+                            </button>
+                            <button type="button" class="action-btn" @onclick="() => ViewDetail(filing)" @onclick:stopPropagation="true"
+                                    aria-label="@($"View details for {filing.HouseNum} {filing.StreetName}")"
+                                    title="View details">
+                                <span aria-hidden="true">→</span>
+                            </button>
                         </div>
                     </div>
                     <div class="mobile-card-meta">
@@ -298,7 +423,9 @@
                     </div>
                     @if (!string.IsNullOrWhiteSpace(filing.JobDescription))
                     {
-                        <div class="mobile-card-desc" @onclick="() => ToggleDesc(filing.Id)" @onclick:stopPropagation="true">
+                        <button type="button" class="mobile-card-desc" @onclick="() => ToggleDesc(filing.Id)" @onclick:stopPropagation="true"
+                                aria-expanded="@(expandedDescIds.Contains(filing.Id).ToString().ToLower())"
+                                aria-label="@($"Toggle job description for {filing.HouseNum} {filing.StreetName}")">
                             @if (expandedDescIds.Contains(filing.Id))
                             {
                                 <span>@filing.JobDescription</span>
@@ -308,10 +435,10 @@
                                 <span>@KonXProWebApp.Services.DescriptionHelper.Summarize(filing)</span>
                                 @if (filing.JobDescription.Length > 80)
                                 {
-                                    <span class="desc-expand-hint">tap to expand</span>
+                                    <span class="desc-expand-hint" aria-hidden="true">tap to expand</span>
                                 }
                             }
-                        </div>
+                        </button>
                     }
                 </div>
             }
@@ -319,13 +446,13 @@
             {
                 <div class="mobile-cards-pager">
                     <span class="mobile-cards-showing">Showing @mobilePermits.Count of @totalCount permits</span>
-                    <button class="btn-load-more" @onclick="LoadMoreMobile">Load More</button>
+                    <button type="button" class="btn-load-more" @onclick="LoadMoreMobile" aria-label="Load more permits">Load More</button>
                 </div>
             }
         }
         else
         {
-            <div class="mobile-cards-empty">Loading permits…</div>
+            <div class="mobile-cards-empty" role="status">Loading permits…</div>
         }
     </div>
 </div>

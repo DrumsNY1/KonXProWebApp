@@ -11,13 +11,21 @@
 <RadzenTemplateForm Action="@($"account/login?redirectUrl={redirectUrl}")" Data="@("login")" Method="post">
     <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Danger" Visible="@errorVisible" class="mb-3">@error</RadzenAlert>
     <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Info" Visible="@infoVisible" class="mb-3">@info</RadzenAlert>
-    <RadzenLogin AllowResetPassword="false" AllowRegister="false" FormFieldVariant="Variant.Outlined"
-            Text="Log in to KonXPro"
-    />
+    <div class="auth-form-group">
+        <label for="userName" class="auth-input-label">Email or Username</label>
+        <RadzenTextBox id="userName" Name="userName" AutoComplete="username" class="w-100 auth-input" aria-required="true" aria-label="Email or Username" />
+    </div>
+    <div class="auth-form-group">
+        <label for="password" class="auth-input-label">Password</label>
+        <RadzenPassword id="password" Name="password" AutoComplete="current-password" class="w-100 auth-input" aria-required="true" aria-label="Password" />
+    </div>
+    <button type="submit" class="auth-submit-btn" aria-label="Log in to KonXPro">
+        Log In
+    </button>
 </RadzenTemplateForm>
 
 <div class="auth-actions">
-    <a href="javascript:void(0)" @onclick="ResetPassword" class="auth-link">Forgot password?</a>
-    <a href="javascript:void(0)" @onclick="Register" class="auth-link">Create an account</a>
+    <a href="javascript:void(0)" @onclick="ResetPassword" class="auth-link" role="button">Forgot password?</a>
+    <a href="javascript:void(0)" @onclick="Register" class="auth-link" role="button">Create an account</a>
 </div>
 

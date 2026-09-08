@@ -171,4 +171,109 @@ public class PermitSearchComponentTests : TestContext
         // After clear, bar should disappear
         Assert.DoesNotContain("filter-summary-bar", cut.Markup);
     }
+
+    [Fact]
+    public void FilterChips_HaveAriaPressedAndAccessibleRoles()
+    {
+        var cut = RenderComponent<PermitSearch>();
+
+        // Find borough filter chips
+        var firstChip = cut.FindAll("button.filter-chip")
+            .First(b => b.GetAttribute("aria-label")?.StartsWith("Filter by") == true);
+
+        Assert.Equal("false", firstChip.GetAttribute("aria-pressed"));
+        Assert.DoesNotContain("is-selected", firstChip.ClassList);
+
+        // Click to toggle
+        firstChip.Click();
+
+        // Re-query after re-render: should now be pressed and have is-selected class
+        var updatedChip = cut.FindAll("button.filter-chip")
+            .First(b => b.GetAttribute("aria-label")?.StartsWith("Filter by") == true);
+        Assert.Equal("true", updatedChip.GetAttribute("aria-pressed"));
+        Assert.Contains("is-selected", updatedChip.ClassList);
+    }
+
+    [Fact]
+    public void SortableHeaders_RenderAccessibleButtonsWithAriaSort()
+    {
+        _context.DobjobFilings.Add(new DobjobFiling
+        {
+            JobNum = 700020,
+            Borough = "BROOKLYN",
+            HouseNum = "10",
+            StreetName = "SORT TEST ST",
+            JobType = "A1",
+            LatestActionDate = DateTime.UtcNow
+        });
+        _context.SaveChanges();
+
+        var cut = RenderComponent<PermitSearch>();
+
+        // Header sort buttons should exist with aria-sort="none" initially
+        var sortButtons = cut.FindAll("button.grid-sort-header-btn");
+        Assert.NotEmpty(sortButtons);
+
+        var permitNumBtn = sortButtons.First(b => b.TextContent.Contains("Permit #"));
+        Assert.Equal("none", permitNumBtn.GetAttribute("aria-sort"));
+
+        // Click to sort ascending
+        permitNumBtn.Click();
+        permitNumBtn = cut.FindAll("button.grid-sort-header-btn").First(b => b.TextContent.Contains("Permit #"));
+        Assert.Equal("ascending", permitNumBtn.GetAttribute("aria-sort"));
+        Assert.Contains("sorted ascending", permitNumBtn.GetAttribute("aria-label"));
+
+        // Click again to sort descending
+        permitNumBtn.Click();
+        permitNumBtn = cut.FindAll("button.grid-sort-header-btn").First(b => b.TextContent.Contains("Permit #"));
+        Assert.Equal("descending", permitNumBtn.GetAttribute("aria-sort"));
+        Assert.Contains("sorted descending", permitNumBtn.GetAttribute("aria-label"));
+    }
+
+    [Fact]
+    public void ActionButtonsAndMobileCards_HaveAccessibleAttributes()
+    {
+        _context.DobjobFilings.Add(new DobjobFiling
+        {
+            JobNum = 700030,
+            Borough = "MANHATTAN",
+            HouseNum = "500",
+            StreetName = "FIFTH AVE",
+            JobDescription = "Full floor commercial interior renovation with structural framing.",
+            JobType = "A1",
+            LatestActionDate = DateTime.UtcNow
+        });
+        _context.SaveChanges();
+
+        var cut = RenderComponent<PermitSearch>();
+
+        // Check action buttons in desktop and mobile
+        var saveBtns = cut.FindAll("button.action-btn").Where(b => b.GetAttribute("title") == "Save as lead").ToList();
+        Assert.NotEmpty(saveBtns);
+        Assert.All(saveBtns, b =>
+        {
+            Assert.Contains("Save as lead:", b.GetAttribute("aria-label"));
+            Assert.Equal("false", b.GetAttribute("aria-pressed"));
+        });
+
+        var detailBtns = cut.FindAll("button.action-btn").Where(b => b.GetAttribute("title") == "View details").ToList();
+        Assert.NotEmpty(detailBtns);
+        Assert.All(detailBtns, b =>
+        {
+            Assert.Contains("View details for", b.GetAttribute("aria-label"));
+            Assert.Contains("→", b.TextContent);
+        });
+
+        // Mobile cards should be keyboard accessible
+        var mobileCards = cut.FindAll(".mobile-card");
+        Assert.NotEmpty(mobileCards);
+        var firstCard = mobileCards.First();
+        Assert.Equal("0", firstCard.GetAttribute("tabindex"));
+        Assert.Equal("button", firstCard.GetAttribute("role"));
+
+        // Mobile description expander is an accessible button
+        var descBtn = cut.Find("button.mobile-card-desc");
+        Assert.NotNull(descBtn);
+        Assert.Equal("false", descBtn.GetAttribute("aria-expanded"));
+    }
 }

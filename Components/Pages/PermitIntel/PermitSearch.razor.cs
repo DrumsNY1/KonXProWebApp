@@ -140,6 +140,70 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             mobilePageSize += MobilePageIncrement;
         }
 
+        protected HashSet<int> savedFilingIds = new();
+        protected string currentSortColumn = "";
+        protected bool isSortAscending = true;
+
+        protected void SortByColumn(string propertyName)
+        {
+            if (permits == null) return;
+
+            if (currentSortColumn == propertyName)
+            {
+                isSortAscending = !isSortAscending;
+            }
+            else
+            {
+                currentSortColumn = propertyName;
+                isSortAscending = true;
+            }
+
+            var sorted = propertyName switch
+            {
+                nameof(DobjobFiling.JobNum) => isSortAscending ? permits.OrderBy(p => p.JobNum) : permits.OrderByDescending(p => p.JobNum),
+                nameof(DobjobFiling.StreetName) => isSortAscending ? permits.OrderBy(p => p.StreetName) : permits.OrderByDescending(p => p.StreetName),
+                nameof(DobjobFiling.Borough) => isSortAscending ? permits.OrderBy(p => p.Borough) : permits.OrderByDescending(p => p.Borough),
+                nameof(DobjobFiling.JobType) => isSortAscending ? permits.OrderBy(p => p.JobType) : permits.OrderByDescending(p => p.JobType),
+                nameof(DobjobFiling.InitialCost) => isSortAscending ? permits.OrderBy(p => p.InitialCost) : permits.OrderByDescending(p => p.InitialCost),
+                nameof(DobjobFiling.PreFilingDate) => isSortAscending ? permits.OrderBy(p => p.PreFilingDate) : permits.OrderByDescending(p => p.PreFilingDate),
+                nameof(DobjobFiling.LatestActionDate) => isSortAscending ? permits.OrderBy(p => p.LatestActionDate) : permits.OrderByDescending(p => p.LatestActionDate),
+                nameof(DobjobFiling.LeadScore) => isSortAscending ? permits.OrderBy(p => p.LeadScore) : permits.OrderByDescending(p => p.LeadScore),
+                nameof(DobjobFiling.JobStatusDescrp) => isSortAscending ? permits.OrderBy(p => p.JobStatusDescrp) : permits.OrderByDescending(p => p.JobStatusDescrp),
+                nameof(DobjobFiling.DataSource) => isSortAscending ? permits.OrderBy(p => p.DataSource) : permits.OrderByDescending(p => p.DataSource),
+                _ => permits
+            };
+            permits = sorted.ToList();
+        }
+
+        protected string GetAriaSort(string propertyName)
+        {
+            if (currentSortColumn != propertyName) return "none";
+            return isSortAscending ? "ascending" : "descending";
+        }
+
+        protected string GetSortAriaLabel(string title, string propertyName)
+        {
+            if (currentSortColumn != propertyName)
+                return $"Sort by {title}, not sorted. Activate to sort ascending.";
+            return isSortAscending
+                ? $"Sort by {title}, currently sorted ascending. Activate to sort descending."
+                : $"Sort by {title}, currently sorted descending. Activate to sort ascending.";
+        }
+
+        protected string GetSortIndicator(string propertyName)
+        {
+            if (currentSortColumn != propertyName) return "↕";
+            return isSortAscending ? "▲" : "▼";
+        }
+
+        protected void HandleCardKeyDown(KeyboardEventArgs e, DobjobFiling filing)
+        {
+            if (e.Key == "Enter" || e.Key == " ")
+            {
+                ViewDetail(filing);
+            }
+        }
+
         protected async Task SaveAsLead(DobjobFiling filing)
         {
             try
@@ -153,6 +217,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
                 var userId = Security.User.Id;
                 await PermitIntelService.SaveLead(userId, filing.Id);
+                savedFilingIds.Add(filing.Id);
                 savedLeadCount = await PermitIntelService.GetSavedLeadCount(userId);
                 NotificationService.Notify(NotificationSeverity.Success, "Lead Saved", $"{filing.HouseNum} {filing.StreetName} added to your leads.");
             }

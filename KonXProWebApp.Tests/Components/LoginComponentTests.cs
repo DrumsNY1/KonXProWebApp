@@ -54,4 +54,25 @@ public class LoginComponentTests : TestContext
         Assert.Contains("Create an account", cut.Markup);
         Assert.Contains("account/login", cut.Markup);
     }
+
+    [Fact]
+    public void Login_HasAccessibleLabelsAndSubmitButton()
+    {
+        var cut = RenderComponent<Login>();
+
+        // Explicit labels with for attribute matching input ids
+        Assert.Contains("for=\"userName\"", cut.Markup);
+        Assert.Contains("for=\"password\"", cut.Markup);
+        Assert.Contains("id=\"userName\"", cut.Markup);
+        Assert.Contains("id=\"password\"", cut.Markup);
+
+        // Required ARIA attributes
+        Assert.Contains("aria-required=\"true\"", cut.Markup);
+
+        // Submit button has accessible name and type submit
+        var submitBtn = cut.Find("button[type='submit']");
+        Assert.NotNull(submitBtn);
+        Assert.Equal("Log in to KonXPro", submitBtn.GetAttribute("aria-label"));
+        Assert.Contains("Log In", submitBtn.TextContent);
+    }
 }
