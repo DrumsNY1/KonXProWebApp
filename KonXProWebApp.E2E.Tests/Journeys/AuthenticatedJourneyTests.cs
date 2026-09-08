@@ -129,4 +129,18 @@ public class AuthenticatedJourneyTests
 
         Assert.True(page.Url.Contains("stripe", StringComparison.OrdinalIgnoreCase) || page.Url.Contains("subscribe", StringComparison.OrdinalIgnoreCase));
     }
+
+    [Fact]
+    public async Task CapturePermitSearchPreview()
+    {
+        await using var context = await _fixture.NewContextAsync();
+        var page = await context.NewPageAsync();
+        await page.SetViewportSizeAsync(1440, 900);
+        var loginOk = await LoginAsync(page, "admin", "admin");
+        Assert.True(loginOk, "Login with admin/admin failed");
+        await page.GotoAsync($"{_fixture.BaseUrl}/permit-intel/search", new() { WaitUntil = WaitUntilState.DOMContentLoaded });
+        await page.WaitForSelectorAsync(".rz-data-grid", new() { Timeout = 15000 });
+        await page.WaitForTimeoutAsync(3000);
+        await page.ScreenshotAsync(new() { Path = @"C:\Users\Reggie\.gemini\antigravity\brain\881eff26-0e09-4bc0-8dcf-a12ff0fbb9e7\permit_feed_preview.png" });
+    }
 }
