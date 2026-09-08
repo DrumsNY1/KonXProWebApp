@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Radzen;
+using Radzen.Blazor;
 using Xunit;
 
 namespace KonXProWebApp.Tests.Components;
@@ -173,25 +174,18 @@ public class PermitSearchComponentTests : TestContext
     }
 
     [Fact]
-    public void FilterChips_HaveAriaPressedAndAccessibleRoles()
+    public void MultiSelectDropdowns_AreRenderedForBoroughsJobTypesAndTrades()
     {
         var cut = RenderComponent<PermitSearch>();
 
-        // Find borough filter chips
-        var firstChip = cut.FindAll("button.filter-chip")
-            .First(b => b.GetAttribute("aria-label")?.StartsWith("Filter by") == true);
+        // Verify RadzenDropDown components exist for Boroughs, Job Types, and Trades
+        var dropdowns = cut.FindComponents<RadzenDropDown<IEnumerable<string>>>();
+        Assert.Equal(3, dropdowns.Count);
 
-        Assert.Equal("false", firstChip.GetAttribute("aria-pressed"));
-        Assert.DoesNotContain("is-selected", firstChip.ClassList);
-
-        // Click to toggle
-        firstChip.Click();
-
-        // Re-query after re-render: should now be pressed and have is-selected class
-        var updatedChip = cut.FindAll("button.filter-chip")
-            .First(b => b.GetAttribute("aria-label")?.StartsWith("Filter by") == true);
-        Assert.Equal("true", updatedChip.GetAttribute("aria-pressed"));
-        Assert.Contains("is-selected", updatedChip.ClassList);
+        // Verify placeholders
+        Assert.Contains("All Boroughs", cut.Markup);
+        Assert.Contains("All Job Types", cut.Markup);
+        Assert.Contains("All Trades", cut.Markup);
     }
 
     [Fact]
@@ -275,5 +269,63 @@ public class PermitSearchComponentTests : TestContext
         var descBtn = cut.Find("button.mobile-card-desc");
         Assert.NotNull(descBtn);
         Assert.Equal("false", descBtn.GetAttribute("aria-expanded"));
+    }
+
+    [Fact]
+    public void PermitNumberColumn_RendersClickableIconWithTooltip()
+    {
+        _context.DobjobFilings.Add(new DobjobFiling
+        {
+            JobNum = 700040,
+            JobFilingNumber = "M00700040",
+            Borough = "MANHATTAN",
+            HouseNum = "123",
+            StreetName = "TEST AVE",
+            JobType = "A1",
+            LatestActionDate = DateTime.UtcNow
+        });
+        _context.SaveChanges();
+
+        var cut = RenderComponent<PermitSearch>();
+
+        // Permit # column should have a clickable icon button
+        var iconBtn = cut.FindAll("button.permit-icon-btn").FirstOrDefault();
+        Assert.NotNull(iconBtn);
+
+        // Tooltip (title) should be the permit number
+        Assert.Equal("M00700040", iconBtn.GetAttribute("title"));
+        Assert.Contains("M00700040", iconBtn.GetAttribute("aria-label"));
+
+        // Click navigates to detail
+        var navManager = Services.GetRequiredService<NavigationManager>();
+        iconBtn.Click();
+        Assert.Contains("/permit-intel/detail/", navManager.Uri);
+    }
+
+    [Fact]
+    public void DataSource_ColumnAndFilter_AreEliminated()
+    {
+        var cut = RenderComponent<PermitSearch>();
+
+        // Source column header should not exist in the grid
+        var headers = cut.FindAll("button.grid-sort-header-btn");
+        Assert.DoesNotContain(headers, h => h.TextContent.Trim() == "Source");
+
+        // Data source filter chips should not exist
+        Assert.DoesNotContain("DOB NOW", cut.Markup);
+        Assert.DoesNotContain("BIS (Legacy)", cut.Markup);
+    }
+
+    [Fact]
+    public void HeaderKpis_RenderConsolidatedCompactStrip()
+    {
+        var cut = RenderComponent<PermitSearch>();
+
+        Assert.Contains("page-header-with-stats", cut.Markup);
+        Assert.Contains("header-stats-strip", cut.Markup);
+        Assert.Contains("New Leads", cut.Markup);
+        Assert.Contains("Active Permits", cut.Markup);
+        Assert.Contains("Job Value", cut.Markup);
+        Assert.Contains("Pipeline", cut.Markup);
     }
 }

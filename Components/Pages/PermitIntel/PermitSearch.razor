@@ -5,33 +5,44 @@
 
 <PageTitle>Permit Search — NYC Permit Intel</PageTitle>
 
-<!-- PAGE HEADER -->
-<div class="page-header">
-    <h1>Permit Feed</h1>
-    <p>@($"{totalCount:N0}") new permits matching your criteria · Last updated just now</p>
-</div>
-
-<!-- STATS CARDS -->
-<div class="stats-row">
-    <div class="stat-card">
-        <div class="stat-label-sm"><RadzenIcon Icon="bolt" class="stat-icon" /> New Leads Today</div>
-        <div class="stat-value">@($"{totalCount:N0}")</div>
-        <div class="stat-change neutral">matching your criteria</div>
+<!-- PAGE HEADER WITH CONSOLIDATED COMPACT STATS -->
+<div class="page-header-with-stats">
+    <div class="header-left">
+        <h1>Permit Feed</h1>
+        <p>Live DOB Feed · @($"{totalCount:N0}") permits matching your criteria</p>
     </div>
-    <div class="stat-card">
-        <div class="stat-label-sm"><RadzenIcon Icon="assignment" class="stat-icon" /> Active Permits</div>
-        <div class="stat-value">@($"{activePermitsCount:N0}")</div>
-        <div class="stat-change neutral">in database</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label-sm"><RadzenIcon Icon="attach_money" class="stat-icon text-success" /> Est. Job Value</div>
-        <div class="stat-value text-h2">@FormatCurrency(totalJobValue)</div>
-        <div class="stat-change neutral">across all permits</div>
-    </div>
-    <div class="stat-card">
-        <div class="stat-label-sm"><RadzenIcon Icon="bookmark" class="stat-icon" /> My Pipeline</div>
-        <div class="stat-value">@($"{savedLeadCount:N0}")</div>
-        <div class="stat-change neutral">leads being tracked</div>
+    <div class="header-stats-strip" role="region" aria-label="Permit feed summary metrics">
+        <div class="header-stat-item" title="New Leads matching your criteria">
+            <RadzenIcon Icon="bolt" class="header-stat-icon text-amber" />
+            <div class="header-stat-meta">
+                <span class="header-stat-label">New Leads</span>
+                <span class="header-stat-val">@($"{totalCount:N0}")</span>
+            </div>
+        </div>
+        <div class="header-stat-divider"></div>
+        <div class="header-stat-item" title="Active Permits in database">
+            <RadzenIcon Icon="assignment" class="header-stat-icon text-info" />
+            <div class="header-stat-meta">
+                <span class="header-stat-label">Active Permits</span>
+                <span class="header-stat-val">@($"{activePermitsCount:N0}")</span>
+            </div>
+        </div>
+        <div class="header-stat-divider"></div>
+        <div class="header-stat-item" title="Estimated Job Value across all permits">
+            <RadzenIcon Icon="attach_money" class="header-stat-icon text-success" />
+            <div class="header-stat-meta">
+                <span class="header-stat-label">Job Value</span>
+                <span class="header-stat-val">@FormatCurrency(totalJobValue)</span>
+            </div>
+        </div>
+        <div class="header-stat-divider"></div>
+        <div class="header-stat-item" title="Leads being tracked in your pipeline">
+            <RadzenIcon Icon="bookmark" class="header-stat-icon text-primary" />
+            <div class="header-stat-meta">
+                <span class="header-stat-label">Pipeline</span>
+                <span class="header-stat-val">@($"{savedLeadCount:N0}")</span>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -39,7 +50,7 @@
     <div class="card-header">
         <div>
             <div class="card-title">Live Permit Feed</div>
-            <div class="card-subtitle">Filter by Borough, Type, and Date</div>
+            <div class="card-subtitle">Filter by Borough, Type, Trade, and Date</div>
         </div>
         <div class="card-actions">
             <RadzenButton Text="Search" Icon="search" ButtonStyle="Radzen.ButtonStyle.Primary" Size="Radzen.ButtonSize.Small" Click="@SearchPermits" />
@@ -48,33 +59,35 @@
     </div>
     <div class="rz-p-4">
         <RadzenRow Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="6">
+            <RadzenColumn Size="12" SizeMD="4">
                 <RadzenLabel Text="Boroughs" class="rz-mb-1 rz-display-block" />
-                <div class="filter-chip-group" role="group" aria-label="Borough options">
-                    @foreach (var b in boroughOptions)
-                    {
-                        <button type="button" class="filter-chip @(b.Selected ? "is-selected" : "")"
-                                aria-pressed="@(b.Selected.ToString().ToLower())"
-                                aria-label="@($"Filter by {b.Name}")"
-                                @onclick="() => b.Selected = !b.Selected">
-                            @b.Name
-                        </button>
-                    }
-                </div>
+                <RadzenDropDown @bind-Value="selectedBoroughs" Data="@boroughOptions"
+                                TextProperty="Name" ValueProperty="Name"
+                                Multiple="true" AllowClear="true"
+                                Placeholder="All Boroughs"
+                                Chips="true" MaxSelectedLabels="2"
+                                Change="@(args => SearchPermits())"
+                                Style="width: 100%;" />
             </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="6">
+            <RadzenColumn Size="12" SizeMD="4">
                 <RadzenLabel Text="Job Types" class="rz-mb-1 rz-display-block" />
-                <div class="filter-chip-group" role="group" aria-label="Job type options">
-                    @foreach (var j in jobTypeOptions)
-                    {
-                        <button type="button" class="filter-chip @(j.Selected ? "is-selected" : "")"
-                                aria-pressed="@(j.Selected.ToString().ToLower())"
-                                aria-label="@($"Filter by {j.Name}")"
-                                @onclick="() => j.Selected = !j.Selected">
-                            @j.Name
-                        </button>
-                    }
-                </div>
+                <RadzenDropDown @bind-Value="selectedJobTypes" Data="@jobTypeOptions"
+                                TextProperty="Name" ValueProperty="Key"
+                                Multiple="true" AllowClear="true"
+                                Placeholder="All Job Types"
+                                Chips="true" MaxSelectedLabels="2"
+                                Change="@(args => SearchPermits())"
+                                Style="width: 100%;" />
+            </RadzenColumn>
+            <RadzenColumn Size="12" SizeMD="4">
+                <RadzenLabel Text="Trades" class="rz-mb-1 rz-display-block" />
+                <RadzenDropDown @bind-Value="selectedTrades" Data="@tradeOptions"
+                                TextProperty="Name" ValueProperty="Key"
+                                Multiple="true" AllowClear="true"
+                                Placeholder="All Trades"
+                                Chips="true" MaxSelectedLabels="2"
+                                Change="@(args => SearchPermits())"
+                                Style="width: 100%;" />
             </RadzenColumn>
         </RadzenRow>
         <RadzenRow class="rz-mt-4" Gap="1rem">
@@ -95,37 +108,6 @@
                 <RadzenNumeric @bind-Value="maxCost" Style="width: 100%;" Name="numMax" Placeholder="No limit" Format="N0" aria-label="Maximum cost in dollars" />
             </RadzenColumn>
         </RadzenRow>
-
-        <RadzenRow class="rz-mt-4" Gap="1rem">
-            <RadzenColumn Size="12" SizeMD="8">
-                <RadzenLabel Text="Trades" class="rz-mb-1 rz-display-block" />
-                <div class="filter-chip-group" role="group" aria-label="Trade options">
-                    @foreach (var trade in tradeOptions)
-                    {
-                        <button type="button" class="filter-chip @(trade.Selected ? "is-selected" : "")"
-                                aria-pressed="@(trade.Selected.ToString().ToLower())"
-                                aria-label="@($"Filter by {trade.Name}")"
-                                @onclick="() => trade.Selected = !trade.Selected">
-                            @trade.Name
-                        </button>
-                    }
-                </div>
-            </RadzenColumn>
-            <RadzenColumn Size="12" SizeMD="4">
-                <RadzenLabel Text="Data Source" class="rz-mb-1 rz-display-block" />
-                <div class="filter-chip-group" role="radiogroup" aria-label="Data Source">
-                    <button type="button" role="radio" aria-checked="@(selectedSource == "ALL" ? "true" : "false")"
-                            class="filter-chip @(selectedSource == "ALL" ? "is-selected" : "")"
-                            @onclick='() => selectedSource = "ALL"'>All</button>
-                    <button type="button" role="radio" aria-checked="@(selectedSource == "DOBNOW" ? "true" : "false")"
-                            class="filter-chip @(selectedSource == "DOBNOW" ? "is-selected" : "")"
-                            @onclick='() => selectedSource = "DOBNOW"'>DOB NOW</button>
-                    <button type="button" role="radio" aria-checked="@(selectedSource == "BIS" ? "true" : "false")"
-                            class="filter-chip @(selectedSource == "BIS" ? "is-selected" : "")"
-                            @onclick='() => selectedSource = "BIS"'>BIS (Legacy)</button>
-                </div>
-            </RadzenColumn>
-        </RadzenRow>
     </div>
 
     @* ── Filter Summary Bar (visible only when filters are active) ── *@
@@ -138,20 +120,22 @@
                 <span class="filter-summary-results">@($"{totalCount:N0}") results</span>
             </div>
             <div class="filter-summary-pills">
-                @foreach (var b in boroughOptions.Where(x => x.Selected))
+                @foreach (var b in GetEffectiveBoroughs())
                 {
                     var captured = b;
-                    <button class="filter-pill" @onclick="() => RemoveFilter(captured)" aria-label="@($"Remove {b.Name} filter")">@b.Name ×</button>
+                    <button class="filter-pill" @onclick="() => RemoveBoroughFilter(captured)" aria-label="@($"Remove {b} filter")">@b ×</button>
                 }
-                @foreach (var j in jobTypeOptions.Where(x => x.Selected))
+                @foreach (var j in GetEffectiveJobTypes())
                 {
                     var captured = j;
-                    <button class="filter-pill" @onclick="() => RemoveFilter(captured)" aria-label="@($"Remove {j.Name} filter")">@j.Name ×</button>
+                    var label = jobTypeOptions.FirstOrDefault(x => x.Key == j)?.Name ?? j;
+                    <button class="filter-pill" @onclick="() => RemoveJobTypeFilter(captured)" aria-label="@($"Remove {label} filter")">@label ×</button>
                 }
-                @foreach (var t in tradeOptions.Where(x => x.Selected))
+                @foreach (var t in GetEffectiveTrades())
                 {
                     var captured = t;
-                    <button class="filter-pill" @onclick="() => RemoveFilter(captured)" aria-label="@($"Remove {t.Name} filter")">@t.Name ×</button>
+                    var label = tradeOptions.FirstOrDefault(x => x.Key == t)?.Name ?? t;
+                    <button class="filter-pill" @onclick="() => RemoveTradeFilter(captured)" aria-label="@($"Remove {label} filter")">@label ×</button>
                 }
                 @if (dateFrom.HasValue)
                 {
@@ -169,10 +153,6 @@
                 {
                     <button class="filter-pill" @onclick="RemoveMaxCost" aria-label="Remove maximum cost filter">Max $@maxCost.Value.ToString("N0") ×</button>
                 }
-                @if (selectedSource != "ALL")
-                {
-                    <button class="filter-pill" @onclick="RemoveSource" aria-label="Remove data source filter">@selectedSource ×</button>
-                }
             </div>
             <button class="filter-clear-all" @onclick="ClearAllFilters"><RadzenIcon Icon="close" Style="font-size: 13px; vertical-align: middle; margin-right: 2px;" /> Clear All</button>
         </div>
@@ -180,13 +160,14 @@
 
     @* ── Desktop: Data Grid (hidden below 768px) ── *@
     <div class="desktop-grid">
-        <RadzenDataGrid @ref="grid0" Data="@permits" TItem="DobjobFiling"
+        <RadzenDataGrid @ref="grid0" Data="@permits" Count="@totalCount" LoadData="@OnLoadData" TItem="DobjobFiling"
                         AllowSorting="true" AllowPaging="true" PageSize="25"
+                        PageSizeOptions="@(new int[]{10, 25, 50, 100})"
                         ShowPagingSummary="true" PagerHorizontalAlign="Radzen.HorizontalAlign.Center"
                         AllowColumnResize="true" ColumnWidth="180px"
                         Style="min-height: 400px;" class="rz-border-top">
             <Columns>
-                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="120px">
+                <RadzenDataGridColumn TItem="DobjobFiling" Property="JobNum" Title="Permit #" Width="90px" TextAlign="TextAlign.Center">
                     <HeaderTemplate>
                         <button type="button" class="grid-sort-header-btn"
                                 @onclick="() => SortByColumn(nameof(DobjobFiling.JobNum))"
@@ -197,7 +178,15 @@
                         </button>
                     </HeaderTemplate>
                     <Template Context="filing">
-                        <span class="permit-num">@(filing.JobFilingNumber ?? filing.JobNum?.ToString())</span>
+                        @{
+                            var permitNumber = filing.JobFilingNumber ?? filing.JobNum?.ToString() ?? "Permit";
+                        }
+                        <button type="button" class="permit-icon-btn"
+                                @onclick="() => ViewDetail(filing)"
+                                title="@permitNumber"
+                                aria-label="@($"View permit details for {permitNumber}")">
+                            <RadzenIcon Icon="description" />
+                        </button>
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Property="StreetName" Title="Address" Width="180px">
@@ -329,27 +318,6 @@
                             var (label, cssClass) = GetStatusTier(filing.JobStatusDescrp);
                         }
                         <span class="status-badge @cssClass">@label</span>
-                    </Template>
-                </RadzenDataGridColumn>
-                <RadzenDataGridColumn TItem="DobjobFiling" Property="DataSource" Title="Source" Width="90px">
-                    <HeaderTemplate>
-                        <button type="button" class="grid-sort-header-btn"
-                                @onclick="() => SortByColumn(nameof(DobjobFiling.DataSource))"
-                                aria-label="@GetSortAriaLabel("Data Source", nameof(DobjobFiling.DataSource))"
-                                aria-sort="@GetAriaSort(nameof(DobjobFiling.DataSource))">
-                            <span>Source</span>
-                            <span class="sort-indicator" aria-hidden="true">@GetSortIndicator(nameof(DobjobFiling.DataSource))</span>
-                        </button>
-                    </HeaderTemplate>
-                    <Template Context="filing">
-                        @if (filing.DataSource == "DOBNOW")
-                        {
-                            <span class="status-badge status-active" style="font-size: 0.65rem;">DOB NOW</span>
-                        }
-                        else
-                        {
-                            <span class="status-badge status-closed" style="font-size: 0.65rem;">BIS</span>
-                        }
                     </Template>
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">
