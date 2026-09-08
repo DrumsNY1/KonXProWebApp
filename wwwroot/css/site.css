@@ -1765,3 +1765,179 @@ body,
   line-height: var(--leading-normal);
 }
 
+/* ── 31. PERMIT FEED HEADER & DATA GRID ENHANCEMENTS ──────────────── */
+.page-header-with-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.page-header-with-stats .header-left h1 {
+  font-size: 22px;
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.5px;
+  margin: 0;
+}
+
+.page-header-with-stats .header-left p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+.header-stats-strip {
+  display: flex;
+  align-items: center;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 6px 14px;
+  gap: 12px;
+}
+
+.header-stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: default;
+}
+
+.header-stat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.header-stat-icon.text-amber   { color: #ffb400; }
+.header-stat-icon.text-info    { color: var(--color-info, #17a2b8); }
+.header-stat-icon.text-success { color: var(--color-success, #28a745); }
+.header-stat-icon.text-primary { color: var(--color-primary-bright, #5b9cf6); }
+
+.header-stat-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.header-stat-label {
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.header-stat-val {
+  font-size: 14px;
+  font-weight: var(--weight-bold);
+  color: var(--text-primary);
+  letter-spacing: -0.2px;
+}
+
+.header-stat-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-default);
+}
+
+@media (max-width: 900px) {
+  .page-header-with-stats {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-stats-strip {
+    width: 100%;
+    justify-content: space-between;
+    overflow-x: auto;
+  }
+}
+
+/* Permit Icon Button in Grid */
+.permit-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  background: rgba(58, 123, 213, 0.12);
+  border: 1px solid rgba(58, 123, 213, 0.3);
+  color: var(--color-primary-bright, #5b9cf6);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.permit-icon-btn:hover {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(58, 123, 213, 0.35);
+}
+
+.permit-icon-btn:focus-visible {
+  outline: 2px solid var(--color-primary-bright);
+  outline-offset: 2px;
+}
+
+.permit-icon-btn .rz-icon {
+  font-size: 18px;
+}
+
+/* Desktop Data Grid Horizontal Scroll & Paginator */
+.desktop-grid {
+  position: relative;
+  width: 100%;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+.desktop-grid .rz-data-grid {
+  width: 100%;
+  border: none;
+}
+
+.desktop-grid .rz-data-grid-data {
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong, #3a4d6b) var(--surface-raised, #182234);
+}
+
+.desktop-grid .rz-grid-table {
+  min-width: 1250px;
+}
+
+.desktop-grid .rz-data-grid-data::-webkit-scrollbar {
+  height: 8px;
+}
+
+.desktop-grid .rz-data-grid-data::-webkit-scrollbar-track {
+  background: var(--surface-raised, #182234);
+  border-radius: 4px;
+}
+
+.desktop-grid .rz-data-grid-data::-webkit-scrollbar-thumb {
+  background: var(--border-strong, #3a4d6b);
+  border-radius: 4px;
+}
+
+.desktop-grid .rz-data-grid-data::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary, #3a7bd5);
+}
+
+.desktop-grid .rz-paginator {
+  background: var(--surface-raised);
+  border-top: 1px solid var(--border-default);
+  padding: var(--space-2) var(--space-4);
+}
+
+

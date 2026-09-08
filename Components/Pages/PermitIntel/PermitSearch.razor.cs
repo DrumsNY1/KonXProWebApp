@@ -57,6 +57,11 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         protected DateTime? dateTo;
         protected string selectedSource = "ALL";
 
+        // Multi-select dropdown state
+        protected IEnumerable<string> selectedBoroughs = new List<string>();
+        protected IEnumerable<string> selectedJobTypes = new List<string>();
+        protected IEnumerable<string> selectedTrades = new List<string>();
+
         // Filter options
         protected List<BoroughOption> boroughOptions = new()
         {
@@ -108,21 +113,61 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 : 0;
         }
 
+        public List<string> GetEffectiveBoroughs()
+        {
+            var list = selectedBoroughs?.ToList() ?? new List<string>();
+            var legacySelected = boroughOptions.Where(b => b.Selected).Select(b => b.Name).ToList();
+            return list.Union(legacySelected, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        public List<string> GetEffectiveJobTypes()
+        {
+            var list = selectedJobTypes?.ToList() ?? new List<string>();
+            var legacySelected = jobTypeOptions.Where(j => j.Selected).Select(j => j.Key).ToList();
+            return list.Union(legacySelected, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
+        public List<string> GetEffectiveTrades()
+        {
+            var list = selectedTrades?.ToList() ?? new List<string>();
+            var legacySelected = tradeOptions.Where(t => t.Selected).Select(t => t.Key).ToList();
+            return list.Union(legacySelected, StringComparer.OrdinalIgnoreCase).ToList();
+        }
+
         protected async Task SearchPermits()
         {
             mobilePageSize = MobilePageIncrement;
+            if (grid0 != null)
+            {
+                await grid0.FirstPage(true);
+            }
+            else
+            {
+                await LoadGridData(0, 25, currentSortColumn.Length > 0 ? $"{currentSortColumn} {(isSortAscending ? "asc" : "desc")}" : null);
+            }
+        }
+
+        protected async Task OnLoadData(LoadDataArgs args)
+        {
+            await LoadGridData(args.Skip ?? 0, args.Top ?? 25, args.OrderBy);
+        }
+
+        private async Task LoadGridData(int skip, int take, string orderBy)
+        {
             var query = new PermitSearchQuery
             {
                 SearchText = searchText,
-                Boroughs = boroughOptions.Where(b => b.Selected).Select(b => b.Name).ToList(),
-                JobTypes = jobTypeOptions.Where(j => j.Selected).Select(j => j.Key).ToList(),
-                Trades = tradeOptions.Where(t => t.Selected).Select(t => t.Key).ToList(),
+                Boroughs = GetEffectiveBoroughs(),
+                JobTypes = GetEffectiveJobTypes(),
+                Trades = GetEffectiveTrades(),
                 MinCost = minCost,
                 MaxCost = maxCost,
                 DateFrom = dateFrom,
                 DateTo = dateTo,
-                DataSource = selectedSource,
-                Take = 25
+                DataSource = null, // Eliminate data source filter, fetch all
+                Skip = skip,
+                Take = take,
+                OrderBy = !string.IsNullOrWhiteSpace(orderBy) ? orderBy : "LatestActionDate desc"
             };
 
             var (results, count) = await PermitIntelService.SearchPermits(query);
@@ -345,17 +390,19 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         // ── Filter Summary Bar ──────────────────────────────────────────
         protected int ActiveFilterCount =>
-            boroughOptions.Count(b => b.Selected)
-            + jobTypeOptions.Count(j => j.Selected)
-            + tradeOptions.Count(t => t.Selected)
+            GetEffectiveBoroughs().Count
+            + GetEffectiveJobTypes().Count
+            + GetEffectiveTrades().Count
             + (dateFrom.HasValue ? 1 : 0)
             + (dateTo.HasValue ? 1 : 0)
             + (minCost.HasValue ? 1 : 0)
-            + (maxCost.HasValue ? 1 : 0)
-            + (selectedSource != "ALL" ? 1 : 0);
+            + (maxCost.HasValue ? 1 : 0);
 
         protected async Task ClearAllFilters()
         {
+            selectedBoroughs = new List<string>();
+            selectedJobTypes = new List<string>();
+            selectedTrades = new List<string>();
             foreach (var b in boroughOptions) b.Selected = false;
             foreach (var j in jobTypeOptions) j.Selected = false;
             foreach (var t in tradeOptions) t.Selected = false;
@@ -367,21 +414,48 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
             await SearchPermits();
         }
 
+        protected async Task RemoveBoroughFilter(string name)
+        {
+            selectedBoroughs = selectedBoroughs?.Where(b => !string.Equals(b, name, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<string>();
+            var opt = boroughOptions.FirstOrDefault(b => string.Equals(b.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (opt != null) opt.Selected = false;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveJobTypeFilter(string key)
+        {
+            selectedJobTypes = selectedJobTypes?.Where(j => !string.Equals(j, key, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<string>();
+            var opt = jobTypeOptions.FirstOrDefault(j => string.Equals(j.Key, key, StringComparison.OrdinalIgnoreCase));
+            if (opt != null) opt.Selected = false;
+            await SearchPermits();
+        }
+
+        protected async Task RemoveTradeFilter(string key)
+        {
+            selectedTrades = selectedTrades?.Where(t => !string.Equals(t, key, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<string>();
+            var opt = tradeOptions.FirstOrDefault(t => string.Equals(t.Key, key, StringComparison.OrdinalIgnoreCase));
+            if (opt != null) opt.Selected = false;
+            await SearchPermits();
+        }
+
         protected async Task RemoveFilter(BoroughOption option)
         {
             option.Selected = false;
+            selectedBoroughs = selectedBoroughs?.Where(b => !string.Equals(b, option.Name, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<string>();
             await SearchPermits();
         }
 
         protected async Task RemoveFilter(JobTypeOption option)
         {
             option.Selected = false;
+            selectedJobTypes = selectedJobTypes?.Where(j => !string.Equals(j, option.Key, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<string>();
             await SearchPermits();
         }
 
         protected async Task RemoveFilter(TradeOption option)
         {
             option.Selected = false;
+            selectedTrades = selectedTrades?.Where(t => !string.Equals(t, option.Key, StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<string>();
             await SearchPermits();
         }
 
