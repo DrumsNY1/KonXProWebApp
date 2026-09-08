@@ -2,13 +2,16 @@
 @page "/securitycode"
 
 <PageTitle>Verify it is you</PageTitle>
-<RadzenText Text="Verify it is you" TextStyle="Radzen.Blazor.TextStyle.H5" class="mb-4" TagName="Radzen.Blazor.TagName.P" />
-<RadzenRow>
-    <RadzenColumn SizeMD="12">
-        <RadzenTemplateForm Action="@($"account/verifysecuritycode")" Data="@("code")" Method="post">
-            <RadzenText Text="@message" TextStyle="Radzen.Blazor.TextStyle.Body2" TagName="Radzen.Blazor.TagName.P" />
-            <RadzenSecurityCode @ref=sc Count="6" Name="code" Change=@VerifySecurityCode />
-        </RadzenTemplateForm>
-    </RadzenColumn>
-</RadzenRow>
+
+<div class="auth-header">
+    <h1>Verify Your Identity</h1>
+    <p>@message</p>
+</div>
+
+<RadzenTemplateForm Action="@($"account/verifysecuritycode")" Data="@("code")" Method="post">
+    <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+        <RadzenSecurityCode @ref=sc Count="6" Name="code" Change=@VerifySecurityCode />
+    </div>
+</RadzenTemplateForm>
+
 

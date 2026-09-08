@@ -2,20 +2,22 @@
 @page "/login"
 
 <PageTitle>Login</PageTitle>
-<RadzenText Text="Login" TextStyle="Radzen.Blazor.TextStyle.H5" class="mb-4" TagName="Radzen.Blazor.TagName.H2" />
-<RadzenRow>
-    <RadzenColumn SizeMD="12">
-        <RadzenTemplateForm Action="@($"account/login?redirectUrl={redirectUrl}")" Data="@("login")"
-            Method="post">
-            <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Danger" Visible="@errorVisible">@error</RadzenAlert>
-            <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Info" Visible="@infoVisible">@info</RadzenAlert>
-            <RadzenLogin AllowResetPassword="false" AllowRegister="false" FormFieldVariant="Variant.Filled"
-                    Text="Log in to KonXPro"
-            />
-        </RadzenTemplateForm>
-        <div class="rz-display-flex rz-justify-content-space-between rz-mt-4" style="font-size: 14px; padding: 0 0.5rem;">
-            <a href="javascript:void(0)" @onclick="ResetPassword" style="color: var(--rz-primary); text-decoration: none; font-weight: 500; cursor: pointer;">Forgot password?</a>
-            <a href="javascript:void(0)" @onclick="Register" style="color: var(--rz-primary); text-decoration: none; font-weight: 500; cursor: pointer;">Create an account</a>
-        </div>
-    </RadzenColumn>
-</RadzenRow>
+
+<div class="auth-header">
+    <h1>Sign In</h1>
+    <p>Enter your credentials to access your account</p>
+</div>
+
+<RadzenTemplateForm Action="@($"account/login?redirectUrl={redirectUrl}")" Data="@("login")" Method="post">
+    <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Danger" Visible="@errorVisible" class="mb-3">@error</RadzenAlert>
+    <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Info" Visible="@infoVisible" class="mb-3">@info</RadzenAlert>
+    <RadzenLogin AllowResetPassword="false" AllowRegister="false" FormFieldVariant="Variant.Outlined"
+            Text="Log in to KonXPro"
+    />
+</RadzenTemplateForm>
+
+<div class="auth-actions">
+    <a href="javascript:void(0)" @onclick="ResetPassword" class="auth-link">Forgot password?</a>
+    <a href="javascript:void(0)" @onclick="Register" class="auth-link">Create an account</a>
+</div>
+
