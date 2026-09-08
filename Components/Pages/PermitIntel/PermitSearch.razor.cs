@@ -186,7 +186,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
         private static (string Label, string CssClass) GetStatusTier(string statusDescription)
         {
             if (string.IsNullOrEmpty(statusDescription))
-                return ("📋 UNKNOWN", "status-other");
+                return ("UNKNOWN", "status-other");
 
             // Normalize for case-insensitive matching (DOB NOW uses mixed case)
             var upper = statusDescription.ToUpperInvariant();
@@ -200,7 +200,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 "APPLICATION PROCESSED-PART-NO PAYMENT" or
                 "APPLICATION PROCESSED - PAYMENT ONLY" or
                 "IN PROCESS" or                          // DOB NOW filing status
-                "INCOMPLETE" => ("🔥 HOT", "status-hot"),
+                "INCOMPLETE" => ("HOT", "status-hot"),
 
                 // ACTIVE — plan review in progress
                 "APPLICATION ASSIGNED TO PLAN EXAMINER" or
@@ -209,7 +209,7 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 "PLAN EXAM - PARTIAL APPROVAL" or
                 "DISAPPROVED" or                         // DOB NOW filing status
                 "OBJECTIONS" or                          // DOB NOW filing status
-                "PAA APPROVAL" => ("⚡ ACTIVE", "status-active"),
+                "PAA APPROVAL" => ("ACTIVE", "status-active"),
 
                 // PERMITTED — approved or issued
                 "PLAN EXAM - APPROVED" or
@@ -217,16 +217,16 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 "PERMIT ISSUED - PARTIAL JOB" or
                 "APPROVED" or                            // DOB NOW filing status
                 "PERMIT ISSUED" or                       // DOB NOW filing status
-                "LOC ISSUED" => ("✅ PERMITTED", "status-permitted"),
+                "LOC ISSUED" => ("PERMITTED", "status-permitted"),
 
                 // CLOSED — work complete
                 "SIGNED OFF" or
                 "SIGNED-OFF" or                          // DOB NOW uses hyphenated form
                 "COMPLETED" or
                 "SUSPENDED" or
-                "WITHDRAWN" => ("⬜ CLOSED", "status-closed"),
+                "WITHDRAWN" => ("CLOSED", "status-closed"),
 
-                _ => ("📋 " + statusDescription, "status-other"),
+                _ => (statusDescription, "status-other"),
             };
         }
 

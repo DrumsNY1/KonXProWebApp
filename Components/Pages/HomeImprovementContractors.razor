@@ -25,7 +25,7 @@
 
     <!-- A/B Campaign Testing Performance Bar -->
     <div style="background: var(--rz-base-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-        <h4 style="margin-top: 0; margin-bottom: 16px; font-weight: 700;">📊 A/B Testing Campaign Analytics</h4>
+        <h4 style="margin-top: 0; margin-bottom: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px;"><RadzenIcon Icon="analytics" Style="font-size: 20px; color: var(--rz-primary);" /> A/B Testing Campaign Analytics</h4>
         <div class="grid grid-cols-3 gap-4">
             <!-- Cohort A Card -->
             <div style="border-left: 4px solid var(--rz-primary); padding-left: 12px; background: rgba(58, 123, 213, 0.02); padding-top: 4px; padding-bottom: 4px; border-radius: 0 4px 4px 0;">
@@ -90,7 +90,9 @@
     <div class="grid grid-cols-4 gap-4 imp-mb-6">
         <!-- Card 1 -->
         <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 32px; background: rgba(58, 123, 213, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rz-primary);">👷</div>
+            <div style="background: rgba(58, 123, 213, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--rz-primary);">
+                <RadzenIcon Icon="engineering" Style="font-size: 30px;" />
+            </div>
             <div>
                 <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@totalCount</div>
                 <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Total Ingested</div>
@@ -99,7 +101,9 @@
 
         <!-- Card 2 -->
         <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 32px; background: rgba(40, 167, 69, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #28a745;">✅</div>
+            <div style="background: rgba(40, 167, 69, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #28a745;">
+                <RadzenIcon Icon="verified" Style="font-size: 30px;" />
+            </div>
             <div>
                 <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@activeCount</div>
                 <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Active DCA Licenses</div>
@@ -108,7 +112,9 @@
 
         <!-- Card 3 -->
         <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 32px; background: rgba(255, 193, 7, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffc107;">📬</div>
+            <div style="background: rgba(255, 193, 7, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ffc107;">
+                <RadzenIcon Icon="markunread_mailbox" Style="font-size: 30px;" />
+            </div>
             <div>
                 <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@postcardsCount</div>
                 <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Postcards Mailed</div>
@@ -117,7 +123,9 @@
 
         <!-- Card 4 -->
         <div class="stat-card" style="background: var(--rz-background-color); border: 1px solid var(--rz-border-color); border-radius: 8px; padding: 16px; display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 32px; background: rgba(23, 162, 184, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #17a2b8;">📧</div>
+            <div style="background: rgba(23, 162, 184, 0.1); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #17a2b8;">
+                <RadzenIcon Icon="mail" Style="font-size: 30px;" />
+            </div>
             <div>
                 <div style="font-size: 24px; font-weight: 700; color: var(--rz-text-color);">@emailsCount</div>
                 <div style="font-size: 12px; color: var(--rz-text-muted-color); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Emails Sent</div>
@@ -168,11 +176,11 @@
                         <select value="@c.SalesStatus" 
                                 @onchange="@((ChangeEventArgs args) => UpdateSalesStatus(c, args.Value?.ToString()))"
                                 style="width: 100%; border: 1px solid var(--rz-border-color); border-radius: 4px; padding: 4px 8px; font-size: 13px; background: transparent; color: var(--rz-text-color); font-weight: 500;">
-                            <option value="New">🆕 New</option>
-                            <option value="Contacted">📞 Contacted</option>
-                            <option value="Interested">⭐ Interested</option>
-                            <option value="Not Interested">❌ Not Interested</option>
-                            <option value="Subscribed">👑 Subscribed</option>
+                            <option value="New">New</option>
+                            <option value="Contacted">Contacted</option>
+                            <option value="Interested">Interested</option>
+                            <option value="Not Interested">Not Interested</option>
+                            <option value="Subscribed">Subscribed</option>
                         </select>
                     </Template>
                 </RadzenDataGridColumn>
@@ -194,25 +202,25 @@
                                 <!-- Postcard Switch -->
                                 <button class="flex items-center gap-1" style="border: none; background: transparent; cursor: pointer; padding: 4px;" 
                                         @onclick="() => TogglePostcardSent(c)" title="Toggle Postcard Sent">
-                                    <span style="font-size: 18px; filter: @(c.PostcardSent ? "none" : "grayscale(100%) opacity(40%)")">📬</span>
+                                    <RadzenIcon Icon="markunread_mailbox" Style="@($"font-size: 18px; color: {(c.PostcardSent ? "var(--rz-primary)" : "var(--rz-text-muted-color)")};")" />
                                     <span style="font-size: 11px; font-weight: 600; color: @(c.PostcardSent ? "var(--rz-primary)" : "var(--rz-text-muted-color)")">Postcard</span>
                                 </button>
 
                                 <!-- Email Switch -->
                                 <button class="flex items-center gap-1" style="border: none; background: transparent; cursor: pointer; padding: 4px;" 
                                         @onclick="() => ToggleEmailSent(c)" title="Toggle Email Sent">
-                                    <span style="font-size: 18px; filter: @(c.EmailSent ? "none" : "grayscale(100%) opacity(40%)")">📧</span>
+                                    <RadzenIcon Icon="mail" Style="@($"font-size: 18px; color: {(c.EmailSent ? "var(--rz-primary)" : "var(--rz-text-muted-color)")};")" />
                                     <span style="font-size: 11px; font-weight: 600; color: @(c.EmailSent ? "var(--rz-primary)" : "var(--rz-text-muted-color)")">Email</span>
                                 </button>
                             </div>
                             <div class="flex gap-1 flex-wrap">
                                 @if (c.CampaignVisited)
                                 {
-                                    <span class="badge" title="Visited: @c.CampaignVisitedAt?.ToLocalTime().ToString()" style="font-size: 10px; background-color: rgba(40, 167, 69, 0.15); color: #28a745; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px;">👁️ Visited</span>
+                                    <span class="badge" title="Visited: @c.CampaignVisitedAt?.ToLocalTime().ToString()" style="font-size: 10px; background-color: rgba(40, 167, 69, 0.15); color: #28a745; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><RadzenIcon Icon="visibility" Style="font-size: 12px;" /> Visited</span>
                                 }
                                 @if (c.CampaignConverted)
                                 {
-                                    <span class="badge" title="Converted: @c.CampaignConvertedAt?.ToLocalTime().ToString()" style="font-size: 10px; background-color: rgba(157, 78, 221, 0.15); color: #9d4edd; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px;">🎯 Converted</span>
+                                    <span class="badge" title="Converted: @c.CampaignConvertedAt?.ToLocalTime().ToString()" style="font-size: 10px; background-color: rgba(157, 78, 221, 0.15); color: #9d4edd; padding: 2px 6px; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;"><RadzenIcon Icon="track_changes" Style="font-size: 12px;" /> Converted</span>
                                 }
                             </div>
                         </div>
@@ -224,10 +232,10 @@
                     <Template Context="c">
                         @if (!string.IsNullOrEmpty(c.ContactPhoneNumber))
                         {
-                            <div style="font-weight: 500; font-size: 13px;">📞 @c.ContactPhoneNumber</div>
+                            <div style="font-weight: 500; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;"><RadzenIcon Icon="call" Style="font-size: 13px;" /> @c.ContactPhoneNumber</div>
                         }
-                        <div style="font-size: 12px; color: var(--rz-text-muted-color);">
-                            📍 @c.AddressBuilding @c.AddressStreetName, @c.AddressCity, @(c.AddressState ?? "NY") @c.AddressZip
+                        <div style="font-size: 12px; color: var(--rz-text-muted-color); display: inline-flex; align-items: center; gap: 4px;">
+                            <RadzenIcon Icon="location_on" Style="font-size: 13px;" /> @c.AddressBuilding @c.AddressStreetName, @c.AddressCity, @(c.AddressState ?? "NY") @c.AddressZip
                         </div>
                     </Template>
                 </RadzenDataGridColumn>
@@ -251,7 +259,7 @@
                             <!-- Convert to Customer -->
                             @if (c.SalesStatus == "Subscribed")
                             {
-                                <span class="badge badge-success" style="padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;">👑 Active Cust</span>
+                                <span class="badge badge-success" style="padding: 6px 12px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;"><RadzenIcon Icon="verified" Style="font-size: 14px;" /> Active Cust</span>
                             }
                             else
                             {

@@ -46,7 +46,7 @@ else
         <div class="card-header" style="background: linear-gradient(135deg, rgba(255, 180, 0, 0.1) 0%, rgba(255, 100, 0, 0.05) 100%); border-bottom: 1px solid var(--rz-border-color);">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                 <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <span style="font-size: 1.25rem;">🔥</span>
+                    <RadzenIcon Icon="local_fire_department" Style="color: var(--color-danger); font-size: 1.5rem;" />
                     <div>
                         <div class="card-title">Lead Quality Intelligence</div>
                         <div class="card-subtitle">AI-weighted lead priority & risk signals</div>
@@ -238,7 +238,7 @@ else
                                 @if (!string.IsNullOrWhiteSpace(filing.OwnersPhone))
                                 {
                                     <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body2">
-                                        <a href="tel:@filing.OwnersPhone" style="color: var(--rz-primary);">📞 @filing.OwnersPhone</a>
+                                        <a href="tel:@filing.OwnersPhone" style="color: var(--rz-primary); display: inline-flex; align-items: center; gap: 4px;"><RadzenIcon Icon="call" Style="font-size: 15px;" /> @filing.OwnersPhone</a>
                                     </RadzenText>
                                 }
                                 else
@@ -253,7 +253,7 @@ else
                             {
                                 <div class="rz-p-3" style="background: rgba(13, 110, 253, 0.05); border: 1px solid rgba(13, 110, 253, 0.25); border-radius: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;" class="rz-mb-2">
-                                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--rz-primary); text-transform: uppercase; letter-spacing: 0.5px;">⚡ 1-Click Lookup</span>
+                                        <span style="font-size: 0.75rem; font-weight: 700; color: var(--rz-primary); text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 4px;"><RadzenIcon Icon="bolt" Style="font-size: 15px;" /> 1-Click Lookup</span>
                                         <span class="badge badge-info" style="font-size: 0.65rem; padding: 0.15rem 0.45rem;">@userTier.ToUpper()</span>
                                     </div>
                                     <RadzenStack Gap="0.4rem">
@@ -262,7 +262,7 @@ else
                                             <a href="@GetOwnerSearchUrl()" target="_blank" rel="noopener noreferrer"
                                                class="btn-lookup"
                                                style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px; text-decoration: none; background: #fff; color: #1a1a1a; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                                🔍 Google Owner
+                                                <RadzenIcon Icon="search" Style="font-size: 16px;" /> Google Owner
                                             </a>
                                         }
                                         @if (!string.IsNullOrWhiteSpace(filing.OwnersBusinessName) && !filing.OwnersBusinessName.Equals("Not Applicable", StringComparison.OrdinalIgnoreCase))
@@ -270,13 +270,13 @@ else
                                             <a href="@GetBusinessSearchUrl()" target="_blank" rel="noopener noreferrer"
                                                class="btn-lookup"
                                                style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px; text-decoration: none; background: #fff; color: #1a1a1a; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                                🏢 Google Business
+                                                <RadzenIcon Icon="domain" Style="font-size: 16px;" /> Google Business
                                             </a>
                                         }
                                         <a href="https://apps.dos.ny.gov/publicInquiry/" target="_blank" rel="noopener noreferrer"
                                            class="btn-lookup"
                                            style="display: flex; align-items: center; justify-content: center; gap: 0.4rem; padding: 0.45rem 0.6rem; font-size: 0.8rem; font-weight: 500; border-radius: 6px; text-decoration: none; background: #fff; color: #1a1a1a; border: 1px solid #dee2e6; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                                            🏛️ NY DOS Corp Search
+                                            <RadzenIcon Icon="account_balance" Style="font-size: 16px;" /> NY DOS Corp Search
                                         </a>
                                     </RadzenStack>
                                 </div>
@@ -285,7 +285,7 @@ else
                             {
                                 <div class="rz-p-3" style="background: rgba(255, 180, 0, 0.05); border: 1px dashed rgba(255, 180, 0, 0.4); border-radius: 8px;">
                                     <div style="display: flex; justify-content: space-between; align-items: center;" class="rz-mb-1">
-                                        <span style="font-size: 0.75rem; font-weight: 700; color: #b8860b; text-transform: uppercase;">🔒 1-Click Owner Lookup</span>
+                                        <span style="font-size: 0.75rem; font-weight: 700; color: #b8860b; text-transform: uppercase; display: inline-flex; align-items: center; gap: 4px;"><RadzenIcon Icon="lock" Style="font-size: 15px;" /> 1-Click Owner Lookup</span>
                                         <span class="badge badge-warning" style="font-size: 0.65rem; padding: 0.15rem 0.45rem;">BUSINESS & AGENCY</span>
                                     </div>
                                     <p style="font-size: 0.75rem; color: #6c757d; margin: 0.25rem 0 0.5rem 0; line-height: 1.4;">

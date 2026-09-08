@@ -68,9 +68,9 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         protected List<KeyValuePair<int?, string>> scoreOptions = new()
         {
-            new(4, "🔥 4+ Stars (Hot)"),
-            new(3, "⚡ 3+ Stars (High Priority)"),
-            new(2, "📋 2+ Stars")
+            new(4, "4+ Stars (Hot)"),
+            new(3, "3+ Stars (High Priority)"),
+            new(2, "2+ Stars")
         };
 
         protected List<KeyValuePair<decimal?, string>> costOptions = new()

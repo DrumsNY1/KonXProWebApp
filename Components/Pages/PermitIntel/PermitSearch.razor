@@ -14,22 +14,22 @@
 <!-- STATS CARDS -->
 <div class="stats-row">
     <div class="stat-card">
-        <div class="stat-label-sm">⚡ New Leads Today</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="bolt" class="stat-icon" /> New Leads Today</div>
         <div class="stat-value">@($"{totalCount:N0}")</div>
         <div class="stat-change neutral">matching your criteria</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">📋 Active Permits</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="assignment" class="stat-icon" /> Active Permits</div>
         <div class="stat-value">@($"{activePermitsCount:N0}")</div>
         <div class="stat-change neutral">in database</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">💰 Est. Job Value</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="attach_money" class="stat-icon text-success" /> Est. Job Value</div>
         <div class="stat-value text-h2">@FormatCurrency(totalJobValue)</div>
         <div class="stat-change neutral">across all permits</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">📌 My Pipeline</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="bookmark" class="stat-icon" /> My Pipeline</div>
         <div class="stat-value">@($"{savedLeadCount:N0}")</div>
         <div class="stat-change neutral">leads being tracked</div>
     </div>
@@ -161,7 +161,7 @@
                     <button class="filter-pill" @onclick="RemoveSource" aria-label="Remove data source filter">@selectedSource ×</button>
                 }
             </div>
-            <button class="filter-clear-all" @onclick="ClearAllFilters">✕ Clear All</button>
+            <button class="filter-clear-all" @onclick="ClearAllFilters"><RadzenIcon Icon="close" Style="font-size: 13px; vertical-align: middle; margin-right: 2px;" /> Clear All</button>
         </div>
     }
 
@@ -250,8 +250,8 @@
                 </RadzenDataGridColumn>
                 <RadzenDataGridColumn TItem="DobjobFiling" Title="" Width="100px" Sortable="false" Filterable="false">
                     <Template Context="filing">
-                        <button class="action-btn" @onclick="() => SaveAsLead(filing)">⭐</button>
-                        <button class="action-btn" @onclick="() => ViewDetail(filing)">→</button>
+                        <button class="action-btn" @onclick="() => SaveAsLead(filing)" aria-label="Save as lead" title="Save as lead"><RadzenIcon Icon="star" Style="font-size: 16px;" /></button>
+                        <button class="action-btn" @onclick="() => ViewDetail(filing)" aria-label="View details" title="View details">→</button>
                     </Template>
                 </RadzenDataGridColumn>
             </Columns>
@@ -270,8 +270,8 @@
                     <div class="mobile-card-row-top">
                         <div class="mobile-card-address">@filing.HouseNum @filing.StreetName</div>
                         <div class="mobile-card-actions">
-                            <button class="action-btn" @onclick="() => SaveAsLead(filing)" @onclick:stopPropagation="true" aria-label="Save as lead">⭐</button>
-                            <button class="action-btn" @onclick="() => ViewDetail(filing)" @onclick:stopPropagation="true" aria-label="View details">→</button>
+                            <button class="action-btn" @onclick="() => SaveAsLead(filing)" @onclick:stopPropagation="true" aria-label="Save as lead" title="Save as lead"><RadzenIcon Icon="star" Style="font-size: 16px;" /></button>
+                            <button class="action-btn" @onclick="() => ViewDetail(filing)" @onclick:stopPropagation="true" aria-label="View details" title="View details">→</button>
                         </div>
                     </div>
                     <div class="mobile-card-meta">
