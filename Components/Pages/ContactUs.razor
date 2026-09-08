@@ -1,108 +1,152 @@
-@page "/contact-us"
-@attribute [Authorize]
+@page "/contact-us"
+@layout KonXProWebApp.Components.Layout.LandingLayout
 
-<PageTitle>Contact Us</PageTitle>
+<PageTitle>Contact Us — KonXPro</PageTitle>
 
-<RadzenRow class="rz-w-100 rz-mx-auto rz-my-4 rz-my-md-12" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center">
-    <RadzenColumn Size="12" class="rz-px-8 rz-px-md-6">
-        <RadzenText Text="Contact us" TextStyle="Radzen.Blazor.TextStyle.DisplayH1" />
-    </RadzenColumn>
-</RadzenRow>
+<div class="contact-page-container" style="max-width: 1040px; margin: 0 auto; padding: 48px 24px 96px 24px;">
+    <!-- HEADER -->
+    <div style="text-align: center; margin-bottom: 48px;">
+        <span style="display: inline-block; padding: 6px 14px; background: rgba(37,99,235,0.12); color: var(--color-primary-light, #60a5fa); border-radius: 9999px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Get in Touch</span>
+        <h1 style="font-size: clamp(32px, 4vw, 44px); font-weight: 800; color: var(--text-primary, #f8fafc); margin: 0 0 12px 0;">Talk to Our NYC Team</h1>
+        <p style="font-size: 17px; color: var(--text-muted, #94a3b8); max-width: 600px; margin: 0 auto;">Questions about permit feeds, custom borough alert routing, or Agency pricing? We're here to help.</p>
+    </div>
 
-<RadzenRow class="rz-background-color-white rz-color-on-base-lighter rz-my-0 rz-my-md-12 rz-py-0 rz-py-md-12 rz-px-2">
-<RadzenColumn Size="12">
-    <RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px">
-    <RadzenColumn Size="12" SizeSM="6" class="rz-p-6">
-        <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
-            <RadzenText Text="Our contact details" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-mb-4 rz-mb-md-8 rz-color-on-base-lighter" />
-            <RadzenStack Gap="1rem">
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
-                <RadzenIcon Icon="location_on"></RadzenIcon>
-                <RadzenText Text="1234 Elm Street, Suite 567, Metropolis, NY 10001" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-m-0" />
-                </RadzenStack>
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
-                <RadzenIcon Icon="call"></RadzenIcon>
-                <RadzenText Text="+1 (555) 123-4567" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-m-0" />
-                </RadzenStack>
-                <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="0.5rem">
-                <RadzenIcon Icon="mail"></RadzenIcon>
-                <RadzenText Text="ContactAtCompanyName.com" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-m-0" />
-                </RadzenStack>
-            </RadzenStack>
-            <RadzenText Text="Visit us" TextStyle="Radzen.Blazor.TextStyle.DisplayH4" Style="max-width: 800px" class="rz-color-on-base-lighter rz-mt-6 rz-mt-md-12 rz-mb-4 rz-mb-md-8" />
-            <RadzenStack Gap="1rem">
-                <RadzenText Text="Our office is open for consultations and property viewings:" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
-                <RadzenText Text="Monday - Friday: 9:00 AM - 6:00 PM" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
-                <RadzenText Text="Saturday: 10:00 AM - 4:00 PM" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
-                <RadzenText Text="Sunday: Closed" TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" />
-                <RadzenText Text="Schedule an appointment to speak with one of our real estate experts!" TextStyle="Radzen.Blazor.TextStyle.Body2" class="rz-color-on-base-lighter rz-text-tertiary-color rz-m-0" Style="font-style: italic" />
-            </RadzenStack>
-        </RadzenStack>
-    </RadzenColumn>
-    <RadzenColumn Size="12" SizeSM="6" class="rz-p-6 rz-p-sm-0">
-        <RadzenGoogleMap class="rz-w-100" Style="min-height: 400px"></RadzenGoogleMap>
-    </RadzenColumn>
-    </RadzenRow>
-</RadzenColumn>
-</RadzenRow>
-<RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px;">
-    <RadzenColumn Size="12" SizeMD="6" Offset="0" OffsetMD="3" class="rz-px-8 rz-py-6 rz-px-md-6">
-        <RadzenStack Gap="1rem" JustifyContent="Radzen.JustifyContent.Center" class="rz-mx-auto" Style="max-width: 600px">  
-            <RadzenText Text="Send us a message" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" TextAlign="Radzen.TextAlign.Center" />
-            <RadzenText Text="Fill out the form below, and we’ll get back to you shortly." TextStyle="Radzen.Blazor.TextStyle.H5" Style="max-width: 800px" TextAlign="Radzen.TextAlign.Center" />
-            <RadzenTemplateForm TItem="dynamic">
-                <RadzenStack>
-                <RadzenFormField Text="Name">
-                    <ChildContent>
-                    <RadzenTextBox Name="Name" />
-                    </ChildContent>
-                    <Helper>
-                    <RadzenRequiredValidator Component="Name" Text="Name is required." />
-                    </Helper>
-                </RadzenFormField>
-                <RadzenFormField Text="Email">
-                    <ChildContent>
-                    <RadzenTextBox Name="Email" />
-                    </ChildContent>
-                    <Helper>
-                    <RadzenRequiredValidator Component="Email" Text="Email is required." />
-                    </Helper>
-                </RadzenFormField>
-                <RadzenFormField Text="Message">
-                    <ChildContent>
-                    <RadzenTextArea Name="Message" Rows="10" />
-                    </ChildContent>
-                    <Helper>
-                    <RadzenRequiredValidator Component="Message" Text="Message is required." />
-                    </Helper>
-                </RadzenFormField>
-                <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center">
-                    <RadzenButton ButtonStyle="ButtonStyle.Primary" ButtonType="ButtonType.Submit" Icon="send" Text="Submit" Variant="Variant.Flat" Size="Radzen.ButtonSize.Large" class="rz-w-100" />
-                </RadzenStack>
-                </RadzenStack>
-            </RadzenTemplateForm>
-        </RadzenStack>
-    </RadzenColumn>
-</RadzenRow>
-<RadzenRow class="rz-mt-6 rz-my-md-12">
-    <RadzenColumn Size="12" class="rz-mt-6 rz-my-md-12">
-        <RadzenRow class="rz-background-color-white rz-color-on-base-lighter rz-mt-6 rz-my-md-12 rz-px-2">
-            <RadzenColumn Size="12">
-                <RadzenRow class="rz-w-100 rz-mx-auto" Style="max-width: 1440px" AlignItems="Radzen.AlignItems.Center">
-                    <RadzenColumn Size="12" SizeMD="5" class="rz-p-6">
-                        <RadzenStack AlignItems="Radzen.AlignItems.Normal" Gap="0">
-                            <RadzenText Text="We’d love to hear from you!" TextStyle="Radzen.Blazor.TextStyle.DisplayH3" Style="max-width: 800px" class="rz-color-on-base-lighter rz-mb-4 rz-mb-md-8" />
-                            <RadzenText Text="Whether you’re looking to buy, sell, rent, or simply have questions about the real estate market, our team is here to help." TextStyle="Radzen.Blazor.TextStyle.H5" TagName="Radzen.Blazor.TagName.P" Style="line-height: 1.5; max-width: 800px" class="rz-color-on-base-lighter" />
-                            <RadzenStack Orientation="Radzen.Orientation.Horizontal" Gap="1rem" Wrap="Radzen.FlexWrap.Wrap" class="rz-mt-2 rz-mt-sm-12">
-                                <RadzenLink Text="Call us now!" class="rz-button rz-button-lg rz-variant-flat rz-text-align-center rz-primary rz-shade-default" Style="--rz-link-hover-text-decoration: none" Path="" />
-                            </RadzenStack>
-                        </RadzenStack>
-                    </RadzenColumn>
-                    <RadzenColumn Size="12" SizeMD="6" OffsetMD="1" class="rz-display-none rz-display-md-block">
-                        <RadzenImage Path="images/contact-us-pexels-thanhhoa-tran-640546-1488297.jpg" Style="margin-bottom: -3em; margin-top: -3em; border-radius: var(--rz-card-border-radius)" class="rz-w-100"></RadzenImage>
-                    </RadzenColumn>
-                </RadzenRow>
-            </RadzenColumn>
-        </RadzenRow>
-    </RadzenColumn>
-</RadzenRow>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-bottom: 48px;">
+        <!-- CONTACT CARDS -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card" style="padding: 28px; background: var(--surface-card, #0a1628); border: 1px solid var(--border-default, #1e293b); border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(37,99,235,0.15); display: flex; align-items: center; justify-content: center;">
+                        <RadzenIcon Icon="email" Style="color: var(--color-primary-light, #60a5fa); font-size: 22px;" />
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: var(--text-primary, #f8fafc);">Sales & Agency Inquiries</h3>
+                        <p style="margin: 0; font-size: 13px; color: var(--text-muted, #94a3b8);">High-volume trades, crews & custom exports</p>
+                    </div>
+                </div>
+                <p style="margin: 0 0 8px 0; font-size: 15px; color: var(--text-secondary, #cbd5e1);">
+                    <a href="mailto:sales@konxpro.com" style="color: var(--color-primary-light, #60a5fa); font-weight: 600; text-decoration: none;">sales@konxpro.com</a>
+                </p>
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted, #64748b);">Response within 2 hours during business days.</p>
+            </div>
+
+            <div class="card" style="padding: 28px; background: var(--surface-card, #0a1628); border: 1px solid var(--border-default, #1e293b); border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(16,185,129,0.15); display: flex; align-items: center; justify-content: center;">
+                        <RadzenIcon Icon="support_agent" Style="color: #34d399; font-size: 22px;" />
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: var(--text-primary, #f8fafc);">Subscriber Support</h3>
+                        <p style="margin: 0; font-size: 13px; color: var(--text-muted, #94a3b8);">Alert configuration, billing & accounts</p>
+                    </div>
+                </div>
+                <p style="margin: 0 0 8px 0; font-size: 15px; color: var(--text-secondary, #cbd5e1);">
+                    <a href="mailto:support@konxpro.com" style="color: var(--color-primary-light, #60a5fa); font-weight: 600; text-decoration: none;">support@konxpro.com</a>
+                </p>
+                <p style="margin: 0; font-size: 13px; color: var(--text-muted, #64748b);">Monday – Friday: 7:00 AM – 7:00 PM EST</p>
+            </div>
+
+            <div class="card" style="padding: 28px; background: var(--surface-card, #0a1628); border: 1px solid var(--border-default, #1e293b); border-radius: 12px;">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 12px;">
+                    <div style="width: 42px; height: 42px; border-radius: 8px; background: rgba(245,158,11,0.15); display: flex; align-items: center; justify-content: center;">
+                        <RadzenIcon Icon="location_city" Style="color: #fbbf24; font-size: 22px;" />
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: var(--text-primary, #f8fafc);">Coverage Territory</h3>
+                        <p style="margin: 0; font-size: 13px; color: var(--text-muted, #94a3b8);">All 5 NYC Boroughs</p>
+                    </div>
+                </div>
+                <p style="margin: 0; font-size: 14px; color: var(--text-muted, #94a3b8);">
+                    Manhattan · Brooklyn · Queens · Bronx · Staten Island<br>
+                    <span style="font-size: 12px; color: var(--text-muted, #64748b);">NYC Department of Buildings Public Records Index</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- CONTACT FORM -->
+        <div class="card" style="padding: 36px; background: var(--surface-card, #0a1628); border: 1px solid var(--border-default, #1e293b); border-radius: 12px;">
+            <h3 style="font-size: 22px; font-weight: 700; color: var(--text-primary, #f8fafc); margin: 0 0 8px 0;">Send Us a Message</h3>
+            <p style="font-size: 14px; color: var(--text-muted, #94a3b8); margin: 0 0 24px 0;">Fill out the details below and a team specialist will follow up shortly.</p>
+
+            @if (messageSent)
+            {
+                <div style="padding: 20px; background: rgba(16,185,129,0.12); border: 1px solid #059669; border-radius: 8px; text-align: center;">
+                    <RadzenIcon Icon="check_circle" Style="color: #10b981; font-size: 36px; margin-bottom: 8px;" />
+                    <h4 style="color: #34d399; margin: 0 0 4px 0; font-size: 18px;">Thank You!</h4>
+                    <p style="color: var(--text-secondary, #cbd5e1); font-size: 14px; margin: 0;">Your inquiry has been received. Our team will contact you shortly.</p>
+                </div>
+            }
+            else
+            {
+                <form @onsubmit="HandleSubmit" @onsubmit:preventDefault="true">
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary, #cbd5e1); margin-bottom: 6px;">Your Name *</label>
+                            <input type="text" required @bind="contactName" placeholder="e.g. Sal Genovese" 
+                                   style="width: 100%; height: 42px; background: #071020; border: 1px solid var(--border-default, #1e293b); border-radius: 6px; padding: 0 14px; color: #f8fafc; font-size: 14px;" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary, #cbd5e1); margin-bottom: 6px;">Business Email *</label>
+                            <input type="email" required @bind="contactEmail" placeholder="you@contracting.com" 
+                                   style="width: 100%; height: 42px; background: #071020; border: 1px solid var(--border-default, #1e293b); border-radius: 6px; padding: 0 14px; color: #f8fafc; font-size: 14px;" />
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary, #cbd5e1); margin-bottom: 6px;">Primary Trade / Specialty</label>
+                            <select @bind="contactTrade" style="width: 100%; height: 42px; background: #071020; border: 1px solid var(--border-default, #1e293b); border-radius: 6px; padding: 0 14px; color: #f8fafc; font-size: 14px;">
+                                <option value="General">General Contractor</option>
+                                <option value="Plumbing">Plumbing & Mechanical</option>
+                                <option value="Electrical">Electrical</option>
+                                <option value="Roofing">Roofing & Waterproofing</option>
+                                <option value="Agency">Agency / Multiple Trades</option>
+                                <option value="Other">Other / Inquiries</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary, #cbd5e1); margin-bottom: 6px;">Message *</label>
+                            <textarea required rows="4" @bind="contactMessage" placeholder="How can we help your business succeed in NYC?" 
+                                      style="width: 100%; background: #071020; border: 1px solid var(--border-default, #1e293b); border-radius: 6px; padding: 10px 14px; color: #f8fafc; font-size: 14px; font-family: inherit; resize: vertical;"></textarea>
+                        </div>
+                        <button type="submit" class="btn-primary" style="height: 44px; margin-top: 8px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <RadzenIcon Icon="send" Style="font-size: 18px;" /> Submit Message
+                        </button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string contactName = "";
+    private string contactEmail = "";
+    private string contactTrade = "General";
+    private string contactMessage = "";
+    private bool messageSent = false;
+
+    [SupplyParameterFromQuery(Name = "plan")]
+    private string PlanParam { get; set; }
+
+    [SupplyParameterFromQuery(Name = "subject")]
+    private string SubjectParam { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(PlanParam))
+        {
+            contactTrade = "Agency";
+            contactMessage = $"Inquiring about the {PlanParam} tier for our contracting business.";
+        }
+        else if (!string.IsNullOrEmpty(SubjectParam))
+        {
+            contactMessage = $"Subject: {SubjectParam}\n";
+        }
+    }
+
+    private void HandleSubmit()
+    {
+        if (!string.IsNullOrWhiteSpace(contactName) && !string.IsNullOrWhiteSpace(contactEmail) && !string.IsNullOrWhiteSpace(contactMessage))
+        {
+            messageSent = true;
+        }
+    }
+}

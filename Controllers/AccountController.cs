@@ -60,6 +60,23 @@ namespace KonXProWebApp.Controllers
             return Redirect("~/Login");
         }
 
+        [HttpGet]
+        [ActionName("Register")]
+        public IActionResult RegisterGet(string returnUrl, string tier)
+        {
+            var target = "~/Login?register=true";
+            if (!string.IsNullOrEmpty(tier))
+            {
+                target += $"&tier={Uri.EscapeDataString(tier)}";
+            }
+            if (returnUrl != "/" && !string.IsNullOrEmpty(returnUrl))
+            {
+                target += $"&redirectUrl={Uri.EscapeDataString(returnUrl)}";
+            }
+
+            return Redirect(target);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Login(string userName, string password, string redirectUrl)
         {

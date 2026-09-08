@@ -14,8 +14,8 @@
       <a href="/#pricing">Pricing</a>
     </div>
     <div class="nav-actions">
-      <button class="btn-ghost" @onclick='() => NavigationManager.NavigateTo("Account/Login", true)'>Sign In</button>
-      <button class="btn-primary" @onclick='() => NavigationManager.NavigateTo("Account/Register", true)'>Start Free Trial</button>
+      <button type="button" class="btn-ghost" @onclick='() => NavigationManager.NavigateTo("Login")'>Sign In</button>
+      <button type="button" class="btn-primary" @onclick='() => NavigationManager.NavigateTo("Login?register=true")'>Start Free Trial</button>
     </div>
   </nav>
 
