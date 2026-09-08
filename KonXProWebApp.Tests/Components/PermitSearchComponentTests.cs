@@ -87,7 +87,7 @@ public class PermitSearchComponentTests : TestContext
 
         // Security.User defaults to the "Anonymous" user (Id == null), so SaveAsLead should warn
         // instead of calling PermitIntelService.SaveLead.
-        var saveButton = cut.FindAll("button.action-btn").First(b => b.TextContent.Contains("⭐"));
+        var saveButton = cut.FindAll("button.action-btn").First(b => b.GetAttribute("aria-label") == "Save as lead" || b.InnerHtml.Contains("star"));
         saveButton.Click();
 
         var captured = notificationService.Messages.LastOrDefault();

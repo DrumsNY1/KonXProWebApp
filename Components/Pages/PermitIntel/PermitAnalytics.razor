@@ -23,22 +23,22 @@ else
     <!-- STATS CARDS BANNER -->
     <div class="stats-row rz-mb-4">
         <div class="stat-card">
-            <div class="stat-label-sm">📊 Tracked Job Filings</div>
+            <div class="stat-label-sm"><RadzenIcon Icon="analytics" class="stat-icon" /> Tracked Job Filings</div>
             <div class="stat-value">@($"{summary.TotalFilingsCount:N0}")</div>
             <div class="stat-change neutral">Socrata Open Data</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-sm">💰 Total NYC Job Volume</div>
+            <div class="stat-label-sm"><RadzenIcon Icon="attach_money" class="stat-icon text-success" /> Total NYC Job Volume</div>
             <div class="stat-value text-success">@summary.TotalJobCost.ToString("C0")</div>
             <div class="stat-change up">construction valuation</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-sm">🏗️ Avg Cost per Project</div>
+            <div class="stat-label-sm"><RadzenIcon Icon="construction" class="stat-icon" /> Avg Cost per Project</div>
             <div class="stat-value">@summary.AverageJobCost.ToString("C0")</div>
             <div class="stat-change neutral">estimated cost</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label-sm">🔥 High Quality Lead Ratio</div>
+            <div class="stat-label-sm"><RadzenIcon Icon="local_fire_department" class="stat-icon text-danger" /> High Quality Lead Ratio</div>
             <div class="stat-value text-danger">@($"{summary.HotLeadsPercentage}%")</div>
             <div class="stat-change up">score 4+ stars</div>
         </div>

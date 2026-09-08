@@ -14,22 +14,22 @@
 <!-- STATS BANNER -->
 <div class="stats-row rz-mb-4">
     <div class="stat-card">
-        <div class="stat-label-sm">🏢 DOB Violations Count</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="domain" class="stat-icon" /> DOB Violations Count</div>
         <div class="stat-value">@($"{totalDobCount:N0}")</div>
         <div class="stat-change neutral">building safety</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">🚨 HPD Housing Violations</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="warning" class="stat-icon text-danger" /> HPD Housing Violations</div>
         <div class="stat-value text-danger">@($"{totalHpdCount:N0}")</div>
         <div class="stat-change up">housing code</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">⚠️ Class C Severe Violations</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="report_problem" class="stat-icon text-danger" /> Class C Severe Violations</div>
         <div class="stat-value text-danger">@($"{classCCount:N0}")</div>
         <div class="stat-change down">immediately hazardous</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">🏙️ Covered Boroughs</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="location_city" class="stat-icon" /> Covered Boroughs</div>
         <div class="stat-value">5 NYC Boroughs</div>
         <div class="stat-change neutral">citywide database</div>
     </div>

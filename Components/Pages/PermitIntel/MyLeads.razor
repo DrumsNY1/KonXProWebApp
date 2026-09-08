@@ -14,22 +14,22 @@
 <!-- PIPELINE KPI STATS BAR -->
 <div class="stats-row rz-mb-4">
     <div class="stat-card">
-        <div class="stat-label-sm">📋 Total Saved Leads</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="bookmark" class="stat-icon" /> Total Saved Leads</div>
         <div class="stat-value">@($"{totalLeadsCount:N0}")</div>
         <div class="stat-change neutral">saved in pipeline</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">🔥 High Quality Hot Leads</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="local_fire_department" class="stat-icon text-danger" /> High Quality Hot Leads</div>
         <div class="stat-value text-danger">@($"{hotLeadsCount:N0}")</div>
         <div class="stat-change up">score 4+ stars</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">💰 Est. Pipeline Job Value</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="attach_money" class="stat-icon text-success" /> Est. Pipeline Job Value</div>
         <div class="stat-value text-success">@totalPipelineValue.ToString("C0")</div>
         <div class="stat-change neutral">active construction</div>
     </div>
     <div class="stat-card">
-        <div class="stat-label-sm">⚡ Active Opportunities</div>
+        <div class="stat-label-sm"><RadzenIcon Icon="trending_up" class="stat-icon" /> Active Opportunities</div>
         <div class="stat-value">@($"{activeOpportunitiesCount:N0}")</div>
         <div class="stat-change neutral">contacted / quoted</div>
     </div>
@@ -92,14 +92,16 @@
                     Style="border-top: 1px solid var(--border);">
         <EmptyTemplate>
             <div class="empty-state">
-                <div class="empty-state-icon">⭐</div>
+                <div class="empty-state-icon">
+                    <RadzenIcon Icon="bookmark_border" Style="font-size: 48px; color: var(--color-primary-light);" />
+                </div>
                 <h3 class="empty-state-title">No saved leads yet</h3>
                 <p class="empty-state-description">
                     Browse the Permit Feed to discover new filings, then click
                     <strong>"Save Lead"</strong> on any permit detail page to add it to your pipeline.
                 </p>
                 <a href="/permit-intel/search" class="empty-state-cta">
-                    <span class="empty-state-cta-icon">📋</span> Go to Permit Feed
+                    <RadzenIcon Icon="feed" Style="font-size: 16px; margin-right: 6px; vertical-align: middle;" /> Go to Permit Feed
                 </a>
             </div>
         </EmptyTemplate>
@@ -167,7 +169,7 @@
             </RadzenDataGridColumn>
             <RadzenDataGridColumn TItem="SavedLead" Title="" Width="60px" Sortable="false">
                 <Template Context="lead">
-                    <button class="action-btn" @onclick="() => RemoveLead(lead)">🗑️</button>
+                    <button class="action-btn" @onclick="() => RemoveLead(lead)" aria-label="Remove lead" title="Remove lead"><RadzenIcon Icon="delete" Style="font-size: 16px;" /></button>
                 </Template>
             </RadzenDataGridColumn>
         </Columns>

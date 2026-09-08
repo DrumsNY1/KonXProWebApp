@@ -6,49 +6,49 @@
     <div class="sidebar-logo">
       <div class="logo-icon">K</div>
       <span class="logo-text">Kon<span>X</span>Pro</span>
-      <button class="sidebar-close-btn" @onclick="ToggleSidebar" aria-label="Close menu">✕</button>
+      <button class="sidebar-close-btn" @onclick="ToggleSidebar" aria-label="Close menu"><RadzenIcon Icon="close" /></button>
     </div>
 
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
     <a class="nav-item" href="permit-intel/search" Match="NavLinkMatch.Prefix">
-      <span class="nav-icon">📋</span> Permit Feed
+      <RadzenIcon Icon="feed" class="nav-icon" /> Permit Feed
     </a>
     <a class="nav-item" href="permit-intel/leads">
-      <span class="nav-icon">⭐</span> Saved Leads
+      <RadzenIcon Icon="bookmark" class="nav-icon" /> Saved Leads
     </a>
     <a class="nav-item" href="permit-intel/alerts">
-      <span class="nav-icon">🔔</span> Alerts
+      <RadzenIcon Icon="notifications" class="nav-icon" /> Alerts
     </a>
 
     <div class="nav-section-label">Tools</div>
     <a class="nav-item" href="permit-intel/map">
-      <span class="nav-icon">🗺️</span> Map
+      <RadzenIcon Icon="map" class="nav-icon" /> Map
     </a>
     <a class="nav-item" href="permit-intel/dashboard">
-      <span class="nav-icon">📊</span> Reports
+      <RadzenIcon Icon="analytics" class="nav-icon" /> Reports
     </a>
 
     <AuthorizeView Roles="Admin, Marketing">
       <Authorized>
         <div class="nav-section-label">Admin</div>
         <a class="nav-item" href="admin/contractors">
-          <span class="nav-icon">👷</span> Contractors
+          <RadzenIcon Icon="engineering" class="nav-icon" /> Contractors
         </a>
       </Authorized>
     </AuthorizeView>
 
     <div class="nav-section-label">Account</div>
     <a class="nav-item" href="profile">
-      <span class="nav-icon">⚙️</span> Profile & Settings
+      <RadzenIcon Icon="settings" class="nav-icon" /> Profile & Settings
     </a>
     <a class="nav-item text-accent" href="permit-intel/subscribe">
-      <span class="nav-icon">⚡</span> Upgrade to Pro
+      <RadzenIcon Icon="bolt" class="nav-icon" /> Upgrade to Pro
     </a>
   </nav>
 
   <div class="sidebar-upgrade">
-    <div class="upgrade-label">⚡ Pro Trial</div>
+    <div class="upgrade-label"><RadzenIcon Icon="bolt" Style="font-size: 14px; vertical-align: middle; margin-right: 2px;" /> Pro Trial</div>
     <p>7 days left — upgrade to keep unlimited leads and SMS alerts.</p>
     <button class="btn-upgrade" @onclick='() => NavigationManager.NavigateTo("permit-intel/subscribe")'>Upgrade Now — $149/mo</button>
   </div>
@@ -73,18 +73,18 @@
   <div class="main">
     <!-- TOP BAR -->
     <header class="topbar">
-      <button class="hamburger-btn" @onclick="ToggleSidebar" aria-label="Toggle Navigation Menu">☰</button>
+      <button class="hamburger-btn" @onclick="ToggleSidebar" aria-label="Toggle Navigation Menu"><RadzenIcon Icon="menu" /></button>
       <div class="topbar-search">
-        <span class="text-muted-color">🔍</span>
+        <RadzenIcon Icon="search" class="text-muted-color" Style="font-size: 18px;" />
         <input type="text" placeholder="Search permits, addresses, owners..." @onkeydown="SearchGlobal" />
       </div>
     <div class="topbar-date">@DateTime.Today.ToString("ddd, MMMM d, yyyy")</div>
     <div class="topbar-actions">
-      <button class="topbar-btn" @onclick='() => NavigationManager.NavigateTo("permit-intel/map")'>
-        🗺
+      <button class="topbar-btn" @onclick='() => NavigationManager.NavigateTo("permit-intel/map")' aria-label="Map">
+        <RadzenIcon Icon="map" />
       </button>
-      <button class="topbar-btn" @onclick='() => NavigationManager.NavigateTo("permit-intel/alerts")'>
-        🔔
+      <button class="topbar-btn" @onclick='() => NavigationManager.NavigateTo("permit-intel/alerts")' aria-label="Alerts">
+        <RadzenIcon Icon="notifications" />
       </button>
       <div class="topbar-avatar" @onclick='() => NavigationManager.NavigateTo("profile")'>
         @(string.IsNullOrEmpty(Security.User?.Name) || Security.User?.Name == "Anonymous" ? "US" : Security.User.Name.Substring(0, Math.Min(2, Security.User.Name.Length)).ToUpper())
