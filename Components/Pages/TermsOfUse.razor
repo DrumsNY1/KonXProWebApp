@@ -1,24 +1,101 @@
-@page "/terms-of-use"
-@attribute [Authorize]
-<PageTitle>Terms of use</PageTitle>
-<RadzenRow class="rz-w-100 rz-mx-auto rz-my-4 rz-my-md-12" Style="max-width: 960px" AlignItems="Radzen.AlignItems.Center">
-    <RadzenColumn Size="12" class="rz-px-8 rz-px-md-6">
-        <RadzenText Text="Terms of use" TextStyle="Radzen.Blazor.TextStyle.DisplayH1" />
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-mb-8">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur porta dignissim dui, quis convallis erat viverra vitae. Sed convallis, lorem in maximus pulvinar, est enim laoreet diam, quis interdum felis enim sit amet arcu. Sed faucibus purus id nulla euismod ultricies. Suspendisse euismod dolor nec massa venenatis consectetur vitae eu enim. Vivamus quis massa lacus. Aliquam a mauris massa. Aenean quis dignissim ante. Cras vel libero quis ipsum elementum malesuada in et purus. Etiam quis elementum ipsum, vel varius justo. Suspendisse risus nunc, ornare nec lacinia nec, mollis bibendum odio. Curabitur est tortor, dignissim non libero ut, maximus viverra enim. Nullam pellentesque cursus mauris vel suscipit. Aenean a dolor ut nibh aliquet convallis. Morbi vehicula eros quis dui pellentesque, eget consectetur dolor efficitur. Nunc iaculis felis vitae consectetur tristique.
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-mb-8">
-            Quisque accumsan consequat mi ac ullamcorper. Morbi vestibulum tincidunt mi in consectetur. Morbi sed dolor eu tellus maximus efficitur ac vehicula enim. Quisque id nibh id mauris feugiat rhoncus vitae id ex. Phasellus tristique, eros ut interdum dignissim, elit mauris iaculis mauris, eu euismod orci diam eget arcu. In et nisi ac velit imperdiet vestibulum. Curabitur odio lectus, eleifend sed euismod ut, interdum vel nibh. Interdum et malesuada fames ac ante ipsum primis in faucibus. Sed cursus iaculis libero, non euismod felis ullamcorper a. Integer imperdiet, nisl at mollis semper, augue leo consectetur diam, convallis tincidunt lorem eros quis nisi. Aenean cursus molestie quam, vitae dictum nibh feugiat eu.
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-mb-8">
-            Aenean in viverra libero. Fusce sit amet mauris eros. Nunc egestas urna nec suscipit molestie. Sed elementum semper tincidunt. Mauris id consequat orci, id venenatis ex. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur tincidunt tincidunt quam, vel vehicula sem porttitor et. Vestibulum molestie arcu quis velit fringilla ultricies. Cras tincidunt, ipsum vel pulvinar vulputate, libero lectus tincidunt orci, at mollis nibh felis tincidunt erat. Quisque id aliquet diam, a gravida quam. Pellentesque placerat magna tortor, eget mattis lectus ornare et. Nullam tristique massa enim, id lobortis dui eleifend nec.
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-mb-8">
-            Curabitur bibendum eros sed augue rhoncus, eget mattis ante elementum. Proin vel massa velit. Praesent efficitur lacus et egestas imperdiet. Aenean commodo maximus turpis, vel hendrerit est ultricies ut. Quisque eleifend sem a mauris pharetra, non condimentum tortor efficitur. Integer nec lacus id libero tempor iaculis pulvinar vitae sem. Donec sit amet dapibus lacus, et congue quam. Maecenas eu diam id nulla venenatis euismod.
-        </RadzenText>
-        <RadzenText TextStyle="Radzen.Blazor.TextStyle.Body1" class="rz-mb-8">
-            Donec malesuada ornare sollicitudin. Nunc arcu ante, auctor tempus iaculis at, molestie a mauris. Nullam ac iaculis magna, ut egestas nisi. Curabitur scelerisque condimentum tellus, eu hendrerit orci accumsan eu. Sed mattis scelerisque felis, et tempor enim scelerisque vel. Sed non luctus tortor. Sed efficitur cursus ante, in ullamcorper sapien tempor eu. Aenean dui lacus, viverra sit amet libero id, dictum mollis dui. Curabitur molestie aliquam metus, eget hendrerit ex eleifend ac. Donec fermentum lectus non leo condimentum molestie. Cras eleifend sem non volutpat auctor. Suspendisse vel accumsan turpis, vitae porttitor nunc. Aliquam sapien purus, vulputate eget blandit in, ornare in quam. Aenean lorem elit, placerat id congue in, maximus eu leo.
-        </RadzenText>
-    </RadzenColumn>
-</RadzenRow>
+@page "/terms-of-use"
+@page "/terms"
+@layout KonXProWebApp.Components.Layout.LandingLayout
 
+<PageTitle>Terms of Service — KonXPro</PageTitle>
+
+<div class="legal-page-container" style="max-width: 960px; margin: 0 auto; padding: 48px 24px 96px 24px; color: var(--text-secondary, #94a3b8); line-height: 1.7;">
+    <div style="margin-bottom: 36px; border-bottom: 1px solid var(--border-default, #1e293b); padding-bottom: 24px;">
+        <span style="font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--color-primary-light, #60a5fa);">Legal & Compliance</span>
+        <h1 style="font-size: 36px; font-weight: 800; color: var(--text-primary, #f8fafc); margin-top: 8px; margin-bottom: 8px;">Terms of Service</h1>
+        <p style="font-size: 14px; color: var(--text-muted, #64748b); margin: 0;">Effective Date: September 1, 2026 · Governing Law: State of New York</p>
+    </div>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">1. Acceptance of Terms</h2>
+        <p>By registering, accessing, or subscribing to KonXPro ("Service," "Platform"), operated by KonXPro ("Company," "we," "us"), you agree to be bound by these Terms of Service ("Terms"). If you are entering into these Terms on behalf of a company, partnership, or trade organization, you represent that you hold legal authority to bind that entity.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">2. Eligibility & Account Registration</h2>
+        <p>The Service is intended solely for licensed trade contractors, construction professionals, expediters, and commercial entities operating in the State of New York and surrounding metropolitan regions. You agree to provide accurate, current, and complete registration data and safeguard account credentials.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">3. Service Description & Subscriptions</h2>
+        <p>KonXPro provides a cloud-based intelligence platform ingesting and categorizing building permit records, violation notifications, and owner contact intelligence across Manhattan, Brooklyn, Queens, Bronx, and Staten Island. Services are billed on a flat recurring monthly subscription basis according to your chosen plan tier.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">4. NYC Department of Buildings (DOB) Public Records Disclaimer</h2>
+        <div style="background: rgba(37, 99, 235, 0.08); border-left: 4px solid var(--color-primary, #2563eb); padding: 16px 20px; border-radius: 4px; margin: 12px 0;">
+            <p style="margin: 0; font-size: 14px; color: var(--text-primary, #f8fafc);"><strong>EXPLICIT PUBLIC RECORD NOTICE:</strong> All building permits, job applications, violations, estimated job costs, contractor filings, and property owner identifiers displayed on KonXPro originate from public records published by the City of New York and the NYC Department of Buildings ("NYC DOB"). KonXPro does not verify, warrant, or guarantee the accuracy, completeness, or timeliness of official municipal records. KonXPro is an independent SaaS intelligence service and is NOT affiliated with, sponsored by, or endorsed by the City of New York or any governmental agency.</p>
+        </div>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">5. Subscription Billing, Free Trials & Cancellation</h2>
+        <p>Subscriptions renew automatically on a monthly basis until canceled. If you sign up under a 14-day free trial, you may cancel anytime prior to the trial conclusion without charge via the Customer Billing Portal. Subscription fees are processed securely via Stripe. Paid subscription charges are non-refundable except where required by applicable law.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">6. Acceptable Use & Lead Outreach Standards</h2>
+        <p>Subscribers agree to utilize owner contact records and permit leads in full compliance with applicable federal, state, and local laws, including the Telephone Consumer Protection Act (TCPA), the CAN-SPAM Act, and NYC DCA/DOB home improvement contractor solicitation rules. Automated robotic harassment or unlawful marketing is strictly prohibited.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">7. Intellectual Property & Limited License</h2>
+        <p>KonXPro retains all ownership rights, trademarks, UI architecture, algorithms, and derivative database schema. Subscribers receive a non-exclusive, non-transferable, revocable license to query, view, and export permit dossiers solely for internal trade business development.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">8. Third-Party Integrations & External Data</h2>
+        <p>The Service integrates with third-party providers, including Stripe for payment processing and Leaflet/OpenStreetMap for mapping. We are not liable for outages, alterations, or disruptions originating from third-party vendor platforms.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">9. Confidentiality & Security</h2>
+        <p>You agree to preserve the confidentiality of your account credentials and immediately notify KonXPro of any suspected unauthorized access or breach of security.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">10. Warranty Disclaimer</h2>
+        <p>THE SERVICE AND ALL PERMIT DATA ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR ACCURACY OF PUBLIC RECORDS.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">11. Limitation of Liability</h2>
+        <p>TO THE MAXIMUM EXTENT PERMITTED BY LAW, KONXPRO AND ITS DIRECTORS, EMPLOYEES, AND AFFILIATES SHALL NOT BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR LOST CONTRACT PROFITS. OUR AGGREGATE LIABILITY SHALL NOT EXCEED THE TOTAL FEES PAID BY YOU DURING THE THREE (3) MONTHS IMMEDIATELY PRECEDING THE CLAIM.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">12. Indemnification</h2>
+        <p>You agree to indemnify and hold harmless KonXPro from and against any claims, liabilities, damages, and expenses arising out of your misuse of the platform, violation of these Terms, or any unlawful outreach or communications directed at property owners.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">13. Dispute Resolution & Mandatory Binding Arbitration</h2>
+        <p>Any dispute, controversy, or claim arising out of or relating to these Terms or the breach thereof shall be settled by binding arbitration administered by the American Arbitration Association (AAA) under its Commercial Arbitration Rules. You agree that any claim must be brought in your individual capacity, and not as a plaintiff or class member in any purported class proceeding.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">14. Governing Law & Jurisdiction</h2>
+        <p>These Terms shall be governed by and construed in accordance with the laws of the State of New York, without regard to its conflict of law principles. Any legal proceedings not subject to arbitration shall be submitted to the exclusive jurisdiction of the state and federal courts located in New York County, New York.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">15. Term & Termination</h2>
+        <p>We reserve the right to suspend or terminate accounts that violate acceptable use standards, engage in scraping, or fail to pay subscription dues upon notice.</p>
+    </section>
+
+    <section style="margin-bottom: 28px;">
+        <h2 style="font-size: 18px; font-weight: 700; color: var(--text-primary, #f8fafc); margin-bottom: 8px;">16. General Provisions & Inquiries</h2>
+        <p>These Terms constitute the entire agreement between you and KonXPro regarding the Service. Inquiries concerning these Terms should be directed to:</p>
+        <p style="margin-top: 8px;">
+            <strong style="color: var(--text-primary, #f8fafc);">KonXPro Legal Department</strong><br>
+            Email: <a href="mailto:legal@konxpro.com" style="color: var(--color-primary-light, #60a5fa); text-decoration: underline;">legal@konxpro.com</a><br>
+            Support: <a href="mailto:support@konxpro.com" style="color: var(--color-primary-light, #60a5fa); text-decoration: underline;">support@konxpro.com</a><br>
+            New York, NY
+        </p>
+    </section>
+</div>
