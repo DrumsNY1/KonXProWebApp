@@ -1,0 +1,71 @@
+<Project>
+
+  <!--
+    Central Package Management for KonXProWebApp.sln.
+
+    Every version below is the version that project.assets.json showed as
+    ACTUALLY RESOLVED on 2026-09-10. Nothing was upgraded when this file was
+    created: the intent is that today's build produces byte-identical package
+    resolution to yesterday's, but deterministically from now on.
+
+    To change a version, change it HERE. Do not add Version= back to a csproj.
+  -->
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+
+  <!-- Web app (KonXProWebApp, net9.0) -->
+  <ItemGroup>
+    <PackageVersion Include="DocumentFormat.OpenXml" Version="2.20.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.HeaderPropagation" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.AspNetCore.OData" Version="9.5.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.20" />
+    <PackageVersion Include="Radzen.Blazor" Version="11.3.2" />
+    <PackageVersion Include="Stripe.net" Version="52.1.0" />
+  </ItemGroup>
+
+  <!--
+    Azure Functions (KonXProWebApp.Functions, net8.0)
+
+    NOTE: Microsoft.Data.SqlClient below is 6.1.6, which is what the Functions
+    project resolves. KonXProWebApp.Functions.Tests was resolving 6.0.1 — it
+    carries a VersionOverride to preserve that exactly. See the note in that
+    csproj; the override should be removed once you decide which version wins.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker" Version="2.52.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.1.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
+    <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.1.6" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
+  </ItemGroup>
+
+  <!--
+    Test projects
+
+    bunit and Microsoft.Playwright.Xunit are pinned to 1.36.0 and 1.50.0 — the
+    versions actually being restored. The csproj files previously asked for
+    1.35.6 and 1.49.0, which NuGet was already rounding up because those exact
+    versions are not available on the feed. These numbers reflect reality.
+  -->
+  <ItemGroup>
+    <PackageVersion Include="bunit" Version="1.36.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.48.0" />
+    <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
+    <PackageVersion Include="Moq" Version="4.20.72" />
+    <PackageVersion Include="Testcontainers.MsSql" Version="3.10.0" />
+    <PackageVersion Include="xunit" Version="2.5.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+</Project>

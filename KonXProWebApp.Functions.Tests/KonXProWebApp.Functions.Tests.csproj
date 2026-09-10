@@ -8,16 +8,26 @@
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 
+  <!-- Versions are centralized in Directory.Packages.props -->
   <ItemGroup>
-    <PackageReference Include="coverlet.collector" Version="6.0.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xunit" Version="2.5.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
-    <PackageReference Include="Moq" Version="4.20.72" />
-    <PackageReference Include="Testcontainers.MsSql" Version="3.10.0" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.*-*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.*-*" />
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Moq" />
+    <PackageReference Include="Testcontainers.MsSql" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+
+    <!--
+      Microsoft.Data.SqlClient takes the central 6.1.6, matching what
+      KonXProWebApp.Functions resolves. This project previously asked for 6.0.1,
+      which is a downgrade of the library the code under test depends on
+      (NU1605). It only ever restored because the two projects were last
+      restored at different times against a floating 6.* range, so no single
+      restore saw both constraints. Keep these two aligned.
+    -->
+    <PackageReference Include="Microsoft.Data.SqlClient" />
   </ItemGroup>
 
   <ItemGroup>
