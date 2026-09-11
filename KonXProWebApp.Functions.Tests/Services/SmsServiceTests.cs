@@ -24,7 +24,7 @@ public class SmsServiceTests
     {
         var msg = SmsService.BuildAlertSms(1, "1 Only St");
 
-        Assert.Contains("1 new permit(s)", msg);
+        Assert.Contains("1 new permit lead(s)", msg);
     }
 
     [Fact]

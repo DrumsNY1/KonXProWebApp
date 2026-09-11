@@ -919,11 +919,13 @@ public class IngestionService
                     WHEN NOT MATCHED THEN INSERT (
                         LicenseNumber, BusinessName, DbaTradeName, BusinessUniqueId, LicenseStatus,
                         LicenseIssueDate, LicenseExpirationDate, ContactPhoneNumber, AddressBuilding,
-                        AddressStreetName, AddressCity, AddressState, AddressZip, Borough, IngestedAt
+                        AddressStreetName, AddressCity, AddressState, AddressZip, Borough, IngestedAt,
+                        PostcardSent, EmailSent, CampaignVisited, CampaignConverted
                     ) VALUES (
                         @LicenseNumber, @BusinessName, @DbaTradeName, @BusinessUniqueId, @LicenseStatus,
                         @LicenseIssueDate, @LicenseExpirationDate, @ContactPhoneNumber, @AddressBuilding,
-                        @AddressStreetName, @AddressCity, @AddressState, @AddressZip, @Borough, @IngestedAt
+                        @AddressStreetName, @AddressCity, @AddressState, @AddressZip, @Borough, @IngestedAt,
+                        0, 0, 0, 0
                     ) OUTPUT $action;";
 
                 await using var cmd = new SqlCommand(mergeSql, connection);
