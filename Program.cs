@@ -162,29 +162,7 @@ if (!app.Environment.IsEnvironment("Testing"))
 
         identityDb.SeedTierTestUsersAsync(permitDb).Wait();
 
-        var views = new[]
-        {
-            @"CREATE OR ALTER VIEW dbo.vwFreeTierDashboard AS
-              SELECT JobNum, Borough, ISNULL(HouseNum, '') + ' ' + ISNULL(StreetName, '') AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-              FROM dbo.DOBJobFilings;",
-              
-            @"CREATE OR ALTER VIEW dbo.vwBasicTierDashboard AS
-              SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, JobDescription, Gisntaname AS Neighborhood
-              FROM dbo.DOBJobFilings;",
-              
-            @"CREATE OR ALTER VIEW dbo.vwMidTierDashboard AS
-              SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-              FROM dbo.DOBJobFilings;",
-              
-            @"CREATE OR ALTER VIEW dbo.vwHighTierDashboard AS
-              SELECT JobNum, Borough, HouseNum, StreetName AS Street, LatestActionDate, JobType AS ProjectType, InitialCost AS EstimatedCost, JobDescription, Gisntaname AS Neighborhood
-              FROM dbo.DOBJobFilings;",
-              
-            @"CREATE OR ALTER VIEW dbo.vwDemoDisplay AS
-              SELECT 'Sample Content' AS Content, 'Sample Summary' AS Summary, CAST(GETDATE() AS datetime2) AS CompletionDate;"
-        };
-
-        foreach (var viewSql in views)
+        foreach (var (viewName, viewSql) in KonXProWebApp.Data.TierViewDefinitions.Views)
         {
             try
             {
@@ -192,7 +170,7 @@ if (!app.Environment.IsEnvironment("Testing"))
             }
             catch (Exception exView)
             {
-                logger.LogWarning(exView, "View creation skipped or non-fatal error");
+                logger.LogWarning(exView, "View creation skipped or non-fatal error for {ViewName}", viewName);
             }
         }
     }
