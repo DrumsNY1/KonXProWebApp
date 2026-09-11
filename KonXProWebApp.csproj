@@ -5,6 +5,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>24c95f58-efc8-4842-8097-a7f117bf3ee0</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Components\Pages\ClaudeDobFilings.razor.cs" />
@@ -29,6 +30,23 @@
     <Content Remove="KonXProWebApp.E2E.Tests\**" />
     <EmbeddedResource Remove="KonXProWebApp.E2E.Tests\**" />
     <None Remove="KonXProWebApp.E2E.Tests\**" />
+    <!--
+      Local tooling and working folders. These are developer scratch space, not
+      part of the application: keep them out of the build and out of publish
+      output. They are also listed in .gitignore.
+    -->
+    <Compile Remove="_tools\**" />
+    <Content Remove="_tools\**" />
+    <EmbeddedResource Remove="_tools\**" />
+    <None Remove="_tools\**" />
+    <Compile Remove="scratch\**" />
+    <Content Remove="scratch\**" />
+    <EmbeddedResource Remove="scratch\**" />
+    <None Remove="scratch\**" />
+    <Compile Remove="logs\**" />
+    <Content Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Components\Pages\ClaudeDobFilings.razor" />

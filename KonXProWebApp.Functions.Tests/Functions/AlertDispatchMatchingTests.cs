@@ -24,7 +24,9 @@ public class AlertDispatchMatchingTests
         var user = new AlertDispatchFunction.AlertUser();
         var (sql, parameters) = AlertDispatchFunction.BuildWhereClause(user);
 
-        Assert.Contains("LatestActionDate >= DATEADD", sql);
+        // PreFilingDate, not LatestActionDate: commit 67dafd8 deliberately switched this so alerts
+        // fire on newly-filed permits rather than any permit with recent DOB activity.
+        Assert.Contains("PreFilingDate >= DATEADD", sql);
         Assert.DoesNotContain("Borough IN", sql);
         Assert.DoesNotContain("JobType IN", sql);
         Assert.Empty(parameters);

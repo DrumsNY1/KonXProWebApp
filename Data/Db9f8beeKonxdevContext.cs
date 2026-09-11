@@ -22,15 +22,20 @@ namespace KonXProWebApp.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwBasicTierDashboard>().HasNoKey();
+            // These are real SQL views (CREATE OR ALTER VIEW ...), owned and re-created on every
+            // app startup by the raw DDL block in Program.cs, not by EF migrations. ToView() tells
+            // EF to read from them without ever trying to CreateTable/DropTable them — the model
+            // used to map these as physical tables, which collided with the startup view DDL on a
+            // freshly migrated database. See REMEDIATION.md item 2.2.
+            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwBasicTierDashboard>().HasNoKey().ToView("vwBasicTierDashboard", "dbo");
 
-            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay>().HasNoKey();
+            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay>().HasNoKey().ToView("vwDemoDisplay", "dbo");
 
-            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard>().HasNoKey();
+            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard>().HasNoKey().ToView("vwFreeTierDashboard", "dbo");
 
-            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard>().HasNoKey();
+            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard>().HasNoKey().ToView("vwHighTierDashboard", "dbo");
 
-            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwMidTierDashboard>().HasNoKey();
+            builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.VwMidTierDashboard>().HasNoKey().ToView("vwMidTierDashboard", "dbo");
 
             builder.Entity<KonXProWebApp.Models.db_9f8bee_konxdev.BlogContent>()
               .Property(p => p.CompletionDate)

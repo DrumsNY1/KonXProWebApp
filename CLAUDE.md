@@ -21,7 +21,7 @@ homeowners before competitors.
 |-------|------------------|
 | Web app | ASP.NET Core, `Microsoft.NET.Sdk.Web`, **net9.0** |
 | UI | **Blazor Server** — Razor Components with `InteractiveServerRenderMode` |
-| Component library | **Radzen.Blazor** (floating version — see Known issues) |
+| Component library | **Radzen.Blazor** 11.3.2 |
 | ORM | EF Core 9 with **`UseSqlServer`** |
 | Database | **Microsoft SQL Server**, hosted on Plesk (`plesk9100.is.cc`) |
 | Identity | ASP.NET Core Identity, multi-tenant |
@@ -78,6 +78,25 @@ Both point at the same connection string, `db_9f8bee_konxdevConnection`.
   existing database. Split across `Db9f8beeKonxdevContext.cs` and
   `Db9f8beeKonxdevContext.PermitIntel.cs`.
 
+### The migrations history table was NOT in dbo (as of the 2026-09-10 capture)
+
+Each SQL login's default schema is its own name, so EF put `__EFMigrationsHistory`
+in `konx_admin` (production) and `konx_staging_admin` (staging) rather than `dbo`.
+Both DbContext registrations in `Program.cs` now pin
+`MigrationsHistoryTable("__EFMigrationsHistory", "dbo")` explicitly, so a freshly
+migrated database gets it in `dbo` regardless of which login connects — this
+was folded into the database rebuild described in `REMEDIATION.md` rather than
+migrated in place. See `REMEDIATION.md`'s "Rebuild plan" section for the current
+status of that rebuild (code is ready; staging/production have not been rebuilt yet).
+
+### Production and staging schemas do not match
+
+They were built by different mechanisms. Production's permit tables carry
+EF-generated key names and every index the model declares. Staging's carry SQL
+Server auto-generated names from the `Program.cs` raw DDL, lack both unique
+indexes, and `IngestionLogs` there is a heap. **Do not treat staging as a
+rehearsal for production.** `REMEDIATION.md` has the full comparison.
+
 ### How the schema is actually managed — read this before touching the database
 
 `Program.cs` does three different things at startup, and only the first is migrations:
@@ -85,7 +104,9 @@ Both point at the same connection string, `db_9f8bee_konxdevConnection`.
 1. `identityDb.Database.Migrate()` — proper EF migrations for Identity.
 2. `permitDb.Database.EnsureCreated()` — **not** migrations.
 3. Raw `ExecuteSqlRaw` DDL that creates `Subscriptions`, `SavedLeads` and
-   `AlertPreferences` if absent, then `CREATE OR ALTER VIEW` for five tier views.
+   `AlertPreferences` if absent, then `CREATE OR ALTER VIEW` for five tier views
+   (the view SQL itself lives in `Data/TierViewDefinitions.cs`, shared with the
+   entitlement tests in `KonXProWebApp.Integration.Tests`, not inlined here).
 
 So the app **runs raw DDL against whatever database it boots against, including
 production.** This is the single most surprising thing in the codebase. Consequences:
@@ -187,16 +208,47 @@ dotnet test KonXProWebApp.E2E.Tests             # Playwright, needs a running ap
 `WebApplicationFactory<Program>` works in the integration tests. Don't remove it.
 The app skips all startup migration and seeding when the environment is `Testing`.
 
-### CI reality
+### CI
 
-`.github/workflows/master_konxprofunctionapp.yml` is the only workflow. On push to
-`master` it publishes **`KonXProWebApp.Functions` only** and deploys it to the Azure
-Function App via OIDC. It **runs no tests**.
+Two workflows, with different jobs:
 
-So: **nothing gates a merge.** Tests only run when you run them. Run them.
+- **`build-and-test.yml`** — created 2026-09-11; a prior version of this file
+  described it as already existing and "Completed," which was wrong — it had never
+  been committed anywhere and no PR was ever actually validated by CI. Runs on every
+  PR to `master` (and, temporarily, to `feat/central-package-management` — remove that
+  target once that branch merges) and on push to `master`. Sets up both the .NET 8 and
+  .NET 9 SDKs (the solution needs both), builds the whole solution in Release, then
+  runs `KonXProWebApp.Tests` and `KonXProWebApp.Functions.Tests`. A second job runs
+  `KonXProWebApp.Integration.Tests` against a Testcontainers SQL Server; it is marked
+  `continue-on-error` and is **advisory**, not a gate, since it has no track record
+  yet. Remove that line once it has proven stable — it is the only job that exercises
+  application startup, so it should be a real gate before the startup DDL is touched.
+- **`master_konxprofunctionapp.yml`** — deploys `KonXProWebApp.Functions` to the Azure
+  Function App on push to `master`, via OIDC. Runs no tests. Do not fold the test gate
+  into this workflow; keeping deploy and verification separate is deliberate.
 
-The web app itself is not in any pipeline — it goes out by Web Deploy from a publish
-profile, by hand.
+`KonXProWebApp.E2E.Tests` is never run in CI — it needs a live host.
+
+The web app itself is still not deployed by any pipeline. It goes out by Web Deploy
+from a publish profile, by hand.
+
+---
+
+## Package versions
+
+All package versions are centralized in `Directory.Packages.props` at the repo root
+(`ManagePackageVersionsCentrally`). **Individual csproj files carry no `Version`
+attribute — do not add one back.** To change a version, change it there.
+
+Two constraints to respect:
+
+- `Microsoft.Data.SqlClient` must stay identical in `KonXProWebApp.Functions` and
+  `KonXProWebApp.Functions.Tests`. The test project referencing an older version than
+  the project under test is a NuGet downgrade error (NU1605), which is how this was
+  first found.
+- `bunit` and `Microsoft.Playwright.Xunit` are pinned at 1.36.0 and 1.50.0. Earlier
+  csproj files asked for 1.35.6 and 1.49.0, versions that do not exist on the feed, so
+  NuGet was silently rounding up. Pin to versions that exist.
 
 ---
 
@@ -216,11 +268,30 @@ profile, by hand.
 
 Config keys live in `appsettings.json` / `appsettings.Staging.json`:
 `ConnectionStrings:db_9f8bee_konxdevConnection` and `Smtp:*` (host konxpro.com:587).
+Both files, plus `appsettings.Development.json` and
+`KonXProWebApp.Functions/local.settings.json`, held real production/staging
+passwords in plain text — committed to git since the initial commit — until
+[PR #37](https://github.com/DrumsNY1/KonXProWebApp/pull/37). They now hold
+`PLACEHOLDER`; real values belong in `dotnet user-secrets` locally (both
+`KonXProWebApp.csproj` and `KonXProWebApp.Functions.csproj` have a
+`UserSecretsId`) and environment variables on the server. Rotating the actual
+SQL passwords is still open — see item 0.1 in `REMEDIATION.md`.
 
 **Never put a credential in a command line, a commit, or a chat message.** Use
 `dotnet user-secrets` locally and environment variables on the server. If you need a
 value that isn't already in the environment, ask — don't read it out of a config file
 and paste it into a command.
+
+**`dotnet ef` reads user secrets too.** Once real credentials are in user-secrets,
+any `dotnet ef migrations`/`database update` command run from this project builds
+the app host the normal way and picks them up automatically — including commands
+that don't look like they'd need a live connection (`migrations remove` checks the
+target database's migration history). Override the connection string explicitly
+(e.g. `$env:ConnectionStrings__db_9f8bee_konxdevConnection = '<connection string>'`
+before the command, using single quotes — this PowerShell setup mis-parses
+double-quoted strings containing parentheses, e.g. `(localdb)`) when working
+against a local/disposable database, rather than relying on `appsettings.json`'s
+placeholder to fail closed.
 
 Do not run `sqlcmd`, `dotnet publish`, or anything else against production. Schema and
 data changes go through the paths described in the Data section, reviewed by a human.
@@ -229,18 +300,32 @@ data changes go through the paths described in the Data section, reviewed by a h
 
 ## Known issues to be aware of
 
-- **Floating package versions, in both projects.** `Radzen.Blazor Version="*"` and
-  `9.*-*` on the EF Core and ASP.NET Core packages in the web app; `2.*`, `3.*`, `4.*`,
-  `6.*`, `8.*` across the Functions packages. A restore can change dependencies between
-  runs. If a build breaks for no reason you can trace to a code change, suspect this
-  first.
-- **The solution is mixed-target.** Web app is net9.0, Functions is net8.0, and CI pins
-  `DOTNET_VERSION: '8.0'` — correct for the Functions project it builds, but the
-  pipeline cannot build the web app as written. Anyone adding the web app to CI must
-  bump that first.
+- **`xunit` is behind its own transitive dependencies (NU1608).** `xunit` is pinned at
+  2.5.3, but `bunit` and `Microsoft.Playwright.Xunit` pull in
+  `xunit.extensibility.core` 2.8.0. The build warns on every restore. Fixing it means
+  moving all four test projects to xunit 2.8.x, which risks test discovery — do it as
+  its own change, not as a side effect.
+- **The solution is mixed-target.** Web app and all four test projects are net9.0;
+  `KonXProWebApp.Functions` is net8.0. Any pipeline or tool that builds the whole
+  solution needs both SDKs installed. The deploy workflow pins `DOTNET_VERSION: '8.0'`,
+  which is correct for the Functions project it builds alone.
+- **Integration tests build their schema from the EF model, not from production's.**
+  `SqlWebApplicationFactory` sets the environment to `Testing` (skipping the startup
+  DDL) and calls `EnsureCreatedAsync()`. So those tests run against a schema that
+  *includes* the unique indexes production lacks, and *excludes* the five tier views,
+  which only exist in the startup DDL. Do not read a passing integration test as
+  evidence that production's schema is correct.
 - **`publish/`, `publish.zip` (36 MB), `logs/`, `scratch/`** are build output and noise.
   Don't read them looking for source.
 - `REGRESSION_TEST_SUITE.md` is 59 KB. Open it only when working on test coverage.
+
+---
+
+## Current work
+
+`REMEDIATION.md` at the repo root is the live plan: what has been fixed, what is
+open, the dependency order, and the schema findings behind it. Read it before
+starting anything to do with migrations, CI, packaging or the tier views.
 
 ---
 

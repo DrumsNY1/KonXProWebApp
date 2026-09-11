@@ -5,7 +5,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace KonXProWebApp.Models.db_9f8bee_konxdev
 {
-    [Table("vwDemoDisplay", Schema = "dbo")]
+    // View mapping (ToView) is configured in db_9f8bee_konxdevContext.OnModelCreating,
+    // not here — a [Table] attribute here would give this entity a table name too,
+    // which makes EF try to CreateTable it as a migration despite ToView().
     public partial class VwDemoDisplay
     {
         public string Content { get; set; }
