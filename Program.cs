@@ -28,7 +28,8 @@ builder.Services.AddScoped<KonXProWebApp.Services.ComplianceIntelService>();
 builder.Services.AddSingleton<Microsoft.AspNetCore.Authorization.IAuthorizationHandler, KonXProWebApp.Authorization.SubscriptionAuthorizationHandler>();
 builder.Services.AddDbContext<KonXProWebApp.Data.db_9f8bee_konxdevContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("db_9f8bee_konxdevConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("db_9f8bee_konxdevConnection"),
+        sql => sql.MigrationsHistoryTable("__EFMigrationsHistory", "dbo"));
 });
 builder.Services.AddHttpClient("KonXProWebApp", client =>
 {
@@ -46,7 +47,8 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<KonXProWebApp.SecurityService>();
 builder.Services.AddDbContext<ApplicationIdentityDbContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("db_9f8bee_konxdevConnection"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("db_9f8bee_konxdevConnection"),
+        sql => sql.MigrationsHistoryTable("__EFMigrationsHistory", "dbo"));
 });
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<ApplicationIdentityDbContext>().AddDefaultTokenProviders();
 builder.Services.AddTransient<IUserStore<ApplicationUser>, MultiTenancyUserStore>();
