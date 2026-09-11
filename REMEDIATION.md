@@ -2,9 +2,13 @@
 
 Living document. Last updated 2026-09-11.
 
-Phase 0 is complete. Phase 1 is complete. Phases 2–4 are open, and the plan below
-has been **revised** from its original form because Phase 1 disproved two of its
-assumptions. Read the Findings section before starting any Phase 2 item.
+Phase 0 is complete. Phase 1 is complete. Items 2.0, 2.1, 2.2, and 3.1 are
+done in code (see "Rebuild plan" below) but **not yet applied to any real
+database**. Phases 2–4 have been **revised twice** from their original form:
+once because Phase 1 disproved two of its assumptions, and again because
+investigating 2.2 found the first revision was itself wrong about how
+production's tables got their shape. Read the Findings section and the
+Rebuild plan before starting anything further.
 
 ---
 
@@ -105,6 +109,66 @@ in both, consistent with `CREATE OR ALTER VIEW` re-running on every app restart.
 
 ## Completed
 
+**2.0 — migrations history table.** Superseded by the decision to rebuild both
+databases from a clean migration set rather than patch them in place (see
+"Rebuild plan" below) — a freshly migrated database gets `dbo.__EFMigrationsHistory`
+from the start, so the fragile in-place move is no longer needed. Both
+`ApplicationIdentityDbContext` and `db_9f8bee_konxdevContext` now pin
+`MigrationsHistoryTable("__EFMigrationsHistory", "dbo")` explicitly in
+`Program.cs` regardless, so a future change of SQL login can't reintroduce
+Finding 1's fragility.
+
+**2.1 — HpdViolations drift.** This item's premise was already stale by the
+time it was investigated: `HpdViolation` is present and correctly mapped in
+`db_9f8bee_konxdevContextModelSnapshot.cs`. Confirmed clean by regenerating
+the baseline migration for item 2.2 below — it produced no unexpected
+`CreateTable` for `HpdViolations`.
+
+**2.2 — reconcile the four permit tables with migration history.** The
+original finding was wrong: `Data/Migrations/20260712141006_AddServiceRequests311.cs`
+*did* contain `CreateTable` for `Subscriptions`, `SavedLeads`, `AlertPreferences`,
+`IngestionLogs`, and — critically — the five `vw*TierDashboard` names, mapped as
+physical tables with `INSTEAD OF`-trigger annotations. That's a real, latent bug:
+the current model still mapped those five views as tables (via a stray
+`[Table(...)]` attribute on each POCO, left over from an earlier design), while
+`Program.cs` has managed them as real SQL views via `CREATE OR ALTER VIEW` for
+some time. A fresh `dotnet ef database update` would `CreateTable` those names,
+which then collides with the startup view DDL ("not a view") and breaks app
+startup. Someone worked around this on production by manually dropping the
+table objects outside of EF's knowledge — which is why schema-truth capture
+sees real views today despite the migration history saying otherwise, and
+explains Finding 2's EF-shaped table names (they came from this migration
+being genuinely applied, not from `EnsureCreated()` as originally guessed).
+
+Fixed by removing the `[Table(...)]` attribute from each of the five view POCOs
+(`Models/Db9f8beeKonxdev/Vw*.cs`) and mapping them via `ToView()` in
+`db_9f8bee_konxdevContext.OnModelCreating` instead, which correctly excludes
+them from migrations. The five original migrations for `db_9f8bee_konxdevContext`
+were squashed into one `InitialCreate` baseline generated from the corrected
+model — verified against a disposable LocalDB database: the new migration
+creates 13 tables and zero `vw*` objects, and `Program.cs`'s exact
+`CREATE OR ALTER VIEW` statements then succeed, twice in a row (idempotent
+across restarts). Squashing rather than reconciling was possible because the
+plan changed to rebuilding both databases from scratch (see below), so there
+was no need to preserve compatibility with the old, partially-wrong history.
+
+Also surfaced in passing: the current model maps `DobViolation` to table
+`DobBisViolations` and `EcbViolation` to `ECBViolations`, but the old migration
+(and presumably production, right now) has them as `DOB_Violations` and
+`ECB_Violations`. Same class of drift as the view issue — the rebuild adopts
+the model's current names, which is what the running app code actually expects.
+
+**3.1 — tier view entitlement tests.** Added
+`KonXProWebApp.Integration.Tests/Database/TierViewEntitlementTests.cs`,
+table-driven per tier, asserting both boundaries (`HouseNum` never on Free,
+`EstimatedCost` never on Free or Basic). The five view definitions were
+extracted out of `Program.cs`'s startup DDL into `Data/TierViewDefinitions.cs`
+so the test and the startup code run identical SQL rather than a copy that
+could drift. **Not yet executed** — this machine doesn't have Docker Desktop
+running and the test needs `Testcontainers.MsSql`. Verified the same SQL and
+column shapes directly against a disposable LocalDB database instead; run the
+real suite in CI or any Docker-capable environment before treating it as a gate.
+
 **0.2 — package versions pinned.** `Directory.Packages.props` at the repo root,
 central package management, no `Version` attribute in any csproj. Pinned to the
 versions that were already resolving; nothing was upgraded except
@@ -124,50 +188,36 @@ runs `KonXProWebApp.Tests` and `KonXProWebApp.Functions.Tests`. A second job run
 
 ## Open
 
-### 0.1 — Rotate exposed credentials · do first, blocks nothing
+### 0.1 — Rotate exposed credentials · do first, blocks nothing · revised
 
-Production and staging SQL passwords and the Web Deploy password are in plaintext
-in `~/.gemini/config/config.json`, saved as part of approved command strings.
-Rotate all three. Move local development to `dotnet user-secrets`, use
-`SQLCMDPASSWORD` for ad-hoc queries, put the deploy password in GitHub secrets.
-Then delete the `allow` array from that config file.
+Worse than originally described: the production (`konx_admin` / `priority_konx`)
+and staging (`konx_staging_admin` / `priority_ks`) SQL passwords, plus two SMTP
+passwords, were committed in **plain text in git** — `appsettings.json`,
+`appsettings.Staging.json`, `appsettings.Development.json`, and
+`KonXProWebApp.Functions/local.settings.json` — since the repository's initial
+commit, and pushed to `origin/master`. The `~/.gemini/config/config.json` copy
+this item originally described is a separate, additional exposure on top of that.
 
-This matters more now that an agent with a shell runs on this machine.
+[PR #37](https://github.com/DrumsNY1/KonXProWebApp/pull/37) replaces all four
+real values with `PLACEHOLDER`, adds `UserSecretsId` to both csproj files so
+`dotnet user-secrets` works, and untracks `local.settings.json` going forward
+(Azure Functions local settings should never be committed). **Still open:**
 
-### 2.0 — Pin the migrations history table · NEW, from Finding 1
+- Rotate the actual SQL Server passwords — the PR only stops future plaintext
+  commits, the previously-committed values must be treated as compromised.
+- Rotate the Web Deploy password and clean up `~/.gemini/config/config.json`.
+- Decide whether/how to scrub the old values from git history (disruptive with
+  ~30 active branches — worth a deliberate decision, not a reflexive rewrite).
 
-Configure `MigrationsHistoryTable("__EFMigrationsHistory", "dbo")` and move the
-existing rows from `konx_admin.__EFMigrationsHistory` to `dbo.` in each
-environment. Until this is done, changing the SQL login the app connects with
-will make EF replay every migration against a populated database.
-
-Do this before 2.1 and 2.2 — both depend on EF reading the correct history.
-
-### 2.1 — Defuse the HpdViolations drift · blocked by 2.0
-
-`HpdViolation` is a `DbSet` in `Db9f8beeKonxdevContext.PermitIntel.cs` but is
-absent from `db_9f8bee_konxdevContextModelSnapshot.cs`. The next
-`dotnet ef migrations add` will therefore generate a `CreateTable` for
-`HpdViolations`, which fails on apply where the table exists.
-
-Done when `dotnet ef migrations add Probe --context db_9f8bee_konxdevContext`
-produces an **empty** migration. Delete the probe afterwards.
-
-### 2.2 — Reconcile the four permit tables with migration history · revised
-
-Originally "write a baseline migration for four phantom tables". Finding 1 changes
-this: production's tables are EF-shaped and its history is complete, so the goal
-is narrower — make sure a **fresh** database built by `dotnet ef database update`
-alone produces the same schema production has, without `Program.cs` creating
-anything.
-
-Note that no migration in `Data/Migrations/` contains a `CreateTable` for
-`Subscriptions`, `SavedLeads`, `AlertPreferences` or `IngestionLogs`, yet they
-exist in production with EF-generated names and every index the model declares,
-and they appear in the model snapshot. `20260715003319_ScaffoldPendingChanges`
-has an empty `Up()` and `Down()`. Establish how they got there before writing
-anything — the answer determines whether a guarded baseline migration is needed
-or whether the snapshot simply needs to agree with reality.
+This matters more now that an agent with a shell runs on this machine — and
+note that `dotnet ef` commands build the app host the normal way, which reads
+user secrets automatically; once real credentials are in user-secrets, any
+`dotnet ef` invocation against this project can silently connect to whichever
+database they point at unless the connection string is explicitly overridden
+(e.g. via a `ConnectionStrings__db_9f8bee_konxdevConnection` environment
+variable, which outranks user secrets in ASP.NET Core's configuration
+precedence). This is exactly how a read-only production connection happened
+once already during this remediation work.
 
 ### 2.3 — Add the two missing unique indexes to staging · small
 
@@ -175,30 +225,31 @@ Production already has both. Staging has neither and no conflicting data. Add
 them, or rebuild staging from production, which also fixes the heap
 `IngestionLogs` and the raw-DDL key names.
 
-### 2.4 — Retire the startup DDL · blocked by 2.2, 2.3, 3.1
+### 2.4 — Retire the startup DDL · blocked by 2.3 · deliberately deferred
 
-Remove `EnsureCreated()`, the `ExecuteSqlRaw` table DDL and the view loop from
-`Program.cs`; replace with `permitDb.Database.Migrate()`. Keep the
-`IsEnvironment("Testing")` guard — the integration tests depend on startup doing
-nothing. Consider moving migration out of app startup entirely into a deploy
-step; an app that migrates on boot races itself when two instances start.
+Remove `EnsureCreated()` and the now-redundant `Subscriptions`/`SavedLeads`/
+`AlertPreferences` table DDL from `Program.cs`; replace with
+`permitDb.Database.Migrate()`. The five-view `CREATE OR ALTER VIEW` loop stays
+regardless (now reading from `Data/TierViewDefinitions.cs`) unless 3.2 also
+happens. Keep the `IsEnvironment("Testing")` guard — the integration tests
+depend on startup doing nothing. Consider moving migration out of app startup
+entirely into a deploy step; an app that migrates on boot races itself when
+two instances start.
 
-### 3.1 — Test what each tier view exposes · gates 2.4
+Deliberately not done yet in this pass — 3.1's tests exist now as the safety
+net this item's ordering always called for, but haven't been run against a
+real database in this environment (see 3.1 above), so removing the code that
+creates these objects felt premature until that test suite has actually gone
+green somewhere with Docker available.
 
-`KonXProWebApp.Integration.Tests` already references `Testcontainers.MsSql`.
-Assert the exact column set of all four tier views, table-driven, one row per
-tier. Must fail if `EstimatedCost` appears in Free or Basic, **and** if
-`HouseNum` appears in Free.
+### 3.2 — Move the five views into migrations · optional, not required by the rebuild
 
-Note the trap: `SqlWebApplicationFactory` sets the environment to `Testing`
-(skipping the startup DDL) and calls `EnsureCreatedAsync()`, so the views do not
-exist in a test container today. The test needs the views applied from migrations
-first, which couples 3.1 to 3.2 more tightly than the original plan assumed.
-
-### 3.2 — Move the five views into migrations · blocked by 3.1, 2.4
-
-`CREATE OR ALTER VIEW` is already idempotent, so each view can move into its own
-migration nearly as-is, making a future change a reviewable diff.
+`CREATE OR ALTER VIEW` is already idempotent, so each view could move into its
+own migration nearly as-is, making a future change a reviewable diff. Not done
+as part of this pass — the views were instead excluded from migrations
+entirely (`ToView()`) and left as raw DDL in `Program.cs`, which was enough to
+fix the real bug (item 2.2) without also relocating working code. Revisit only
+if the raw-DDL startup block is retired for good in 2.4.
 
 ### 4.1 — Build the web app in CI · decision needed
 
@@ -218,14 +269,31 @@ projects to xunit 2.8.x risks test discovery, so do it on its own.
 
 ---
 
+## Rebuild plan (chosen approach for 2.0–2.4)
+
+Neither database is serving real traffic yet, which opened up a cleaner path
+than the original item-by-item patching: rather than reconcile the old,
+partially-wrong migration history in place, both databases get rebuilt from a
+clean migration set. What's actually irreplaceable is small — Identity
+(accounts/tenants), `Subscriptions` (4 rows), `AlertPreferences` (2 rows) — and
+gets exported and reimported. `DOBJobFilings` is public NYC record data and can
+be re-ingested via the existing Azure Functions rather than restored from a
+backup. `IngestionLogs` and staging's 3 `SavedLeads` rows are disposable.
+
+Status: the corrected migration baseline and the entitlement tests (2.0–2.2,
+3.1) are done and committed on `fix/migrations-history-and-schema-rebuild`,
+verified against a disposable LocalDB database. **The actual rebuild of
+staging or production has not happened** — that's a deliberate, separate step:
+back up both databases, export the small irreplaceable tables, drop and
+rebuild staging first (`dotnet ef database update`), reimport, re-run
+ingestion, verify, then repeat on production only after staging is clean.
+
 ## Revised critical path
 
 ```
-0.1 (independent)
-2.0 -> 2.1 -> 2.2 -> 3.1 -> 3.2 -> 2.4
-              2.3 (independent, small)
+0.1 (independent, credential rotation still open — see above)
+2.0, 2.1, 2.2, 3.1 — done (rebuild plan above)
+2.3 (independent, small — folds into the rebuild regardless)
+2.4 -> 3.2 (optional) — deferred until 3.1 has actually run green somewhere
+4.1, 4.2, 4.3 (independent, untouched by this pass)
 ```
-
-`3.1` sits before `2.4` deliberately: the entitlement test must exist before the
-code that creates the views is deleted, because that deletion is the moment you
-find out whether the database's views match the source.
