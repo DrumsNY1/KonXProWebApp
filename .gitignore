@@ -363,7 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Deployment archives
-publish.zip
+publish.zip
 
 # ---------------------------------------------------------------------------
 # Local tooling and working folders (added Sept 2026)
@@ -378,3 +378,9 @@ publish.zip
 _tools/
 scratch/
 logs/
+
+# Azure Functions local settings — per-developer, holds local secrets/connection
+# strings. Never committed; each developer creates their own from the Azure
+# Functions template.
+KonXProWebApp.Functions/local.settings.json
+

@@ -4,6 +4,7 @@
     <AzureFunctionsVersion>v4</AzureFunctionsVersion>
     <OutputType>Exe</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>bde8ac7a-f809-46e0-9daa-9e659b8f937b</UserSecretsId>
   </PropertyGroup>
   <!-- Versions are centralized in Directory.Packages.props -->
   <ItemGroup>
