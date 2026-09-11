@@ -1,0 +1,58 @@
+name: Build and Test
+
+on:
+  pull_request:
+    branches:
+      - master
+      - feat/central-package-management
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore KonXProWebApp.sln
+
+      - name: Build
+        run: dotnet build KonXProWebApp.sln --configuration Release --no-restore
+
+      - name: Unit tests
+        run: dotnet test KonXProWebApp.Tests --configuration Release --no-build
+
+      - name: Functions tests
+        run: dotnet test KonXProWebApp.Functions.Tests --configuration Release --no-build
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    # Advisory, not a gate, until this has proven stable — see REMEDIATION.md item 0.3.
+    # It is the only job that exercises application startup, so it should become a real
+    # gate before the Program.cs startup DDL block is touched (REMEDIATION item 2.4).
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore
+        run: dotnet restore KonXProWebApp.Integration.Tests/KonXProWebApp.Integration.Tests.csproj
+
+      - name: Integration tests
+        run: dotnet test KonXProWebApp.Integration.Tests --configuration Release

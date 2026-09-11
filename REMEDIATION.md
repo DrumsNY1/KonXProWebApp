@@ -176,11 +176,19 @@ versions that were already resolving; nothing was upgraded except
 6.0.1 to 6.1.6 because the old value was a NuGet downgrade error (NU1605) against
 the project under test.
 
-**0.3 — CI test gate.** `.github/workflows/build-and-test.yml` runs on every PR
-to `master` and on push. Builds the solution with both .NET 8 and .NET 9 SDKs and
-runs `KonXProWebApp.Tests` and `KonXProWebApp.Functions.Tests`. A second job runs
-`KonXProWebApp.Integration.Tests` against a Testcontainers SQL Server, currently
-`continue-on-error: true`.
+**0.3 — CI test gate.** Corrected 2026-09-11: this was marked Completed but
+`.github/workflows/build-and-test.yml` had never actually been committed to any
+branch — the description below was aspirational, not real, and nothing was
+validating any PR. Actually created now. Runs on every PR to `master` (and, for
+the moment, to `feat/central-package-management`, since that branch hasn't
+merged yet and PRs are currently targeting it) and on push to `master`. Builds
+the solution with both .NET 8 and .NET 9 SDKs and runs `KonXProWebApp.Tests`
+and `KonXProWebApp.Functions.Tests`. A second job runs
+`KonXProWebApp.Integration.Tests` against a Testcontainers SQL Server (GitHub's
+`ubuntu-latest` runners have Docker preinstalled), currently `continue-on-error:
+true` since it has no track record yet. Remove the `feat/central-package-management`
+target and the `continue-on-error` line once that branch has merged and the
+integration job has proven stable, respectively.
 
 **1.1 — ground truth.** See Findings above.
 

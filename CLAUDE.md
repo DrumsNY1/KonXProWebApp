@@ -212,14 +212,17 @@ The app skips all startup migration and seeding when the environment is `Testing
 
 Two workflows, with different jobs:
 
-- **`build-and-test.yml`** — runs on every PR to `master` and on push to `master`.
-  Sets up both the .NET 8 and .NET 9 SDKs (the solution needs both), builds the whole
-  solution in Release, then runs `KonXProWebApp.Tests` and
-  `KonXProWebApp.Functions.Tests`. A second job runs `KonXProWebApp.Integration.Tests`
-  against a Testcontainers SQL Server; it is marked `continue-on-error` and is
-  **advisory**, not a gate. Remove that line once it has proven stable — it is the
-  only job that exercises application startup, so it should be a real gate before the
-  startup DDL is touched.
+- **`build-and-test.yml`** — created 2026-09-11; a prior version of this file
+  described it as already existing and "Completed," which was wrong — it had never
+  been committed anywhere and no PR was ever actually validated by CI. Runs on every
+  PR to `master` (and, temporarily, to `feat/central-package-management` — remove that
+  target once that branch merges) and on push to `master`. Sets up both the .NET 8 and
+  .NET 9 SDKs (the solution needs both), builds the whole solution in Release, then
+  runs `KonXProWebApp.Tests` and `KonXProWebApp.Functions.Tests`. A second job runs
+  `KonXProWebApp.Integration.Tests` against a Testcontainers SQL Server; it is marked
+  `continue-on-error` and is **advisory**, not a gate, since it has no track record
+  yet. Remove that line once it has proven stable — it is the only job that exercises
+  application startup, so it should be a real gate before the startup DDL is touched.
 - **`master_konxprofunctionapp.yml`** — deploys `KonXProWebApp.Functions` to the Azure
   Function App on push to `master`, via OIDC. Runs no tests. Do not fold the test gate
   into this workflow; keeping deploy and verification separate is deliberate.
