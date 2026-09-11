@@ -364,3 +364,17 @@ FodyWeavers.xsd
 
 # Deployment archives
 publish.zip
+
+# ---------------------------------------------------------------------------
+# Local tooling and working folders (added Sept 2026)
+#
+# _tools/  one-off diagnostic scripts and their output. The output can contain
+#          live schema detail and customer identifiers, so it must never be
+#          committed. These folders are also excluded from the build in
+#          KonXProWebApp.csproj.
+# scratch/ and logs/ were never ignored before, so anything written there was
+#          committable by accident.
+# ---------------------------------------------------------------------------
+_tools/
+scratch/
+logs/
