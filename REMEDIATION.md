@@ -206,16 +206,21 @@ passwords, were committed in **plain text in git** — `appsettings.json`,
 commit, and pushed to `origin/master`. The `~/.gemini/config/config.json` copy
 this item originally described is a separate, additional exposure on top of that.
 
-[PR #37](https://github.com/DrumsNY1/KonXProWebApp/pull/37) replaces all four
-real values with `PLACEHOLDER`, adds `UserSecretsId` to both csproj files so
-`dotnet user-secrets` works, and untracks `local.settings.json` going forward
-(Azure Functions local settings should never be committed). **Still open:**
+[PR #37](https://github.com/DrumsNY1/KonXProWebApp/pull/37) (merged) replaces
+all four real values with `PLACEHOLDER`, adds `UserSecretsId` to both csproj
+files so `dotnet user-secrets` works, and untracks `local.settings.json` going
+forward (Azure Functions local settings should never be committed). **The
+production and staging SQL Server passwords have been rotated** (2026-09-11).
+**Still open:**
 
-- Rotate the actual SQL Server passwords — the PR only stops future plaintext
-  commits, the previously-committed values must be treated as compromised.
+- Update `dotnet user-secrets` locally and the server's environment
+  variables/Plesk app settings with the new passwords everywhere the old ones
+  were previously configured — rotation alone doesn't propagate the new value,
+  and the app/Functions will fail to connect anywhere still holding the old one.
 - Rotate the Web Deploy password and clean up `~/.gemini/config/config.json`.
 - Decide whether/how to scrub the old values from git history (disruptive with
   ~30 active branches — worth a deliberate decision, not a reflexive rewrite).
+  Lower urgency now that the credentials they protect are no longer valid.
 
 This matters more now that an agent with a shell runs on this machine — and
 note that `dotnet ef` commands build the app host the normal way, which reads
