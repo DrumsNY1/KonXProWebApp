@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Azure Functions local settings — per-developer, holds local secrets/connection
+# strings. Never committed; each developer creates their own from the Azure
+# Functions template.
+KonXProWebApp.Functions/local.settings.json
