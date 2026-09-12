@@ -233,12 +233,24 @@ all four real values with `PLACEHOLDER`, adds `UserSecretsId` to both csproj
 files so `dotnet user-secrets` works, and untracks `local.settings.json` going
 forward (Azure Functions local settings should never be committed). **The
 production and staging SQL Server passwords have been rotated** (2026-09-11).
-Local `dotnet user-secrets` has been updated with the new passwords. **Still open:**
+Local `dotnet user-secrets` has been updated with the new passwords.
+
+**The Web Deploy password has been rotated for both staging and production**
+(2026-09-13). Separately, reading `~/.gemini/config/config.json` while
+investigating this surfaced that it held **18** command strings with plaintext
+credentials in its `allow` array — not just the Web Deploy password, but
+production and staging `sqlcmd -P` passwords too (the same ones already
+rotated above). Cleaned up: backed up the original file locally, then removed
+every entry matching a `sqlcmd -P '...'` or `dotnet publish ... /p:Password=...`
+pattern (194 of the original 212 entries remain; everything else in the file —
+plugins, theme, remote-control settings — untouched). This file lives outside
+the repo, so there's no git-history exposure for it specifically.
+
+**Still open:**
 
 - Update the server's environment variables/Plesk app settings with the new
-  passwords — local dev is covered, but the deployed app/Functions will still
-  fail to connect until the server side is updated too.
-- Rotate the Web Deploy password and clean up `~/.gemini/config/config.json`.
+  SQL passwords — local dev is covered, but the deployed app/Functions will
+  still fail to connect until the server side is updated too.
 - Decide whether/how to scrub the old values from git history (disruptive with
   ~30 active branches — worth a deliberate decision, not a reflexive rewrite).
   Lower urgency now that the credentials they protect are no longer valid.
