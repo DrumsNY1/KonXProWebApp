@@ -378,22 +378,34 @@ Investigated how staging is actually meant to receive data:
   contractors — have **no** staging mechanism at all; they only ever write to
   whichever connection string is primary (production).
 
-**Separate, more serious finding surfaced along the way, flagged as its own
-follow-up task, not fixed here:** `IngestionService.cs`'s DOB-violations MERGE
-still hardcodes `konx_admin.DobBisViolations` (from commit `bb3cf46`, "restore
-konx_admin schema mapping"), but the EF model was switched to
-`dbo.DobBisViolations` ten days later (commit `2a83bc4`, "map all entity
-schemas to dbo for universal compatibility") and `IngestionService.cs` was
-never updated to match. Unlike the other ingestion MERGE statements (which are
-unqualified and so benefit from SQL Server's default-schema-then-`dbo`
-fallback), this one is explicitly schema-qualified and never gets that
-fallback — it always writes to `konx_admin`/`konx_staging_admin`, exactly the
+**Separate, more serious finding surfaced along the way — fixed 2026-09-12,
+[PR #45](https://github.com/DrumsNY1/KonXProWebApp/pull/45):**
+`IngestionService.cs`'s DOB-violations MERGE hardcoded `konx_admin.DobBisViolations`
+(from commit `bb3cf46`, "restore konx_admin schema mapping"), but the EF model
+was switched to `dbo.DobBisViolations` ten days later (commit `2a83bc4`, "map
+all entity schemas to dbo for universal compatibility") and `IngestionService.cs`
+was never updated to match. Unlike the other ingestion MERGE statements (which
+are unqualified and so benefit from SQL Server's default-schema-then-`dbo`
+fallback), this one was explicitly schema-qualified and never got that
+fallback — it always wrote to `konx_admin`/`konx_staging_admin`, exactly the
 same class of bug as the stray tables and dangling synonyms found during the
-staging rebuild above. **This has not been verified on production** (querying
-it is out of scope without explicit sign-off), but the code is identical and
-single-deployed, so it's plausible the same split — real data in
-`konx_admin.DobBisViolations`, invisible to the app's own `dbo`-based
-queries — exists there right now too.
+staging rebuild above.
+
+Fixed by dropping the schema qualifier so this MERGE follows the same
+fallback pattern as every other ingestion path. An audit of every other MERGE
+statement in `IngestionService.cs` against its EF model's `ToTable` mapping
+found no other mismatches (there is no `ECBViolations` ingestion path at all,
+and `HomeImprovementContractors` was already unqualified).
+
+**Still open, deliberately not done as part of that fix — needs explicit
+sign-off first:**
+- Confirm, read-only, on production whether `dbo.DobBisViolations` is a real
+  table or a synonym, and whether `konx_admin.DobBisViolations` holds data
+  invisible to the app — the code fix doesn't tell us which situation
+  production is actually in.
+- If production has the same stray-data pattern staging had, migrate
+  `konx_admin.DobBisViolations` rows into `dbo.DobBisViolations` rather than
+  leaving them behind.
 
 **Production: not started.** Only proceed once staging has been exercised for
 real (an app restart against it, ideally some ingestion) and looks healthy.
