@@ -246,16 +246,28 @@ variable, which outranks user secrets in ASP.NET Core's configuration
 precedence). This is exactly how a read-only production connection happened
 once already during this remediation work.
 
-### 2.4 — Retire the startup DDL · deliberately deferred
+### 2.4 — Retire the startup DDL · partially done, `Migrate()` switch blocked
 
-Remove `EnsureCreated()` and the now-redundant `Subscriptions`/`SavedLeads`/
-`AlertPreferences` table DDL from `Program.cs`; replace with
-`permitDb.Database.Migrate()`. The five-view `CREATE OR ALTER VIEW` loop stays
-regardless (now reading from `Data/TierViewDefinitions.cs`) unless 3.2 also
-happens. Keep the `IsEnvironment("Testing")` guard — the integration tests
-depend on startup doing nothing. Consider moving migration out of app startup
-entirely into a deploy step; an app that migrates on boot races itself when
-two instances start.
+**Done (2026-09-12):** removed the now-dead `Subscriptions`/`SavedLeads`/
+`AlertPreferences` raw-DDL block from `Program.cs`. It was a genuine no-op in
+every current path — `EnsureCreated()` (which runs just before it) already
+creates those three tables from the model on any fresh database, since they're
+ordinary `DbSet`s, and they already exist on both staging and production. The
+five-view `CREATE OR ALTER VIEW` loop is untouched (still reads from
+`Data/TierViewDefinitions.cs`).
+
+**Still blocked: switching `EnsureCreated()` to `permitDb.Database.Migrate()`.**
+This is *not* safe to do before the rebuild plan below actually happens.
+Neither staging (0 `db_9f8bee_konxdevContext` migrations recorded) nor
+production (6 rows recorded, all for the five migrations squashed away in item
+2.2) has a history row for the new `InitialCreate` migration. If `Migrate()`
+ran against either database as it exists today, EF would treat `InitialCreate`
+as pending and try to `CreateTable` everything it defines — which already
+exists there — crashing app startup on the next restart. Do the rebuild first;
+this half of 2.4 lands as part of it. Keep the `IsEnvironment("Testing")` guard
+regardless — the integration tests depend on startup doing nothing. Consider
+moving migration out of app startup entirely into a deploy step; an app that
+migrates on boot races itself when two instances start.
 
 Deliberately not done yet in this pass — 3.1's tests exist now as the safety
 net this item's ordering always called for, but haven't been run against a
