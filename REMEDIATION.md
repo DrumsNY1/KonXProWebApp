@@ -359,13 +359,41 @@ both unique indexes present, migration history shows exactly
 match the entitlement boundaries exactly (`HouseNum` absent from Free,
 `EstimatedCost` absent from Free/Basic).
 
-**Known gap, flagged as a follow-up, not solved here:** `DOBJobFilings` and the
+**Known gap, investigated 2026-09-12, not solved here:** `DOBJobFilings` and the
 contractor/violation tables are now empty pending re-ingestion. There is no
-confirmed way to trigger the deployed ingestion Functions against staging
-specifically — CLAUDE.md only documents one Function App
-(`KonXProFunctionApp`), with no separate staging deployment mentioned. Staging
-will stay empty of permit/contractor/violation data until someone establishes
-how (or whether) ingestion is meant to reach it.
+separate staging Function App or deployment slot — only one, `KonXProFunctionApp`,
+deployed to slot `Production` (`.github/workflows/master_konxprofunctionapp.yml`).
+Investigated how staging is actually meant to receive data:
+
+- `IngestionService` has an optional `StagingSqlConnectionString` config key
+  (added by commit `cd12d71`, "feat: add dual-write staging replication for
+  permit ingestion", 2026-08-29). When set, **only** `UpsertPermits` and
+  `UpsertDobNowFilings` replicate each successful batch to staging after
+  writing to production, best-effort. This is presumably how staging's
+  `DOBJobFilings` and `HPD_Violations` data existed before the rebuild.
+  Whether it's still active depends on whether `StagingSqlConnectionString`
+  is configured as an Azure Application Setting on the real deployed Function
+  App — not verifiable from this repo/machine.
+- The other ingestion paths — 311, DOB violations, HPD violations,
+  contractors — have **no** staging mechanism at all; they only ever write to
+  whichever connection string is primary (production).
+
+**Separate, more serious finding surfaced along the way, flagged as its own
+follow-up task, not fixed here:** `IngestionService.cs`'s DOB-violations MERGE
+still hardcodes `konx_admin.DobBisViolations` (from commit `bb3cf46`, "restore
+konx_admin schema mapping"), but the EF model was switched to
+`dbo.DobBisViolations` ten days later (commit `2a83bc4`, "map all entity
+schemas to dbo for universal compatibility") and `IngestionService.cs` was
+never updated to match. Unlike the other ingestion MERGE statements (which are
+unqualified and so benefit from SQL Server's default-schema-then-`dbo`
+fallback), this one is explicitly schema-qualified and never gets that
+fallback — it always writes to `konx_admin`/`konx_staging_admin`, exactly the
+same class of bug as the stray tables and dangling synonyms found during the
+staging rebuild above. **This has not been verified on production** (querying
+it is out of scope without explicit sign-off), but the code is identical and
+single-deployed, so it's plausible the same split — real data in
+`konx_admin.DobBisViolations`, invisible to the app's own `dbo`-based
+queries — exists there right now too.
 
 **Production: not started.** Only proceed once staging has been exercised for
 real (an app restart against it, ideally some ingestion) and looks healthy.
