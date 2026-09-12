@@ -202,6 +202,40 @@ still unmerged; removed 2026-09-12 now that it has merged into `master`
 
 **1.1 — ground truth.** See Findings above.
 
+**0.1 — rotate exposed credentials.** Worse than originally described: the
+production (`konx_admin` / `priority_konx`) and staging (`konx_staging_admin` /
+`priority_ks`) SQL passwords, plus two SMTP passwords, were committed in
+**plain text in git** — `appsettings.json`, `appsettings.Staging.json`,
+`appsettings.Development.json`, and `KonXProWebApp.Functions/local.settings.json`
+— since the repository's initial commit, and pushed to `origin/master`. The
+`~/.gemini/config/config.json` copy this item originally described was a
+separate, additional exposure on top of that.
+
+Sequence of what actually got done:
+
+1. [PR #37](https://github.com/DrumsNY1/KonXProWebApp/pull/37) (merged)
+   replaced all four real values with `PLACEHOLDER`, added `UserSecretsId` to
+   both csproj files so `dotnet user-secrets` works, and untracked
+   `local.settings.json` going forward (Azure Functions local settings should
+   never be committed).
+2. Production and staging SQL Server passwords rotated (2026-09-11); local
+   `dotnet user-secrets` updated with the new values.
+3. Web Deploy password rotated for both staging and production (2026-09-13).
+4. Reading `~/.gemini/config/config.json` while investigating step 3 surfaced
+   that it held **18** command strings with plaintext credentials in its
+   `allow` array — not just the Web Deploy password, but the same SQL
+   passwords already rotated in step 2. Cleaned up: backed up the original
+   file locally, then removed every entry matching a `sqlcmd -P '...'` or
+   `dotnet publish ... /p:Password=...` pattern (194 of the original 212
+   entries remain; everything else in the file — plugins, theme,
+   remote-control settings — untouched). This file lives outside the repo, so
+   there was no git-history exposure for it specifically.
+5. Server-side Plesk application settings updated with the rotated SQL
+   passwords, so the deployed app/Functions actually use the new credentials.
+
+**Only remaining piece, deliberately deferred:** whether/how to scrub the old
+plaintext values from git history — see item 0.1 in Open.
+
 **2.3 — staging unique indexes.** Added 2026-09-12, directly against staging
 (`priority_ks`) — re-checked for conflicting data first (still none: 0 duplicate
 `StripeSubscriptionId` groups, 0 duplicate `(UserId, DobjobFilingId)` groups),
@@ -218,42 +252,14 @@ indexes only, not a full staging rebuild.
 
 ## Open
 
-### 0.1 — Rotate exposed credentials · do first, blocks nothing · revised
+### 0.1 (remaining piece) — decide on scrubbing git history
 
-Worse than originally described: the production (`konx_admin` / `priority_konx`)
-and staging (`konx_staging_admin` / `priority_ks`) SQL passwords, plus two SMTP
-passwords, were committed in **plain text in git** — `appsettings.json`,
-`appsettings.Staging.json`, `appsettings.Development.json`, and
-`KonXProWebApp.Functions/local.settings.json` — since the repository's initial
-commit, and pushed to `origin/master`. The `~/.gemini/config/config.json` copy
-this item originally described is a separate, additional exposure on top of that.
-
-[PR #37](https://github.com/DrumsNY1/KonXProWebApp/pull/37) (merged) replaces
-all four real values with `PLACEHOLDER`, adds `UserSecretsId` to both csproj
-files so `dotnet user-secrets` works, and untracks `local.settings.json` going
-forward (Azure Functions local settings should never be committed). **The
-production and staging SQL Server passwords have been rotated** (2026-09-11).
-Local `dotnet user-secrets` has been updated with the new passwords.
-
-**The Web Deploy password has been rotated for both staging and production**
-(2026-09-13). Separately, reading `~/.gemini/config/config.json` while
-investigating this surfaced that it held **18** command strings with plaintext
-credentials in its `allow` array — not just the Web Deploy password, but
-production and staging `sqlcmd -P` passwords too (the same ones already
-rotated above). Cleaned up: backed up the original file locally, then removed
-every entry matching a `sqlcmd -P '...'` or `dotnet publish ... /p:Password=...`
-pattern (194 of the original 212 entries remain; everything else in the file —
-plugins, theme, remote-control settings — untouched). This file lives outside
-the repo, so there's no git-history exposure for it specifically.
-
-**Still open:**
-
-- Update the server's environment variables/Plesk app settings with the new
-  SQL passwords — local dev is covered, but the deployed app/Functions will
-  still fail to connect until the server side is updated too.
-- Decide whether/how to scrub the old values from git history (disruptive with
-  ~30 active branches — worth a deliberate decision, not a reflexive rewrite).
-  Lower urgency now that the credentials they protect are no longer valid.
+Everything about this item is done except one deliberate, deferred decision:
+whether/how to scrub the old plaintext values from git history (disruptive
+with ~30 active branches — worth a considered decision, not a reflexive
+rewrite). Lower urgency now that every credential it would remove has already
+been rotated and is no longer valid. See the Completed section for the full
+story of what this item covered.
 
 This matters more now that an agent with a shell runs on this machine — and
 note that `dotnet ef` commands build the app host the normal way, which reads
@@ -425,7 +431,7 @@ real (an app restart against it, ideally some ingestion) and looks healthy.
 ## Revised critical path
 
 ```
-0.1 (independent, Web Deploy password + git-history decision still open)
+0.1 — done except the git-history scrub decision (deliberately deferred, low urgency)
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 Staging rebuild — done; ingestion-into-staging mechanism still an open question
