@@ -362,7 +362,25 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Azure Functions local settings — per-developer, holds local secrets/connection
-# strings. Never committed; each developer creates their own from the Azure
-# Functions template.
-KonXProWebApp.Functions/local.settings.json
+<<<<<<< HEAD
+# Deployment archives
+publish.zip
+
+# ---------------------------------------------------------------------------
+# Local tooling and working folders (added Sept 2026)
+#
+# _tools/  one-off diagnostic scripts and their output. The output can contain
+#          live schema detail and customer identifiers, so it must never be
+#          committed. These folders are also excluded from the build in
+#          KonXProWebApp.csproj.
+# scratch/ and logs/ were never ignored before, so anything written there was
+#          committable by accident.
+# ---------------------------------------------------------------------------
+_tools/
+scratch/
+logs/
+
+# Local settings & dev overrides — contain secrets/connection strings.
+# Never commit; each developer creates their own.
+**/local.settings.json
+appsettings.Development.json

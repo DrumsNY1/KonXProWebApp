@@ -30,6 +30,23 @@
     <Content Remove="KonXProWebApp.E2E.Tests\**" />
     <EmbeddedResource Remove="KonXProWebApp.E2E.Tests\**" />
     <None Remove="KonXProWebApp.E2E.Tests\**" />
+    <!--
+      Local tooling and working folders. These are developer scratch space, not
+      part of the application: keep them out of the build and out of publish
+      output. They are also listed in .gitignore.
+    -->
+    <Compile Remove="_tools\**" />
+    <Content Remove="_tools\**" />
+    <EmbeddedResource Remove="_tools\**" />
+    <None Remove="_tools\**" />
+    <Compile Remove="scratch\**" />
+    <Content Remove="scratch\**" />
+    <EmbeddedResource Remove="scratch\**" />
+    <None Remove="scratch\**" />
+    <Compile Remove="logs\**" />
+    <Content Remove="logs\**" />
+    <EmbeddedResource Remove="logs\**" />
+    <None Remove="logs\**" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="Components\Pages\ClaudeDobFilings.razor" />
@@ -39,15 +56,16 @@
   <ItemGroup>
     <InternalsVisibleTo Include="KonXProWebApp.Integration.Tests" />
   </ItemGroup>
+  <!-- Versions are centralized in Directory.Packages.props -->
   <ItemGroup>
-    <PackageReference Include="Radzen.Blazor" Version="*" />
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.20.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.*-*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.*-*" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="9.*-*" />
-    <PackageReference Include="Microsoft.AspNetCore.OData" Version="9.*-*" />
-    <PackageReference Include="Stripe.net" Version="52.1.0" />
+    <PackageReference Include="Radzen.Blazor" />
+    <PackageReference Include="DocumentFormat.OpenXml" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" />
+    <PackageReference Include="Microsoft.AspNetCore.OData" />
+    <PackageReference Include="Stripe.net" />
   </ItemGroup>
 </Project>

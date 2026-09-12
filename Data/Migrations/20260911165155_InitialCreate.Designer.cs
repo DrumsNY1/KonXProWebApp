@@ -9,18 +9,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
+namespace KonXProWebApp.Data.Migrations
 {
     [DbContext(typeof(db_9f8bee_konxdevContext))]
-    [Migration("20260715075107_AddCampaignTrackingToContractors")]
-    partial class AddCampaignTrackingToContractors
+    [Migration("20260911165155_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.17")
+                .HasAnnotation("ProductVersion", "9.0.20")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -363,7 +363,7 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
 
                     b.HasKey("Id");
 
-                    b.ToTable("DobBisViolations", "konx_admin", t =>
+                    b.ToTable("DobBisViolations", "dbo", t =>
                         {
                             t.HasTrigger("DobBisViolations_Trigger");
                         });
@@ -433,6 +433,10 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
 
                     b.Property<string>("CurbCut")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DataSource")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("DataSource");
 
                     b.Property<DateTime?>("DobrunDate")
                         .HasColumnType("datetime")
@@ -523,6 +527,10 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
 
                     b.Property<string>("JobDescription")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobFilingNumber")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("JobFilingNumber");
 
                     b.Property<int?>("JobNum")
                         .HasColumnType("int");
@@ -837,9 +845,9 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
 
                     b.HasKey("Id");
 
-                    b.ToTable("ECB_Violations", "dbo", t =>
+                    b.ToTable("ECBViolations", "dbo", t =>
                         {
-                            t.HasTrigger("ECB_Violations_Trigger");
+                            t.HasTrigger("ECBViolations_Trigger");
                         });
 
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
@@ -946,7 +954,7 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
 
                     b.HasKey("Id");
 
-                    b.ToTable("HomeImprovementContractors", t =>
+                    b.ToTable("HomeImprovementContractors", "dbo", t =>
                         {
                             t.HasTrigger("HomeImprovementContractors_Trigger");
                         });
@@ -1122,12 +1130,9 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("vwBasicTierDashboard", "dbo", t =>
-                        {
-                            t.HasTrigger("vwBasicTierDashboard_Trigger");
-                        });
+                    b.ToTable((string)null);
 
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToView("vwBasicTierDashboard", "dbo");
                 });
 
             modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.VwDemoDisplay", b =>
@@ -1141,12 +1146,9 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
                     b.Property<string>("Summary")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("vwDemoDisplay", "dbo", t =>
-                        {
-                            t.HasTrigger("vwDemoDisplay_Trigger");
-                        });
+                    b.ToTable((string)null);
 
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToView("vwDemoDisplay", "dbo");
                 });
 
             modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.VwFreeTierDashboard", b =>
@@ -1172,12 +1174,9 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("vwFreeTierDashboard", "dbo", t =>
-                        {
-                            t.HasTrigger("vwFreeTierDashboard_Trigger");
-                        });
+                    b.ToTable((string)null);
 
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToView("vwFreeTierDashboard", "dbo");
                 });
 
             modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.VwHighTierDashboard", b =>
@@ -1209,12 +1208,9 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("vwHighTierDashboard", "dbo", t =>
-                        {
-                            t.HasTrigger("vwHighTierDashboard_Trigger");
-                        });
+                    b.ToTable((string)null);
 
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToView("vwHighTierDashboard", "dbo");
                 });
 
             modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.VwMidTierDashboard", b =>
@@ -1246,12 +1242,9 @@ namespace KonXProWebApp.Migrations.db_9f8bee_konxdev
                     b.Property<string>("Street")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("vwMidTierDashboard", "dbo", t =>
-                        {
-                            t.HasTrigger("vwMidTierDashboard_Trigger");
-                        });
+                    b.ToTable((string)null);
 
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                    b.ToView("vwMidTierDashboard", "dbo");
                 });
 
             modelBuilder.Entity("KonXProWebApp.Models.PermitIntel.SavedLead", b =>

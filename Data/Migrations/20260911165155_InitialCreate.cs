@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace KonXProWebApp.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class AddServiceRequests311 : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,18 +71,16 @@ namespace KonXProWebApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DOB_Violations",
+                name: "DobBisViolations",
                 schema: "dbo",
                 columns: table => new
                 {
-                    id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    isn_dob_bis_viol = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    boro = table.Column<int>(type: "int", nullable: false),
+                    isn_dob_bis_viol = table.Column<string>(type: "varchar", nullable: false),
+                    boro = table.Column<string>(type: "varchar", nullable: false),
                     bin = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     block = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     lot = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    issue_date = table.Column<DateTime>(type: "datetime", nullable: false),
+                    issue_date = table.Column<string>(type: "char(8)", nullable: false),
                     violation_type_code = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     violation_number = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     house_number = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -94,7 +92,7 @@ namespace KonXProWebApp.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_DOB_Violations", x => x.id);
+                    table.PrimaryKey("PK_DobBisViolations", x => x.isn_dob_bis_viol);
                 });
 
             migrationBuilder.CreateTable(
@@ -200,6 +198,8 @@ namespace KonXProWebApp.Data.Migrations
                     GISCENSUSTRACT = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GISNTANAME = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     GISBIN = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    JobFilingNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DataSource = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LeadScore = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
@@ -208,7 +208,7 @@ namespace KonXProWebApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ECB_Violations",
+                name: "ECBViolations",
                 schema: "dbo",
                 columns: table => new
                 {
@@ -244,7 +244,45 @@ namespace KonXProWebApp.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ECB_Violations", x => x.id);
+                    table.PrimaryKey("PK_ECBViolations", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HomeImprovementContractors",
+                schema: "dbo",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    LicenseNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    BusinessName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    DbaTradeName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    BusinessUniqueId = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    LicenseStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    LicenseIssueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LicenseExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    ContactPhoneNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    AddressBuilding = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    AddressStreetName = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    AddressCity = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    AddressState = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    AddressZip = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Borough = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    IngestedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EmailAddress = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: true),
+                    SalesStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    SalesNotes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    PostcardSent = table.Column<bool>(type: "bit", nullable: false),
+                    EmailSent = table.Column<bool>(type: "bit", nullable: false),
+                    CampaignCohort = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: true),
+                    CampaignVisited = table.Column<bool>(type: "bit", nullable: false),
+                    CampaignVisitedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CampaignConverted = table.Column<bool>(type: "bit", nullable: false),
+                    CampaignConvertedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HomeImprovementContractors", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -345,92 +383,6 @@ namespace KonXProWebApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "vwBasicTierDashboard",
-                schema: "dbo",
-                columns: table => new
-                {
-                    JobNum = table.Column<int>(type: "int", nullable: true),
-                    Borough = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HouseNum = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LatestActionDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ProjectType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "vwDemoDisplay",
-                schema: "dbo",
-                columns: table => new
-                {
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Summary = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "vwFreeTierDashboard",
-                schema: "dbo",
-                columns: table => new
-                {
-                    JobNum = table.Column<int>(type: "int", nullable: true),
-                    Borough = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LatestActionDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ProjectType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "vwHighTierDashboard",
-                schema: "dbo",
-                columns: table => new
-                {
-                    JobNum = table.Column<int>(type: "int", nullable: true),
-                    Borough = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HouseNum = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LatestActionDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ProjectType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EstimatedCost = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "vwMidTierDashboard",
-                schema: "dbo",
-                columns: table => new
-                {
-                    JobNum = table.Column<int>(type: "int", nullable: true),
-                    Borough = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    HouseNum = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LatestActionDate = table.Column<DateTime>(type: "datetime", nullable: true),
-                    ProjectType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EstimatedCost = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    JobDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Neighborhood = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SavedLeads",
                 schema: "dbo",
                 columns: table => new
@@ -518,11 +470,15 @@ namespace KonXProWebApp.Data.Migrations
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "DOB_Violations",
+                name: "DobBisViolations",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
-                name: "ECB_Violations",
+                name: "ECBViolations",
+                schema: "dbo");
+
+            migrationBuilder.DropTable(
+                name: "HomeImprovementContractors",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
@@ -543,26 +499,6 @@ namespace KonXProWebApp.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Subscriptions",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "vwBasicTierDashboard",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "vwDemoDisplay",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "vwFreeTierDashboard",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "vwHighTierDashboard",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "vwMidTierDashboard",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
