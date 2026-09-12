@@ -379,8 +379,7 @@ _tools/
 scratch/
 logs/
 
-# Azure Functions local settings — per-developer, holds local secrets/connection
-# strings. Never committed; each developer creates their own from the Azure
-# Functions template.
-KonXProWebApp.Functions/local.settings.json
-
+# Local settings & dev overrides — contain secrets/connection strings.
+# Never commit; each developer creates their own.
+**/local.settings.json
+appsettings.Development.json
