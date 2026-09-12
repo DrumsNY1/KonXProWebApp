@@ -195,6 +195,18 @@ still unmerged; removed 2026-09-12 now that it has merged into `master`
 
 **1.1 — ground truth.** See Findings above.
 
+**2.3 — staging unique indexes.** Added 2026-09-12, directly against staging
+(`priority_ks`) — re-checked for conflicting data first (still none: 0 duplicate
+`StripeSubscriptionId` groups, 0 duplicate `(UserId, DobjobFilingId)` groups),
+then created both indexes to match production exactly:
+`IX_Subscriptions_StripeSubscriptionId` (unique, filtered
+`WHERE StripeSubscriptionId IS NOT NULL`) and
+`IX_SavedLeads_UserId_DobjobFilingId` (unique, on `(UserId, DobjobFilingId)`).
+Needed `SET QUOTED_IDENTIFIER ON` first — `sqlcmd` defaults it off, which
+`CREATE INDEX` on a filtered index rejects. Staging's heap `IngestionLogs` and
+the raw-DDL-generated key names are unchanged; this item was scoped to the two
+indexes only, not a full staging rebuild.
+
 ---
 
 ## Open
@@ -234,13 +246,7 @@ variable, which outranks user secrets in ASP.NET Core's configuration
 precedence). This is exactly how a read-only production connection happened
 once already during this remediation work.
 
-### 2.3 — Add the two missing unique indexes to staging · small
-
-Production already has both. Staging has neither and no conflicting data. Add
-them, or rebuild staging from production, which also fixes the heap
-`IngestionLogs` and the raw-DDL key names.
-
-### 2.4 — Retire the startup DDL · blocked by 2.3 · deliberately deferred
+### 2.4 — Retire the startup DDL · deliberately deferred
 
 Remove `EnsureCreated()` and the now-redundant `Subscriptions`/`SavedLeads`/
 `AlertPreferences` table DDL from `Program.cs`; replace with
@@ -306,9 +312,8 @@ ingestion, verify, then repeat on production only after staging is clean.
 ## Revised critical path
 
 ```
-0.1 (independent, credential rotation still open — see above)
-2.0, 2.1, 2.2, 3.1 — done (rebuild plan above)
-2.3 (independent, small — folds into the rebuild regardless)
-2.4 -> 3.2 (optional) — deferred until 3.1 has actually run green somewhere
+0.1 (independent, Web Deploy password + git-history decision still open)
+2.0, 2.1, 2.2, 2.3, 3.1 — done
+2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 4.1, 4.2, 4.3 (independent, untouched by this pass)
 ```
