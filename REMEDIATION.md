@@ -47,6 +47,13 @@ item 2.0 below.
 
 ### 2. Production and staging were built by different mechanisms
 
+> **Historical — staging's schema described here no longer exists.** This
+> finding captures the 2026-09-10 capture, before item 2.3 (indexes) and the
+> staging rebuild (see "Rebuild plan" below) replaced staging's permit schema
+> entirely on 2026-09-12. Kept as-is for the record of what was found and why
+> "staging is not a rehearsal for production" was true at the time. Production
+> has not been touched and still matches this section.
+
 Primary key names give it away. EF generates `PK_<Table>`; SQL Server
 auto-generates `PK__<8 chars>__<hash>` for an inline `PRIMARY KEY`, which is what
 the raw DDL in `Program.cs` writes.
@@ -307,19 +314,61 @@ projects to xunit 2.8.x risks test discovery, so do it on its own.
 Neither database is serving real traffic yet, which opened up a cleaner path
 than the original item-by-item patching: rather than reconcile the old,
 partially-wrong migration history in place, both databases get rebuilt from a
-clean migration set. What's actually irreplaceable is small — Identity
-(accounts/tenants), `Subscriptions` (4 rows), `AlertPreferences` (2 rows) — and
-gets exported and reimported. `DOBJobFilings` is public NYC record data and can
-be re-ingested via the existing Azure Functions rather than restored from a
-backup. `IngestionLogs` and staging's 3 `SavedLeads` rows are disposable.
+clean migration set.
 
-Status: the corrected migration baseline and the entitlement tests (2.0–2.2,
-3.1) are done and committed on `fix/migrations-history-and-schema-rebuild`,
-verified against a disposable LocalDB database. **The actual rebuild of
-staging or production has not happened** — that's a deliberate, separate step:
-back up both databases, export the small irreplaceable tables, drop and
-rebuild staging first (`dotnet ef database update`), reimport, re-run
-ingestion, verify, then repeat on production only after staging is clean.
+**Staging: done, 2026-09-12.** Revised the "what's irreplaceable" assumption
+first — it turned out to be nothing. `Program.cs` runs `SeedTenantsAdmin()` and
+`SeedTierTestUsersAsync()` unconditionally on every non-`Testing` startup, and
+staging's entire Identity dataset (5 users, 1 tenant) and all 4 `Subscriptions`
+rows were exactly those seeded fixtures — confirmed by matching UpdatedAt
+timestamps to the last app restart. `AlertPreferences` was empty, and
+`SavedLeads` (3 rows) was already called disposable. So nothing needed
+exporting/reimporting; a full logical backup was taken anyway as a precaution
+(20 tables' data, ~46.7 MB, verified row-for-row against `DOBJobFilings` —
+saved locally, not committed).
+
+Three previously-unknown pieces of drift turned up along the way:
+
+- Identity tables (`AspNetUsers` etc.) and `__EFMigrationsHistory` live in the
+  `konx_staging_admin` schema, not `dbo` — same login-default-schema mechanism
+  as Finding 1, just never previously checked for the Identity tables
+  specifically. Harmless (EF is internally consistent about it) and out of
+  scope for this rebuild; left untouched.
+- Six tables — `HomeImprovementContractors`, `DobBisViolations`,
+  `ECBViolations`, plus three (`BusinessLicense`, `DOB_Permits`,
+  `DOBApprovedPermits`) matching no current model at all — existed only in
+  `konx_staging_admin`, not `dbo`. The current app code, which expects
+  `dbo.*`, could not see this data.
+- `dbo` had **synonyms** with the same six names, each pointing at the
+  misplaced table in `konx_staging_admin` — an apparent workaround so
+  `dbo`-facing code could still reach the data. Dropping the underlying tables
+  without also dropping these left them dangling and blocked the migration
+  ("already an object named 'DobBisViolations'") until caught and cleared.
+
+Rebuild steps actually run: dropped the 7 `dbo` permit tables + 5 views, the 6
+stray `konx_staging_admin` tables, and the 6 dangling synonyms (Identity/
+`konx_staging_admin.__EFMigrationsHistory` untouched); ran
+`dotnet ef database update --context db_9f8bee_konxdevContext` with the
+connection string overridden via environment variable (never via
+`appsettings.json` or a command-line argument) to point at staging; manually
+ran the five `CREATE OR ALTER VIEW` statements from
+`Data/TierViewDefinitions.cs` (no way to trigger an actual app restart on the
+deployed staging instance from here). Verified: 13 tables + 5 views in `dbo`,
+both unique indexes present, migration history shows exactly
+`20260911165155_InitialCreate`, no leftover synonyms, and the view column sets
+match the entitlement boundaries exactly (`HouseNum` absent from Free,
+`EstimatedCost` absent from Free/Basic).
+
+**Known gap, flagged as a follow-up, not solved here:** `DOBJobFilings` and the
+contractor/violation tables are now empty pending re-ingestion. There is no
+confirmed way to trigger the deployed ingestion Functions against staging
+specifically — CLAUDE.md only documents one Function App
+(`KonXProFunctionApp`), with no separate staging deployment mentioned. Staging
+will stay empty of permit/contractor/violation data until someone establishes
+how (or whether) ingestion is meant to reach it.
+
+**Production: not started.** Only proceed once staging has been exercised for
+real (an app restart against it, ideally some ingestion) and looks healthy.
 
 ## Revised critical path
 
@@ -327,5 +376,7 @@ ingestion, verify, then repeat on production only after staging is clean.
 0.1 (independent, Web Deploy password + git-history decision still open)
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
+Staging rebuild — done; ingestion-into-staging mechanism still an open question
+Production rebuild — blocked on staging looking healthy for real
 4.1, 4.2, 4.3 (independent, untouched by this pass)
 ```
