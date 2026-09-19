@@ -408,36 +408,49 @@ indexes only, not a full staging rebuild.
 
 ---
 
-## Open
-
-### 2.4 — Retire the startup DDL · partially done, `Migrate()` switch blocked
-
-**Done (2026-09-12):** removed the now-dead `Subscriptions`/`SavedLeads`/
-`AlertPreferences` raw-DDL block from `Program.cs`. It was a genuine no-op in
-every current path — `EnsureCreated()` (which runs just before it) already
-creates those three tables from the model on any fresh database, since they're
-ordinary `DbSet`s, and they already exist on both staging and production. The
+**2.4 — Retire the startup DDL.** `Done (2026-09-12)`: removed the now-dead
+`Subscriptions`/`SavedLeads`/`AlertPreferences` raw-DDL block from
+`Program.cs`. It was a genuine no-op in every current path —
+`EnsureCreated()` (which ran just before it) already created those three
+tables from the model on any fresh database, since they're ordinary
+`DbSet`s, and they already existed on both staging and production. The
 five-view `CREATE OR ALTER VIEW` loop is untouched (still reads from
 `Data/TierViewDefinitions.cs`).
 
-**Still blocked: switching `EnsureCreated()` to `permitDb.Database.Migrate()`.**
-This is *not* safe to do before the rebuild plan below actually happens.
-Neither staging (0 `db_9f8bee_konxdevContext` migrations recorded) nor
-production (6 rows recorded, all for the five migrations squashed away in item
-2.2) has a history row for the new `InitialCreate` migration. If `Migrate()`
-ran against either database as it exists today, EF would treat `InitialCreate`
-as pending and try to `CreateTable` everything it defines — which already
-exists there — crashing app startup on the next restart. Do the rebuild first;
-this half of 2.4 lands as part of it. Keep the `IsEnvironment("Testing")` guard
-regardless — the integration tests depend on startup doing nothing. Consider
-moving migration out of app startup entirely into a deploy step; an app that
-migrates on boot races itself when two instances start.
+**`Migrate()` switch: done 2026-09-19**, once the production rebuild (below)
+removed its blocker — neither database had a history row for `InitialCreate`
+before that, so `Migrate()` would have treated it as pending and tried to
+`CreateTable` everything it defines, crashing startup. `Program.cs:105` now
+calls `permitDb.Database.Migrate()` instead of `EnsureCreated()`. Build and
+`KonXProWebApp.Tests` both clean (156/0/4). The `IsEnvironment("Testing")`
+guard is untouched, so integration tests are unaffected either way.
 
-Deliberately not done yet in this pass — 3.1's tests exist now as the safety
-net this item's ordering always called for, but haven't been run against a
-real database in this environment (see 3.1 above), so removing the code that
-creates these objects felt premature until that test suite has actually gone
-green somewhere with Docker available.
+**Stated plainly, not glossed over: no automated test in this repo exercises
+this exact code path.** `SqlWebApplicationFactory` sets the environment to
+`Testing`, which the guard above uses to skip this whole startup block —
+`KonXProWebApp.Integration.Tests` never calls this `Migrate()`, it calls
+`EnsureCreatedAsync()` itself directly (see CLAUDE.md's "Known issues"). The
+only real evidence this is safe: the rehearsal done for the production
+rebuild (applying these exact migrations to a disposable database, then
+confirming a second `database update` was a clean "already up to date"
+no-op) plus the fact both real databases now match that baselined state.
+
+**Not yet deployed or observed at a real restart.** This only takes effect
+on the next deploy — manual Web Deploy, the user's own action, not done as
+of this writing. Useful connection to item 0.4's still-outstanding restart
+proof: a normal deploy should trigger the same ANCM worker recycle that's
+been hard to force manually through Plesk's UI alone, so deploying this one
+change could confirm both things in the same restart — whether
+`identityDb.Database.Migrate()` finally succeeds cleanly (0.4), and whether
+the new `permitDb.Database.Migrate()` also correctly no-ops (2.4).
+
+**Not part of this change, worth remembering for later:** "Consider moving
+migration out of app startup entirely into a deploy step; an app that
+migrates on boot races itself when two instances start" — still a valid
+consideration, not acted on, lower priority while this app runs as a single
+instance.
+
+## Open
 
 ### 3.2 — Move the five views into migrations · optional, not required by the rebuild
 
@@ -870,14 +883,10 @@ undone decision.
   `FK_SavedLeads_DOBJobFilings`/`NO_ACTION` naming. `SavedLeads` has 0 rows
   on both databases, and `Migrate()` doesn't care about constraint names, so
   left alone.
-- **Item 2.4's `Migrate()` switch** (`Program.cs:105`,
-  `permitDb.Database.EnsureCreated()` → `Migrate()`) — now technically
-  unblocked (its precondition is met), but stays its own later decision with
-  its own explicit go-ahead, code change, build/test/deploy cycle, and
-  ideally proof at a real restart, exactly like item 0.4's still-outstanding
-  restart verification. Bundling it into this rebuild would have conflated a
-  one-time metadata write with a permanent change to every future startup's
-  behavior.
+- **Item 2.4's `Migrate()` switch: code done 2026-09-19** — see its entry in
+  "Completed" above for the full story, including why it's safe now, the
+  honest note about test coverage, and its connection to item 0.4's
+  still-outstanding restart proof. Not yet deployed.
 
 **Near-miss, 2026-09-19 — recorded in full rather than glossed over.** While
 rehearsing the migration split below, two `dotnet ef` commands
@@ -908,8 +917,8 @@ command, every time — never assumed to carry over from an earlier one.
 ```
 0.1 — fully done; git-history scrub decided against 2026-09-19 (accepted risk, all credentials already rotated)
 0.4 — done (2026-09-18): baseline production's dbo.__EFMigrationsHistory. Still watching for proof at an actual restart.
-2.0, 2.1, 2.2, 2.3, 3.1 — done
-2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
+2.0, 2.1, 2.2, 2.3, 2.4, 3.1 — done (2.4's Migrate() switch is code-complete 2026-09-19, not yet deployed/observed at a restart)
+3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 Staging rebuild — done AND verified healthy for real (2026-09-13): Subscriptions=4, all 5 views present, clean restart
 Production rebuild — DONE, run against both production and staging 2026-09-19: 8-row/3-row migration histories respectively, both now agree, real BlogContent/BlogFeedSources tables live everywhere. Only item 2.4's Migrate() switch remains, its own independent decision
 4.1, 4.2, 4.3, 4.4 (independent, untouched by this pass)
