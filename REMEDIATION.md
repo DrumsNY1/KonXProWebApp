@@ -366,8 +366,31 @@ Sequence of what actually got done:
 5. Server-side Plesk application settings updated with the rotated SQL
    passwords, so the deployed app/Functions actually use the new credentials.
 
-**Only remaining piece, deliberately deferred:** whether/how to scrub the old
-plaintext values from git history — see item 0.1 in Open.
+**Decided 2026-09-19: do not rewrite git history.** The remaining piece of
+this item was whether/how to scrub the old plaintext values from history —
+weighed and closed rather than left open indefinitely. Rewriting history
+(`git filter-repo`/BFG) would break all ~30 active branches (every one needs
+recreating or rebasing onto the new history), every open PR would need
+closing and reopening against it, everyone with a local clone would need to
+discard and re-clone, and GitHub's own PR/fork caches can retain old commit
+data even after a force-push — a real guarantee of removal needs GitHub
+Support involved, not just a rewrite. Against that cost, the benefit is now
+almost entirely cosmetic: every credential this would remove (production and
+staging SQL passwords, both SMTP passwords) is already rotated and confirmed
+invalid, so there is no active leak being stopped, only a dead password
+sitting in history. Accepted as a standing risk; revisit only if a
+compliance or audit requirement specifically mandates a history purge later.
+
+**Standing caution, unrelated to the decision above and still worth keeping
+in mind:** now that an agent with a shell runs on this machine, note that
+`dotnet ef` commands build the app host the normal way, which reads user
+secrets automatically — once real credentials are in user-secrets, any
+`dotnet ef` invocation against this project can silently connect to whichever
+database they point at unless the connection string is explicitly overridden
+(e.g. via a `ConnectionStrings__db_9f8bee_konxdevConnection` environment
+variable, which outranks user secrets in ASP.NET Core's configuration
+precedence). This is exactly how a read-only production connection happened
+once already during this remediation work.
 
 **2.3 — staging unique indexes.** Added 2026-09-12, directly against staging
 (`priority_ks`) — re-checked for conflicting data first (still none: 0 duplicate
@@ -384,25 +407,6 @@ indexes only, not a full staging rebuild.
 ---
 
 ## Open
-
-### 0.1 (remaining piece) — decide on scrubbing git history
-
-Everything about this item is done except one deliberate, deferred decision:
-whether/how to scrub the old plaintext values from git history (disruptive
-with ~30 active branches — worth a considered decision, not a reflexive
-rewrite). Lower urgency now that every credential it would remove has already
-been rotated and is no longer valid. See the Completed section for the full
-story of what this item covered.
-
-This matters more now that an agent with a shell runs on this machine — and
-note that `dotnet ef` commands build the app host the normal way, which reads
-user secrets automatically; once real credentials are in user-secrets, any
-`dotnet ef` invocation against this project can silently connect to whichever
-database they point at unless the connection string is explicitly overridden
-(e.g. via a `ConnectionStrings__db_9f8bee_konxdevConnection` environment
-variable, which outranks user secrets in ASP.NET Core's configuration
-precedence). This is exactly how a read-only production connection happened
-once already during this remediation work.
 
 ### 2.4 — Retire the startup DDL · partially done, `Migrate()` switch blocked
 
@@ -636,7 +640,7 @@ own explicit go-ahead.
 ## Revised critical path
 
 ```
-0.1 — done except the git-history scrub decision (deliberately deferred, low urgency)
+0.1 — fully done; git-history scrub decided against 2026-09-19 (accepted risk, all credentials already rotated)
 0.4 — done (2026-09-18): baseline production's dbo.__EFMigrationsHistory. Still watching for proof at an actual restart.
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
