@@ -3,12 +3,14 @@
 Living document. Last updated 2026-09-19.
 
 Phase 0 is complete. Phase 1 is complete. Items 2.0, 2.1, 2.2, and 3.1 are
-done in code (see "Rebuild plan" below) but **not yet applied to any real
-database**. Phases 2–4 have been **revised twice** from their original form:
-once because Phase 1 disproved two of its assumptions, and again because
-investigating 2.2 found the first revision was itself wrong about how
-production's tables got their shape. Read the Findings section and the
-Rebuild plan before starting anything further.
+done in code, and as of 2026-09-19 **item 2.2's `InitialCreate` migration is
+now applied to both staging (2026-09-12) and production (baselined
+2026-09-19, plus its split-out `AddBlogTables` migration run for real)** —
+see "Rebuild plan" below for the full history. Phases 2–4 were **revised
+twice** from their original form before that landed: once because Phase 1
+disproved two of its assumptions, and again because investigating 2.2 found
+the first revision was itself wrong about how production's tables got their
+shape. Read the Findings section and the Rebuild plan for the full story.
 
 ---
 
@@ -829,17 +831,43 @@ SELECT * FROM dbo.__EFMigrationsHistory ORDER BY MigrationId;
 -- If anything looks wrong instead, run: ROLLBACK TRANSACTION;
 ```
 
-Still needs its own explicit go-ahead before running against production —
-nothing above has been executed there. Once it lands, the follow-up for
-staging is a single-row version of the same `AddBlogTables` insert (staging's
-`InitialCreate` is already for-real applied from the 2026-09-12 rebuild, so
-only the new migration needs baselining there).
-- **Explicitly deferred, not part of this rebuild**: flipping
-  `Program.cs:105`'s `permitDb.Database.EnsureCreated()` to
-  `permitDb.Database.Migrate()` (the rest of item 2.4) stays its own later
-  decision, with its own build/test/deploy cycle — bundling it into this
-  rebuild would conflate a one-time metadata write with a permanent change to
-  every future startup's behavior.
+**Run against production 2026-09-19 — confirmed successful.** Re-verified
+immediately before running (fresh schema-truth capture: still 6 rows in
+`dbo.__EFMigrationsHistory`, `BlogContent`/`BlogFeedSources` still absent
+everywhere — nothing had drifted since scoping). Ran inside the transaction,
+reviewed the `SELECT` before committing: exactly 8 rows, in order, with the
+correct `MigrationId`/`ProductVersion` values for both new entries.
+Committed. Production now has:
+- `dbo.__EFMigrationsHistory` with all 8 migrations recorded (the original 6
+  plus `20260911165155_InitialCreate` and `20260919124444_AddBlogTables`).
+- Real `dbo.BlogContent` and `dbo.BlogFeedSources` tables, created for the
+  first time — **this is an immediate, live change**: the
+  `/add-blog-content`, `/blog-contents`, `/blog-feed-sources` pages, which
+  would previously have failed with "Invalid object name" the moment anyone
+  navigated to them, now actually work.
+
+**What this does *not* yet change**: `Program.cs:105` still calls
+`permitDb.Database.EnsureCreated()`, not `Migrate()` — and `EnsureCreated()`
+never reads `__EFMigrationsHistory` at all, so today's baseline has zero
+effect on the app's current runtime behavior. It's purely preparatory,
+exactly as planned: it removes the blocker that made flipping to `Migrate()`
+unsafe, but that flip (the rest of item 2.4) is still its own separate,
+undone decision.
+
+**Still open:**
+- **Staging follow-up**, low urgency: a single-row version of the same
+  `AddBlogTables` insert (staging's `InitialCreate` is already for-real
+  applied from the 2026-09-12 rebuild, so only the new migration needs
+  baselining there — staging already has real `BlogContent`/`BlogFeedSources`
+  tables from that original rebuild).
+- **Item 2.4's `Migrate()` switch** (`Program.cs:105`,
+  `permitDb.Database.EnsureCreated()` → `Migrate()`) — now technically
+  unblocked (its precondition is met), but stays its own later decision with
+  its own explicit go-ahead, code change, build/test/deploy cycle, and
+  ideally proof at a real restart, exactly like item 0.4's still-outstanding
+  restart verification. Bundling it into this rebuild would have conflated a
+  one-time metadata write with a permanent change to every future startup's
+  behavior.
 
 **Near-miss, 2026-09-19 — recorded in full rather than glossed over.** While
 rehearsing the migration split below, two `dotnet ef` commands
@@ -873,6 +901,6 @@ command, every time — never assumed to carry over from an earlier one.
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 Staging rebuild — done AND verified healthy for real (2026-09-13): Subscriptions=4, all 5 views present, clean restart
-Production rebuild — fully scoped and rehearsed 2026-09-19 (baseline-only strategy); 3 synonym tables excluded from migrations, BlogContent/BlogFeedSources split into a real migration, final combined script ready; needs explicit go-ahead to run against production
+Production rebuild — DONE, run against production 2026-09-19 and confirmed: 8-row migration history, real BlogContent/BlogFeedSources tables now live. Staging follow-up (1-row insert) and item 2.4's Migrate() switch both still open, independently
 4.1, 4.2, 4.3, 4.4 (independent, untouched by this pass)
 ```
