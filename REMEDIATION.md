@@ -678,45 +678,149 @@ Done so far as part of scoping:
   `BlogFeedSources`); and a check for whether `SavedLeads` already has
   `FK_SavedLeads_DOBJobFilings_DobjobFilingId`.
 
-**Not yet done — waiting on the extended schema-truth capture's results
-before any of this can be finalized:**
-- `BlogContent`/`BlogFeedSources` are confirmed live, actively-used features
-  (real CRUD pages: `EditBlogContent.razor`, `AddBlogContent.razor`,
-  `BlogContents.razor`, `BlogFeedSources.razor`) not mentioned anywhere in
-  CLAUDE.md's page map — almost certainly exist on production, but
-  unconfirmed where/how (`dbo` real table? synonym? something else?).
-  `ECBViolations` has no ingestion path at all (per the PR #45 audit) — its
-  production existence is genuinely unknown, not just unverified.
-- **A missing table is a different failure class from column drift**, because
-  a migration baselines atomically — `InitialCreate` can't be "half"
-  baselined. If `ECBViolations` (or anything else) turns out to be genuinely
-  absent, baselining anyway would tell EF "this exists" when it doesn't,
-  surfacing later as a runtime `Invalid object name`, not caught at migrate
-  time. The fix in that case: split `InitialCreate` before baselining —
-  remove that table's block, add a small follow-up migration containing just
-  its `CreateTable`, baseline the now-accurate `InitialCreate`, let
-  `dotnet ef database update` actually run the small migration for real (a
-  genuine, narrow, reviewable DDL op).
-- For any table with real column-level drift only: a narrow, transaction-
-  wrapped `ALTER TABLE`/`ALTER COLUMN` for just that delta — never a
-  drop-and-recreate — reviewed the same way as item 0.4 (verify-before-commit
-  `SELECT`, explicit `COMMIT`/`ROLLBACK`).
-- Once every table's disposition is settled: the actual baseline `INSERT`
-  (`VALUES ('20260911165155_InitialCreate', '9.0.20')`), transaction-wrapped
-  and reviewed the same way as item 0.4.
-- Before touching production at all: two local rehearsals — an isolated
-  proof (empty LocalDB, only a hand-built `__EFMigrationsHistory` with the
-  one baseline row, confirm `Migrate()` says "No migrations were applied"
-  even with zero real tables present, demonstrating the safety property is
-  purely history-table-driven) and a full schema-fidelity rehearsal (a
-  throwaway database matching production's *verified* real shape, same
-  baseline, run the actual app's `Migrate()` locally, confirm no exception).
+**Extended schema-truth capture came back 2026-09-19, fully verified. Final
+disposition of every table:**
+
+| Table | Real state | Disposition |
+|---|---|---|
+| `Subscriptions`, `SavedLeads`, `AlertPreferences`, `IngestionLogs` | Real `dbo` table, exact column match | Include in baseline, no DDL |
+| `HPD_Violations` | Real `dbo` table, exact column match | Include in baseline, no DDL |
+| `ServiceRequests311` | Real `dbo` table, exact column match | Include in baseline, no DDL |
+| `HomeImprovementContractors` | Synonym in `dbo` → real table in `konx_admin`; columns match exactly | `ExcludeFromMigrations()` (done — no column fix needed) |
+| `DobBisViolations` | Synonym in `dbo` → real table in `konx_admin`; 2 bare-`varchar` columns fixed | `ExcludeFromMigrations()` (done, plus the 2-column fix from earlier) |
+| `ECBViolations` | Synonym in `dbo` → real table in `konx_admin`; **extensive column drift** (see below) | `ExcludeFromMigrations()` (done) — column drift deliberately not fixed, see new item below |
+| `BlogContent`, `BlogFeedSources` | **Genuinely absent** — not in `dbo`, not a synonym, not in `konx_admin`, anywhere | Split out of `InitialCreate` into a new migration, run for real (done — see below) |
+| `DOBJobFilings` | Real `dbo` table, right columns/count, but **widespread type drift** (see below) | Include in baseline, no DDL — drift doesn't block `Migrate()`'s safety, logged as its own follow-up item |
+
+Three tables turned out to be synonyms, not one — `ECBViolations` and
+`HomeImprovementContractors` needed the exact same `ExcludeFromMigrations()`
+treatment as `DobBisViolations`, both now applied in
+`Data/Db9f8beeKonxdevContext.PermitIntel.cs`.
+
+**`BlogContent`/`BlogFeedSources` are genuinely missing** — confirmed live,
+actively-used features (real CRUD pages: `EditBlogContent.razor`,
+`AddBlogContent.razor`, `BlogContents.razor`, `BlogFeedSources.razor`,
+scaffolded through `Db9f8beeKonxdevService`) not mentioned anywhere in
+CLAUDE.md's page map, that simply don't exist in the database at all. Handled
+exactly per this item's own "missing table" contingency: `InitialCreate`
+(`Data/Migrations/20260911165155_InitialCreate.cs` and its `.Designer.cs`,
+plus `db_9f8bee_konxdevContextModelSnapshot.cs`) had both tables' blocks
+removed, and a new migration, `20260919124444_AddBlogTables`, was scaffolded
+via `dotnet ef migrations add` containing just their two `CreateTable`
+operations — reviewed and confirmed it picked up nothing else. **Consequence
+for staging**: staging already ran the *original* `InitialCreate` for real on
+2026-09-12, including creating these two tables there — staging needs the
+same one-row baseline-insert for `AddBlogTables` once this is deployed, or
+its own next `Migrate()` call would see it as pending and try to recreate
+tables that already exist there too. Low urgency (staging is non-critical),
+but don't lose track of it.
+
+**Rehearsed for real, not just reasoned about.** Applied the edited
+migration set (`InitialCreate` + `AddBlogTables`) via `dotnet ef database
+update` against a disposable local database (connection string overridden
+inline in the same command — see the near-miss note above) — succeeded
+cleanly from scratch, creating all 12 tables across both migrations. Ran
+`database update` again immediately after: **"No migrations were applied.
+The database is already up to date"** — the exact confirmation this item
+needs, demonstrating the migration set is internally consistent end-to-end,
+not just individually plausible.
+
+**Two new follow-up items logged, deliberately not fixed as part of this
+scoping** (neither blocks the baseline — `Migrate()`'s safety is purely
+history-table-driven, confirmed earlier in this section):
+- `DOBJobFilings`' model declares nearly every string column as
+  `nvarchar(max)`; production's real columns are mostly specific lengths
+  (`nvarchar(255)`, `nvarchar(50)`, etc.), and `InitialCost`/`TotalEstFee` are
+  `money` in reality vs. `decimal(18,2)` in the model — a real
+  parameter-sizing correctness concern for `SaveChanges`, independent of
+  migrations, but a big enough surface (dozens of columns) that fixing it is
+  its own task, not a scoping side-effect.
+- `EcbViolation.cs`'s model barely resembles the real `ECBViolations` table
+  — extra real columns (`dob_violation_number`, `created_date`,
+  `modified_date`) the model doesn't know about, and several outright type
+  mismatches (`Boro` modeled as `int`, really `varchar(5)`;
+  `HearingDate`/`ServedDate`/`IssueDate` modeled as `DateTime`, really
+  `varchar(8)`; `ViolationDescription` really the deprecated `TEXT` type).
+  Moot for migrations now that it's excluded, but the model is effectively
+  unusable if anything ever tries to query this entity — matches the
+  already-known fact that no ingestion path writes to it today.
+- Minor, very low priority given `SavedLeads` has 0 rows currently: the real
+  `FK_SavedLeads_DOBJobFilings` foreign key exists but is named differently
+  from what `InitialCreate` expects (`FK_SavedLeads_DOBJobFilings_DobjobFilingId`)
+  and is `NO_ACTION` on delete rather than `CASCADE`.
+
+**Final baseline script, ready to run** — combines the `InitialCreate`
+baseline with actually creating the two genuinely-missing tables, in one
+transaction so both succeed or neither does:
+
+```sql
+BEGIN TRANSACTION;
+
+CREATE TABLE dbo.BlogContent (
+    ContentID int IDENTITY(1,1) NOT NULL,
+    Content nvarchar(max) NULL,
+    Summary nvarchar(max) NULL,
+    CompletionDate datetime2 NULL,
+    SourceID int NULL,
+    CONSTRAINT PK_BlogContent PRIMARY KEY (ContentID)
+);
+
+CREATE TABLE dbo.BlogFeedSources (
+    FeedID int IDENTITY(1,1) NOT NULL,
+    FeedName nvarchar(max) NULL,
+    FeedUrl nvarchar(max) NULL,
+    FeedCategory nvarchar(max) NULL,
+    CONSTRAINT PK_BlogFeedSources PRIMARY KEY (FeedID)
+);
+
+INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion)
+VALUES ('20260919124444_AddBlogTables', '9.0.20');
+
+INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion)
+VALUES ('20260911165155_InitialCreate', '9.0.20');
+
+SELECT * FROM dbo.__EFMigrationsHistory ORDER BY MigrationId;
+
+-- Expect 8 rows: the original 6 plus these 2. Only after confirming that,
+-- run: COMMIT TRANSACTION;
+-- If anything looks wrong instead, run: ROLLBACK TRANSACTION;
+```
+
+Still needs its own explicit go-ahead before running against production —
+nothing above has been executed there. Once it lands, the follow-up for
+staging is a single-row version of the same `AddBlogTables` insert (staging's
+`InitialCreate` is already for-real applied from the 2026-09-12 rebuild, so
+only the new migration needs baselining there).
 - **Explicitly deferred, not part of this rebuild**: flipping
   `Program.cs:105`'s `permitDb.Database.EnsureCreated()` to
   `permitDb.Database.Migrate()` (the rest of item 2.4) stays its own later
   decision, with its own build/test/deploy cycle — bundling it into this
   rebuild would conflate a one-time metadata write with a permanent change to
   every future startup's behavior.
+
+**Near-miss, 2026-09-19 — recorded in full rather than glossed over.** While
+rehearsing the migration split below, two `dotnet ef` commands
+(`database update`, then `database drop --force`) were run in separate tool
+calls without re-applying the LocalDB connection-string override used
+earlier in the same session. Root cause: the shell environment does not
+persist variables between separate command invocations in this environment,
+so the override from an earlier command was silently gone. Without it,
+`dotnet ef` fell through to `dotnet user-secrets`, which holds real
+production credentials on this machine — `database update` attempted
+`CREATE TABLE AlertPreferences` against `priority_konx` directly (failed
+immediately: the table already exists there, exactly the standing
+`dotnet ef`/user-secrets caution already documented in this file), and
+`database drop --force` then attempted to drop `priority_konx` entirely
+(failed: the `konx_admin` login lacks server-level permission to drop a
+database). **Confirmed via a fresh read-only schema-truth capture that
+production is unaffected** — every table's `CreatedUtc`/`ModifiedUtc` and
+every row count matched the pre-incident capture exactly, byte-for-byte.
+No actual damage occurred, but both commands genuinely reached production
+before failing, which is the real lesson: two independent safety nets (the
+table already existing, and a permissions boundary) are what prevented harm
+here, not the process. Fix going forward: the connection-string override
+must be inline with every single `dotnet ef` invocation, in the same
+command, every time — never assumed to carry over from an earlier one.
 
 ## Revised critical path
 
@@ -726,6 +830,6 @@ before any of this can be finalized:**
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 Staging rebuild — done AND verified healthy for real (2026-09-13): Subscriptions=4, all 5 views present, clean restart
-Production rebuild — scoped 2026-09-19 (baseline-only strategy, not staging's drop-and-recreate); DobViolation model fixed + schema-truth extended; waiting on extended verification results before the baseline INSERT can be finalized
+Production rebuild — fully scoped and rehearsed 2026-09-19 (baseline-only strategy); 3 synonym tables excluded from migrations, BlogContent/BlogFeedSources split into a real migration, final combined script ready; needs explicit go-ahead to run against production
 4.1, 4.2, 4.3, 4.4 (independent, untouched by this pass)
 ```

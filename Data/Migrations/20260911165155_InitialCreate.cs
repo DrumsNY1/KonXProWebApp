@@ -5,6 +5,21 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace KonXProWebApp.Data.Migrations
 {
+    // BlogContent and BlogFeedSources were removed from this migration on
+    // 2026-09-19, after schema-truth confirmed neither table exists anywhere
+    // on production (not in dbo, not as a synonym, not in konx_admin) - see
+    // REMEDIATION.md's production rebuild scoping. Baselining this migration
+    // as originally written would have told EF those two tables already
+    // exist on production when they don't. Split into a new migration
+    // (AddBlogTables) containing just their CreateTable so it can run for
+    // real via a normal `dotnet ef database update`, while this migration
+    // gets baselined for everything that genuinely already exists.
+    //
+    // Consequence: staging already ran the ORIGINAL version of this
+    // migration for real on 2026-09-12 (including creating BlogContent/
+    // BlogFeedSources there) - staging will need the same baseline-insert
+    // treatment for AddBlogTables once it exists, since staging's copies of
+    // those two tables already physically exist and match its definition.
     /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
@@ -35,39 +50,6 @@ namespace KonXProWebApp.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AlertPreferences", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BlogContent",
-                schema: "dbo",
-                columns: table => new
-                {
-                    ContentID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Summary = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CompletionDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    SourceID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BlogContent", x => x.ContentID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BlogFeedSources",
-                schema: "dbo",
-                columns: table => new
-                {
-                    FeedID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FeedName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FeedUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FeedCategory = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BlogFeedSources", x => x.FeedID);
                 });
 
             migrationBuilder.CreateTable(
@@ -459,14 +441,6 @@ namespace KonXProWebApp.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AlertPreferences",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BlogContent",
-                schema: "dbo");
-
-            migrationBuilder.DropTable(
-                name: "BlogFeedSources",
                 schema: "dbo");
 
             migrationBuilder.DropTable(
