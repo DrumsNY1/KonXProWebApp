@@ -35,6 +35,19 @@ public partial class db_9f8bee_konxdevContext
             entity.Property(p => p.UpdatedAt).HasColumnType("datetime2");
             entity.HasIndex(e => e.UserId);
             entity.HasIndex(e => new { e.UserId, e.DobjobFilingId }).IsUnique();
+
+            // The DobjobFiling FK relationship was left to EF's convention
+            // (via the [ForeignKey] navigation on SavedLead.DobjobFiling),
+            // which defaults to a generated constraint name and CASCADE
+            // delete for a required relationship. Confirmed via schema-truth
+            // 2026-09-19 that the real production constraint is named
+            // differently and is NO_ACTION, not CASCADE - matching it here
+            // rather than leaving the model's implicit assumption wrong.
+            entity.HasOne(sl => sl.DobjobFiling)
+                .WithMany()
+                .HasForeignKey(sl => sl.DobjobFilingId)
+                .HasConstraintName("FK_SavedLeads_DOBJobFilings")
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
         builder.Entity<AlertPreference>(entity =>

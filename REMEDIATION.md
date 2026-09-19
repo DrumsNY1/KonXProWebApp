@@ -725,7 +725,7 @@ The database is already up to date"** — the exact confirmation this item
 needs, demonstrating the migration set is internally consistent end-to-end,
 not just individually plausible.
 
-**Both follow-up items fixed 2026-09-19** (neither was blocking the
+**All three follow-up items fixed 2026-09-19** (none was blocking the
 baseline — `Migrate()`'s safety is purely history-table-driven, confirmed
 earlier in this section — but both were real runtime-correctness gaps worth
 closing):
@@ -776,11 +776,21 @@ already-proven pattern byte-for-byte, and this is a low-traffic internal
 admin page with no ingestion path writing to it today. Worth a real
 browser check next time someone's already got a safe local environment
 wired up for this table.
-- Minor, very low priority given `SavedLeads` has 0 rows currently: the real
-  `FK_SavedLeads_DOBJobFilings` foreign key exists but is named differently
-  from what `InitialCreate` expects (`FK_SavedLeads_DOBJobFilings_DobjobFilingId`)
-  and is `NO_ACTION` on delete rather than `CASCADE`. Still open, still not
-  fixed — didn't come up naturally while working on the two items above.
+- **Fixed 2026-09-19**: the `SavedLeads` → `DOBJobFilings` FK was left to
+  EF's convention (via the `[ForeignKey]` navigation on
+  `SavedLead.DobjobFiling`), which defaults to a generated constraint name
+  and `CASCADE` delete for a required relationship — but the real production
+  constraint is named `FK_SavedLeads_DOBJobFilings` (not
+  `FK_SavedLeads_DOBJobFilings_DobjobFilingId`) and is `NO_ACTION`.
+  `Data/Db9f8beeKonxdevContext.PermitIntel.cs`'s `SavedLead` entity now
+  configures this explicitly (`HasConstraintName` +
+  `OnDelete(DeleteBehavior.NoAction)`) to match. Build and
+  `KonXProWebApp.Tests` both clean (156/0/4). Same treatment as the
+  `DOBJobFilings` column-length fix: this is a real, low-priority
+  correctness gap (matters only if something ever deletes a `DOBJobFilings`
+  row while real `SavedLeads` reference it — currently impossible, table has
+  0 rows), left as a "pending model change" rather than turned into its own
+  migration right now.
 
 **Final baseline script, ready to run** — combines the `InitialCreate`
 baseline with actually creating the two genuinely-missing tables, in one
