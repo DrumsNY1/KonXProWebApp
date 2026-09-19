@@ -1,6 +1,6 @@
 # KonXProWebApp — remediation status and plan
 
-Living document. Last updated 2026-09-11.
+Living document. Last updated 2026-09-18.
 
 Phase 0 is complete. Phase 1 is complete. Items 2.0, 2.1, 2.2, and 3.1 are
 done in code (see "Rebuild plan" below) but **not yet applied to any real
@@ -124,6 +124,84 @@ from the start, so the fragile in-place move is no longer needed. Both
 `MigrationsHistoryTable("__EFMigrationsHistory", "dbo")` explicitly in
 `Program.cs` regardless, so a future change of SQL login can't reintroduce
 Finding 1's fragility.
+
+**0.4 — baseline production's `dbo.__EFMigrationsHistory`.** Discovered
+2026-09-13 (see "Rebuild plan" below): the code pin from item 2.0 means
+`identityDb.Database.Migrate()` reads `dbo.__EFMigrationsHistory` on every
+startup, but production's actual Identity migration history lives under
+`konx_admin` (the login's default schema, per Finding 1) — the exact failure
+already hit and fixed on staging. Left urgent and open because it can fire on
+an ordinary IIS/Plesk app-pool recycle, not just a deliberate restart, and is
+independent of the rebuild plan.
+
+Read-only verification via `_tools/schema-truth/` on 2026-09-18 (a section was
+added specifically for this) confirmed every precondition before anything was
+written: `dbo.__EFMigrationsHistory` did not exist yet (proving production had
+not yet restarted under the item 2.0 pin — the failure had not happened yet);
+`konx_admin.__EFMigrationsHistory` held exactly 6 rows; all 8 Identity tables
+(`AspNetUsers`, `AspNetRoles`, `AspNetUserRoles`, `AspNetUserClaims`,
+`AspNetUserLogins`, `AspNetUserTokens`, `AspNetRoleClaims`, `AspNetTenants`)
+resolved to `konx_admin`, created within the same second as
+`__EFMigrationsHistory` itself; and `konx_admin.__EFMigrationsHistory`'s exact
+column shape (`MigrationId nvarchar(150)`, `ProductVersion nvarchar(32)`,
+`PK___EFMigrationsHistory`) matched EF Core's standard shape exactly, so the
+new `dbo` copy could be built to mirror it precisely rather than by assumption.
+
+Fixed 2026-09-18, run directly against production inside an explicit
+transaction (`CREATE TABLE dbo.__EFMigrationsHistory` matching the verified
+shape, then the baseline `INSERT ... SELECT ... FROM
+konx_admin.__EFMigrationsHistory`, then a `SELECT *` reviewed before
+committing):
+
+```sql
+CREATE TABLE dbo.__EFMigrationsHistory (
+    MigrationId nvarchar(150) NOT NULL,
+    ProductVersion nvarchar(32) NOT NULL,
+    CONSTRAINT PK___EFMigrationsHistory PRIMARY KEY (MigrationId)
+);
+
+INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion)
+SELECT MigrationId, ProductVersion
+FROM konx_admin.__EFMigrationsHistory
+WHERE MigrationId NOT IN (SELECT MigrationId FROM dbo.__EFMigrationsHistory);
+```
+
+Confirmed committed: `dbo.__EFMigrationsHistory` holds exactly 6 rows outside
+the transaction — `00000000000000_CreateIdentitySchema` plus the five
+pre-squash `db_9f8bee_konxdevContext` migrations item 2.2 describes
+(`AddServiceRequests311`, `AddHomeImprovementContractors`,
+`AddMarketingFieldsToContractors`, `ScaffoldPendingChanges`,
+`AddCampaignTrackingToContractors`) — matching `konx_admin`'s copy exactly, as
+expected since production has not been rebuilt.
+
+**Not yet closed out: proof at an actual restart.** This fixes the history
+table itself, but the risk this item exists for — `Migrate()` throwing and the
+startup try/catch in `Program.cs` silently swallowing it — is only provably
+resolved once production restarts for real and its logs show "No migrations
+were applied" instead of an exception. That hasn't been observed yet.
+
+Tried and inconclusive, 2026-09-18: a Plesk "restart application pool" action,
+and separately touching `web.config` in Plesk's File Manager (the standard
+ANCM trigger for recycling an out-of-process worker), were both tried to force
+a fresh restart for verification. Neither shows any evidence of actually
+having recycled the app process — two independent, unrelated signals in the
+database (the tier views' `modify_date`, and the test-tier `Subscriptions`
+rows' `UpdatedAt`, both written by different steps of the same startup block)
+are still frozen at the same prior restart, 2026-09-08. Note this also means
+`stdoutLogEnabled`'s log files (`logs\stdout_*.log`, per `web.config`) are
+stale for the same reason and can't be used to check this either — the last
+one is from July 15, despite the database evidence showing the app has
+restarted several times since then. Root cause of why Plesk's restart/touch
+actions aren't recycling the process is unknown; only Plesk web panel access
+is available (no RDP/console), which limits the options for forcing it
+further. Decided to wait for a natural IIS app-pool recycle instead of
+continuing to force one blind.
+
+**To check later:** re-run `_tools/schema-truth/` against production and look
+at either signal above — if `modify_date`/`UpdatedAt` have moved past
+2026-09-08, a restart has happened since, and the stdout log directory should
+be checked at that point for "No migrations were applied" vs. "An exception
+occurred while migrating or seeding the database on startup."
 
 **2.1 — HpdViolations drift.** This item's premise was already stale by the
 time it was investigated: `HpdViolation` is present and correctly mapped in
@@ -325,6 +403,18 @@ are excluded from compilation in the csproj but read as live code.
 `xunit.extensibility.core` 2.8.0 (NU1608 on every build). Moving all four test
 projects to xunit 2.8.x risks test discovery, so do it on its own.
 
+### 4.4 — CLOSED, false alarm: `HPD_Violations` is fine
+
+Originally logged 2026-09-18 as "`HpdViolations` table does not exist on
+production," based on a schema-truth query that checked for the wrong table
+name. Corrected same day once `HpdViolation.cs`'s actual mapping was checked —
+it carries `[Table("HPD_Violations", Schema = "dbo")]` (with an underscore),
+not `HpdViolations`. Re-checked with the corrected name: `dbo.HPD_Violations`
+exists exactly where the model expects it, holding 112,262 rows, created
+2026-07-11. No gap, no action needed. Left in this document as a record that
+the original finding was wrong and why, rather than deleting it — the same
+investigation surfaced a real, separate bug (below).
+
 ---
 
 ## Rebuild plan (chosen approach for 2.0–2.4)
@@ -377,6 +467,56 @@ both unique indexes present, migration history shows exactly
 match the entitlement boundaries exactly (`HouseNum` absent from Free,
 `EstimatedCost` absent from Free/Basic).
 
+**Staging health check, 2026-09-13 — found and fixed a real startup bug.**
+After the rebuild, a confirmed Plesk app restart still left `Subscriptions` at
+0 rows (expected 4 from `SeedTierTestUsersAsync()`), which is the exact
+precondition check below failing. No access to Plesk/IIS logs from here, so
+ran the web app locally with `ASPNETCORE_ENVIRONMENT=Staging` and the
+connection string overridden via environment variable (never touching
+`appsettings.json`) to see the actual startup exception directly.
+
+Root cause: `identityDb.Database.Migrate()` was throwing
+`SqlException: There is already an object named 'AspNetTenants' in the
+database`, caught and swallowed by the try/catch that wraps the whole startup
+sequence — so the app looked "up" but never reached `SeedTenantsAdmin()`,
+`EnsureCreated()`, `SeedTierTestUsersAsync()`, or the view-creation loop.
+Cause: item 2.0 pinned `MigrationsHistoryTable("__EFMigrationsHistory",
+"dbo")`, so EF started reading a brand-new, empty `dbo.__EFMigrationsHistory`
+— but the Identity tables themselves (`AspNetUsers`, `AspNetTenants`, etc.)
+already existed in `konx_staging_admin` (the login's default schema, per
+Finding 1), created by a prior successful `Migrate()` run recorded in the
+*old* history table, `konx_staging_admin.__EFMigrationsHistory` (one row:
+`00000000000000_CreateIdentitySchema`, product version 9.0.19). EF saw no
+recorded history in `dbo` and tried to recreate tables that already existed
+under the default-schema fallback.
+
+Fixed on staging with a one-row baseline insert — not a schema change, just
+telling EF the migration it's about to try has already happened:
+
+```sql
+INSERT INTO dbo.__EFMigrationsHistory (MigrationId, ProductVersion)
+SELECT MigrationId, ProductVersion
+FROM konx_staging_admin.__EFMigrationsHistory
+WHERE MigrationId NOT IN (SELECT MigrationId FROM dbo.__EFMigrationsHistory);
+```
+
+Re-ran the local app against staging afterward: `Migrate()` logged "No
+migrations were applied. The database is already up to date," then seeding
+and the five `CREATE OR ALTER VIEW` statements all ran successfully.
+Confirmed by direct query: `Subscriptions` = 4 rows, all 5 `vw*` views present.
+**Staging is now genuinely healthy — the rebuild plan's precondition is met.**
+
+**This is not staging-specific — it is a live risk for production right now,
+independent of the rebuild timeline.** Production has the same
+`MigrationsHistoryTable("...", "dbo")` pin already in `Program.cs`
+(committed as part of item 2.0) and, per Finding 1, its Identity tables and
+`__EFMigrationsHistory` almost certainly still live under `konx_admin` (the
+production login's default schema) with the same one-migration history this
+staging case had. The **next time production's app pool restarts for any
+reason** — not just the planned rebuild — it will hit this identical
+exception on `Migrate()` and silently skip seeding and view-refresh. See the
+new item below.
+
 **Known gap, investigated 2026-09-12, not solved here:** `DOBJobFilings` and the
 contractor/violation tables are now empty pending re-ingestion. There is no
 separate staging Function App or deployment slot — only one, `KonXProFunctionApp`,
@@ -415,26 +555,52 @@ statement in `IngestionService.cs` against its EF model's `ToTable` mapping
 found no other mismatches (there is no `ECBViolations` ingestion path at all,
 and `HomeImprovementContractors` was already unqualified).
 
-**Still open, deliberately not done as part of that fix — needs explicit
-sign-off first:**
-- Confirm, read-only, on production whether `dbo.DobBisViolations` is a real
-  table or a synonym, and whether `konx_admin.DobBisViolations` holds data
-  invisible to the app — the code fix doesn't tell us which situation
-  production is actually in.
-- If production has the same stray-data pattern staging had, migrate
-  `konx_admin.DobBisViolations` rows into `dbo.DobBisViolations` rather than
-  leaving them behind.
+**CLOSED 2026-09-18, false alarm — corrected twice in the same investigation.**
+First pass (read-only): confirmed no real table at `dbo.DobBisViolations` via
+`sys.tables`/`sys.schemas`, concluded it was a genuine visibility bug like the
+one PR #45 already fixed once, and worked out a `CREATE TABLE` +
+data-migration script to fix it (same shape as item 0.4's baseline insert).
 
-**Production: not started.** Only proceed once staging has been exercised for
-real (an app restart against it, ideally some ingestion) and looks healthy.
+That script's `CREATE TABLE dbo.DobBisViolations` failed on production with
+`Msg 2714: There is already an object named 'DobBisViolations' in the
+database` — no partial effect, `@@TRANCOUNT` confirmed `0` immediately after.
+That error was the tell: **`dbo.DobBisViolations` is a synonym pointing at
+`[konx_admin].[DobBisViolations]`**, confirmed via `sys.synonyms` (a query
+`sys.tables` alone will never surface — the same blind spot the earlier
+staging rebuild hit with its six dangling synonyms). Synonyms redirect
+transparently for both reads and writes, so:
+- EF's `ToTable("DobBisViolations", "dbo")` mapping was already resolving
+  correctly through the synonym the entire time. There is no visibility bug
+  and never was one for the *current* codebase — the 2,166 rows in
+  `konx_admin.DobBisViolations` are reachable from `dbo` right now.
+- A code change was made and then reverted: qualifying the ingestion `MERGE`
+  as `dbo.DobBisViolations` (mirroring item 0.4's forward-fix reasoning)
+  turned out to be functionally a no-op once the synonym was known about — it
+  resolves through the same synonym to the same physical table, identical to
+  the unqualified version. Reverted rather than kept, since it doesn't
+  actually change anything and keeping it would misrepresent a fix that
+  didn't happen.
+
+**No action needed.** This entry stays as a record of two consecutive wrong
+diagnoses in one sitting (wrong table name, then a missed synonym) and how
+each was caught — by re-checking a claim against the actual database instead
+of trusting the previous read-only capture's coverage.
+
+**Production: not started.** Staging's precondition (an app restart, exercised
+for real, looking healthy) is now met as of 2026-09-13 — see the health-check
+finding above. Item 0.4 (baseline `dbo.__EFMigrationsHistory` on production)
+is done as of 2026-09-18 — see its entry in "Completed" above — so that
+blocker is clear; the rebuild itself is still a separate decision needing its
+own explicit go-ahead.
 
 ## Revised critical path
 
 ```
 0.1 — done except the git-history scrub decision (deliberately deferred, low urgency)
+0.4 — done (2026-09-18): baseline production's dbo.__EFMigrationsHistory. Still watching for proof at an actual restart.
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
-Staging rebuild — done; ingestion-into-staging mechanism still an open question
-Production rebuild — blocked on staging looking healthy for real
-4.1, 4.2, 4.3 (independent, untouched by this pass)
+Staging rebuild — done AND verified healthy for real (2026-09-13): Subscriptions=4, all 5 views present, clean restart
+Production rebuild — precondition (staging healthy) met, 0.4 no longer blocking; still needs its own explicit go-ahead
+4.1, 4.2, 4.3, 4.4 (independent, untouched by this pass)
 ```
