@@ -630,12 +630,93 @@ diagnoses in one sitting (wrong table name, then a missed synonym) and how
 each was caught — by re-checking a claim against the actual database instead
 of trusting the previous read-only capture's coverage.
 
-**Production: not started.** Staging's precondition (an app restart, exercised
-for real, looking healthy) is now met as of 2026-09-13 — see the health-check
-finding above. Item 0.4 (baseline `dbo.__EFMigrationsHistory` on production)
-is done as of 2026-09-18 — see its entry in "Completed" above — so that
-blocker is clear; the rebuild itself is still a separate decision needing its
-own explicit go-ahead.
+**Production: scoped 2026-09-19, not yet executed.** Staging's "drop
+everything and let EF recreate it" approach is **not** the right model for
+production — production has real accumulated data (`DOBJobFilings` ~13,946
+rows under active daily ingestion, `HPD_Violations` ~112,271 rows,
+`IngestionLogs` history), unlike staging, which turned out to have nothing
+but seeded test fixtures. Chosen approach instead: **baseline the single
+squashed `20260911165155_InitialCreate` migration into
+`dbo.__EFMigrationsHistory`** — the exact same zero-DDL, proven-safe pattern
+already used for item 0.4 — rather than executing any `CREATE TABLE`/
+`DROP TABLE` against a live, populated database. This is sound specifically
+because `Migrate()`'s pending-migration check is a pure `MigrationId`
+string-diff against the history table; it never introspects the live schema,
+so once baselined, a migration is skipped regardless of what the real schema
+looks like (verified by an independent design review before finalizing this
+approach).
+
+Done so far as part of scoping:
+- **`DobViolation` entity fixed** (`Data/Db9f8beeKonxdevContext.PermitIntel.cs`):
+  added `.ToTable("DobBisViolations", "dbo", tb => tb.ExcludeFromMigrations())`
+  — `dbo.DobBisViolations` is a synonym (see the `DobBisViolations` entry
+  above), and **synonyms cannot take DDL** (`ALTER TABLE`/`CREATE INDEX` fail
+  outright against one, even though `SELECT`/`INSERT`/`UPDATE`/`DELETE`
+  resolve through it fine) — without this, the next migration that touches
+  `DobViolation` at all would hard-fail against production the moment it
+  runs. Also fixed two bare `HasColumnType("varchar")` calls (`isn_dob_bis_viol`,
+  `boro`) to their real lengths (`varchar(20)`, `varchar(5)`, confirmed via
+  schema-truth) — doesn't affect `Migrate()`'s safety, but ordinary
+  queries/`SaveChanges` read the current C# model at runtime, so the bare
+  type was a real parameter-sizing correctness gap independent of the
+  migration question. Verified via `dotnet ef migrations
+  has-pending-model-changes` (connection string overridden to LocalDB, never
+  `appsettings.json`) that this doesn't introduce a new pending migration —
+  "No changes have been made to the model since the last migration." Build
+  and `KonXProWebApp.Tests` both clean (156/0/4, same as baseline).
+- **`_tools/schema-truth/schema-truth.sql` extended** with: one comprehensive
+  `sys.objects`/`sys.schemas` query covering all 12 `InitialCreate` tables +
+  5 views at once (does it exist, as what — table/view/synonym — in which
+  schema), generalizing the `DobBisViolations` synonym discovery (which was
+  found reactively, one table at a time, after a `CREATE TABLE` failure —
+  see that entry above) so the same class of miss can't repeat for
+  `ServiceRequests311`, `HomeImprovementContractors`, `BlogContent`,
+  `BlogFeedSources`, `ECBViolations`; a matching all-names `sys.synonyms`
+  check; full column shapes for the six tables never yet compared against
+  `InitialCreate` (`DOBJobFilings` — ~90 columns — `ServiceRequests311`,
+  `HomeImprovementContractors`, `ECBViolations`, `BlogContent`,
+  `BlogFeedSources`); and a check for whether `SavedLeads` already has
+  `FK_SavedLeads_DOBJobFilings_DobjobFilingId`.
+
+**Not yet done — waiting on the extended schema-truth capture's results
+before any of this can be finalized:**
+- `BlogContent`/`BlogFeedSources` are confirmed live, actively-used features
+  (real CRUD pages: `EditBlogContent.razor`, `AddBlogContent.razor`,
+  `BlogContents.razor`, `BlogFeedSources.razor`) not mentioned anywhere in
+  CLAUDE.md's page map — almost certainly exist on production, but
+  unconfirmed where/how (`dbo` real table? synonym? something else?).
+  `ECBViolations` has no ingestion path at all (per the PR #45 audit) — its
+  production existence is genuinely unknown, not just unverified.
+- **A missing table is a different failure class from column drift**, because
+  a migration baselines atomically — `InitialCreate` can't be "half"
+  baselined. If `ECBViolations` (or anything else) turns out to be genuinely
+  absent, baselining anyway would tell EF "this exists" when it doesn't,
+  surfacing later as a runtime `Invalid object name`, not caught at migrate
+  time. The fix in that case: split `InitialCreate` before baselining —
+  remove that table's block, add a small follow-up migration containing just
+  its `CreateTable`, baseline the now-accurate `InitialCreate`, let
+  `dotnet ef database update` actually run the small migration for real (a
+  genuine, narrow, reviewable DDL op).
+- For any table with real column-level drift only: a narrow, transaction-
+  wrapped `ALTER TABLE`/`ALTER COLUMN` for just that delta — never a
+  drop-and-recreate — reviewed the same way as item 0.4 (verify-before-commit
+  `SELECT`, explicit `COMMIT`/`ROLLBACK`).
+- Once every table's disposition is settled: the actual baseline `INSERT`
+  (`VALUES ('20260911165155_InitialCreate', '9.0.20')`), transaction-wrapped
+  and reviewed the same way as item 0.4.
+- Before touching production at all: two local rehearsals — an isolated
+  proof (empty LocalDB, only a hand-built `__EFMigrationsHistory` with the
+  one baseline row, confirm `Migrate()` says "No migrations were applied"
+  even with zero real tables present, demonstrating the safety property is
+  purely history-table-driven) and a full schema-fidelity rehearsal (a
+  throwaway database matching production's *verified* real shape, same
+  baseline, run the actual app's `Migrate()` locally, confirm no exception).
+- **Explicitly deferred, not part of this rebuild**: flipping
+  `Program.cs:105`'s `permitDb.Database.EnsureCreated()` to
+  `permitDb.Database.Migrate()` (the rest of item 2.4) stays its own later
+  decision, with its own build/test/deploy cycle — bundling it into this
+  rebuild would conflate a one-time metadata write with a permanent change to
+  every future startup's behavior.
 
 ## Revised critical path
 
@@ -645,6 +726,6 @@ own explicit go-ahead.
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 Staging rebuild — done AND verified healthy for real (2026-09-13): Subscriptions=4, all 5 views present, clean restart
-Production rebuild — precondition (staging healthy) met, 0.4 no longer blocking; still needs its own explicit go-ahead
+Production rebuild — scoped 2026-09-19 (baseline-only strategy, not staging's drop-and-recreate); DobViolation model fixed + schema-truth extended; waiting on extended verification results before the baseline INSERT can be finalized
 4.1, 4.2, 4.3, 4.4 (independent, untouched by this pass)
 ```
