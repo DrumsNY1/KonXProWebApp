@@ -203,6 +203,23 @@ at either signal above — if `modify_date`/`UpdatedAt` have moved past
 be checked at that point for "No migrations were applied" vs. "An exception
 occurred while migrating or seeding the database on startup."
 
+**4.2 — removed the three excluded dead files.** `ClaudeDobFilings.razor`,
+`EditDobjobFiling.razor`, `HighTierDashboard.razor`, and the two matching
+`.razor.cs` code-behind files, all deleted, along with their now-pointless
+`<Compile Remove>`/`<Content Remove>` entries in `KonXProWebApp.csproj`.
+Verified before deleting, not just trusted from this document's own claim:
+`ClaudeDobFilings.razor` declares the identical route
+(`@page "/view-dobjob-filing"`) as the live `ViewDobjobFiling.razor`, which
+raised the question of whether `<Content Remove>` alone actually excludes a
+`.razor` file from Razor component compilation (as opposed to just static-file
+copying) — if it didn't, this would have been a live ambiguous-route bug, not
+dead code. Confirmed empirically with a build before touching anything: 0
+errors, no ambiguous-route failure, and neither of the two files (nor their
+routes) appear anywhere in the build output, so the exclusion genuinely works
+as documented. Rebuilt and ran `KonXProWebApp.Tests` after deleting: build
+clean, 156 passed / 0 failed / 4 skipped (pre-existing E2E skips, no live
+host) — identical to the pre-deletion baseline plus the five fewer files.
+
 **2.1 — HpdViolations drift.** This item's premise was already stale by the
 time it was investigated: `HpdViolation` is present and correctly mapped in
 `db_9f8bee_konxdevContextModelSnapshot.cs`. Confirmed clean by regenerating
@@ -391,11 +408,6 @@ if the raw-DDL startup block is retired for good in 2.4.
 
 Extend the PR workflow to build the web app. Whether to automate the Plesk
 Web Deploy is a separate decision with a rollback question attached.
-
-### 4.2 — Remove excluded dead files
-
-`ClaudeDobFilings.razor`, `EditDobjobFiling.razor` and `HighTierDashboard.razor`
-are excluded from compilation in the csproj but read as live code.
 
 ### 4.3 — xunit version alignment
 

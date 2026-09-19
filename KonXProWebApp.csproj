@@ -8,8 +8,6 @@
     <UserSecretsId>24c95f58-efc8-4842-8097-a7f117bf3ee0</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Components\Pages\ClaudeDobFilings.razor.cs" />
-    <Compile Remove="Components\Pages\EditDobjobFiling.razor.cs" />
     <Compile Remove="KonXProWebApp.Functions\**" />
     <Content Remove="KonXProWebApp.Functions\**" />
     <EmbeddedResource Remove="KonXProWebApp.Functions\**" />
@@ -47,11 +45,6 @@
     <Content Remove="logs\**" />
     <EmbeddedResource Remove="logs\**" />
     <None Remove="logs\**" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Remove="Components\Pages\ClaudeDobFilings.razor" />
-    <Content Remove="Components\Pages\EditDobjobFiling.razor" />
-    <Content Remove="Components\Pages\HighTierDashboard.razor" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KonXProWebApp.Integration.Tests" />
