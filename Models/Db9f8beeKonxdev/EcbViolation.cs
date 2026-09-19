@@ -15,109 +15,125 @@ namespace KonXProWebApp.Models.db_9f8bee_konxdev
 
         [Column("isn_dob_bis_extract")]
         [Required]
+        [StringLength(20)]
         public string IsnDobBisExtract { get; set; }
 
         [Column("ecb_violation_number")]
         [Required]
+        [StringLength(20)]
         public string EcbViolationNumber { get; set; }
 
         [Column("ecb_violation_status")]
-        [Required]
+        [StringLength(20)]
         public string EcbViolationStatus { get; set; }
 
+        // Real column, confirmed via schema-truth 2026-09-19 - was entirely
+        // missing from this model before. See REMEDIATION.md.
+        [Column("dob_violation_number")]
+        [StringLength(50)]
+        public string DobViolationNumber { get; set; }
+
         [Column("bin")]
-        [Required]
+        [StringLength(20)]
         public string Bin { get; set; }
 
+        // Real column is varchar(5), nullable - value converter below stores
+        // this as a string, matching DobViolation.Boro's established pattern.
         [Column("boro")]
-        [Required]
-        public int Boro { get; set; }
+        public int? Boro { get; set; }
 
         [Column("block")]
-        [Required]
+        [StringLength(10)]
         public string Block { get; set; }
 
         [Column("lot")]
-        [Required]
+        [StringLength(10)]
         public string Lot { get; set; }
 
+        // Real column is varchar(8) YYYYMMDD, nullable - value converter
+        // below matches DobViolation.IssueDate's established pattern.
         [Column("hearing_date")]
-        [Required]
-        public DateTime HearingDate { get; set; }
+        public DateTime? HearingDate { get; set; }
 
         [Column("hearing_time")]
-        [Required]
+        [StringLength(4)]
         public string HearingTime { get; set; }
 
         [Column("served_date")]
-        [Required]
-        public DateTime ServedDate { get; set; }
+        public DateTime? ServedDate { get; set; }
 
         [Column("issue_date")]
-        [Required]
-        public DateTime IssueDate { get; set; }
+        public DateTime? IssueDate { get; set; }
 
         [Column("severity")]
-        [Required]
+        [StringLength(20)]
         public string Severity { get; set; }
 
         [Column("violation_type")]
-        [Required]
+        [StringLength(50)]
         public string ViolationType { get; set; }
 
         [Column("respondent_name")]
-        [Required]
+        [StringLength(100)]
         public string RespondentName { get; set; }
 
         [Column("respondent_house_number")]
-        [Required]
+        [StringLength(20)]
         public string RespondentHouseNumber { get; set; }
 
         [Column("respondent_street")]
-        [Required]
+        [StringLength(100)]
         public string RespondentStreet { get; set; }
 
         [Column("respondent_city")]
-        [Required]
+        [StringLength(50)]
         public string RespondentCity { get; set; }
 
         [Column("respondent_zip")]
-        [Required]
+        [StringLength(10)]
         public string RespondentZip { get; set; }
 
+        // Real column is the deprecated SQL Server `text` type - kept as
+        // `string` in C#, mapped explicitly below since EF's convention
+        // default (nvarchar(max)) doesn't match.
         [Column("violation_description")]
-        [Required]
         public string ViolationDescription { get; set; }
 
         [Column("penality_imposed")]
-        [Required]
-        public decimal PenalityImposed { get; set; }
+        public decimal? PenalityImposed { get; set; }
 
         [Column("amount_paid")]
-        [Required]
-        public decimal AmountPaid { get; set; }
+        public decimal? AmountPaid { get; set; }
 
         [Column("balance_due")]
-        [Required]
-        public decimal BalanceDue { get; set; }
+        public decimal? BalanceDue { get; set; }
 
         [Column("infraction_code1")]
-        [Required]
+        [StringLength(10)]
         public string InfractionCode1 { get; set; }
 
         [Column("section_law_description1")]
-        [Required]
+        [StringLength(200)]
         public string SectionLawDescription1 { get; set; }
 
         [Column("aggravated_level")]
-        [Required]
+        [StringLength(5)]
         public string AggravatedLevel { get; set; }
 
         [Column("hearing_status")]
-        [Required]
+        [StringLength(50)]
         public string HearingStatus { get; set; }
 
         [Column("certification_status")]
+        [StringLength(50)]
         public string CertificationStatus { get; set; }
+
+        // Real columns, confirmed via schema-truth 2026-09-19 - both were
+        // entirely missing from this model before. See REMEDIATION.md.
+        [Column("created_date")]
+        public DateTime? CreatedDate { get; set; }
+
+        [Column("modified_date")]
+        public DateTime? ModifiedDate { get; set; }
     }
 }
