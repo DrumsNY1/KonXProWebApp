@@ -98,16 +98,54 @@ public partial class db_9f8bee_konxdevContext
         {
             // dbo.ECBViolations is also a synonym pointing at
             // konx_admin.ECBViolations - same reasoning as DobViolation
-            // above. Confirmed via schema-truth 2026-09-19: the real table's
-            // columns differ extensively from this model (extra columns
-            // dob_violation_number/created_date/modified_date, several
-            // varchar/decimal(10,2) columns where the model expects
-            // int/datetime2/decimal(18,2)) - a separate, larger data-model
-            // correctness gap logged in REMEDIATION.md, out of scope for the
-            // migration-exclusion fix here. Excluding from migrations is
-            // needed regardless of that drift, for the same "synonyms can't
-            // take DDL" reason.
+            // above.
             entity.ToTable("ECBViolations", "dbo", tb => tb.ExcludeFromMigrations());
+
+            // Boro: real column is varchar(5), nullable - same int?<->string
+            // conversion pattern as DobViolation.Boro, reusing the same
+            // helper. Null-safe versions since this column is nullable here
+            // (DobViolation's real column is NOT NULL, so it doesn't need
+            // null handling).
+            entity.Property(e => e.Boro)
+                .HasConversion(
+                    v => v.HasValue ? v.Value.ToString() : null,
+                    v => string.IsNullOrEmpty(v) ? (int?)null : ConvertBoroToInt(v)
+                )
+                .HasColumnType("varchar(5)");
+
+            // HearingDate/ServedDate/IssueDate: real columns are varchar(8)
+            // YYYYMMDD, nullable - same DateTime?<->string conversion
+            // pattern as DobViolation.IssueDate, null-safe since these are
+            // nullable here (DobViolation's is NOT NULL).
+            entity.Property(e => e.HearingDate)
+                .HasConversion(
+                    v => v.HasValue ? v.Value.ToString("yyyyMMdd") : null,
+                    v => string.IsNullOrWhiteSpace(v) ? (DateTime?)null : System.DateTime.ParseExact(v.Trim(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)
+                )
+                .HasColumnType("varchar(8)");
+
+            entity.Property(e => e.ServedDate)
+                .HasConversion(
+                    v => v.HasValue ? v.Value.ToString("yyyyMMdd") : null,
+                    v => string.IsNullOrWhiteSpace(v) ? (DateTime?)null : System.DateTime.ParseExact(v.Trim(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)
+                )
+                .HasColumnType("varchar(8)");
+
+            entity.Property(e => e.IssueDate)
+                .HasConversion(
+                    v => v.HasValue ? v.Value.ToString("yyyyMMdd") : null,
+                    v => string.IsNullOrWhiteSpace(v) ? (DateTime?)null : System.DateTime.ParseExact(v.Trim(), "yyyyMMdd", System.Globalization.CultureInfo.InvariantCulture)
+                )
+                .HasColumnType("varchar(8)");
+
+            // Real column is the deprecated SQL Server `text` type.
+            entity.Property(e => e.ViolationDescription).HasColumnType("text");
+
+            // Real columns are decimal(10,2), not EF's unconfigured default
+            // of decimal(18,2).
+            entity.Property(e => e.PenalityImposed).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.AmountPaid).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.BalanceDue).HasColumnType("decimal(10,2)");
         });
 
         builder.Entity<HomeImprovementContractor>(entity =>

@@ -725,29 +725,62 @@ The database is already up to date"** — the exact confirmation this item
 needs, demonstrating the migration set is internally consistent end-to-end,
 not just individually plausible.
 
-**Two new follow-up items logged, deliberately not fixed as part of this
-scoping** (neither blocks the baseline — `Migrate()`'s safety is purely
-history-table-driven, confirmed earlier in this section):
-- `DOBJobFilings`' model declares nearly every string column as
-  `nvarchar(max)`; production's real columns are mostly specific lengths
-  (`nvarchar(255)`, `nvarchar(50)`, etc.), and `InitialCost`/`TotalEstFee` are
-  `money` in reality vs. `decimal(18,2)` in the model — a real
-  parameter-sizing correctness concern for `SaveChanges`, independent of
-  migrations, but a big enough surface (dozens of columns) that fixing it is
-  its own task, not a scoping side-effect.
-- `EcbViolation.cs`'s model barely resembles the real `ECBViolations` table
-  — extra real columns (`dob_violation_number`, `created_date`,
-  `modified_date`) the model doesn't know about, and several outright type
-  mismatches (`Boro` modeled as `int`, really `varchar(5)`;
-  `HearingDate`/`ServedDate`/`IssueDate` modeled as `DateTime`, really
-  `varchar(8)`; `ViolationDescription` really the deprecated `TEXT` type).
-  Moot for migrations now that it's excluded, but the model is effectively
-  unusable if anything ever tries to query this entity — matches the
-  already-known fact that no ingestion path writes to it today.
+**Both follow-up items fixed 2026-09-19** (neither was blocking the
+baseline — `Migrate()`'s safety is purely history-table-driven, confirmed
+earlier in this section — but both were real runtime-correctness gaps worth
+closing):
+
+- **`DOBJobFilings`** (`Models/Db9f8beeKonxdev/DobjobFiling.cs`): added
+  `[StringLength(N)]` to every string column matching its real captured
+  length (`nvarchar(255)`, `nvarchar(50)`, etc. — dozens of columns; a
+  handful that are genuinely `nvarchar(max)` in reality were left alone), and
+  `[Column(TypeName = "money")]` on `InitialCost`/`TotalEstFee` (real type,
+  vs. EF's unconfigured `decimal(18,2)` default). Leaves the model with a
+  "pending model change" relative to `InitialCreate`'s own embedded snapshot
+  — expected and left alone deliberately: generating and applying the
+  resulting ~75-column `AlterColumn` migration for real is a separate, much
+  bigger decision than fixing the model's correctness, and isn't needed for
+  the baseline (which doesn't care what `InitialCreate`'s body says once
+  baselined). A future migration for any other real change will naturally
+  pick this up too.
+- **`EcbViolation`** (`Models/Db9f8beeKonxdev/EcbViolation.cs` +
+  `Data/Db9f8beeKonxdevContext.PermitIntel.cs`): the model barely resembled
+  the real table. Added the two missing real columns (`CreatedDate`,
+  `ModifiedDate`) and one previously-undiscovered one
+  (`DobViolationNumber`); fixed `Boro` (`int?`, was non-nullable `int`) and
+  `HearingDate`/`ServedDate`/`IssueDate` (`DateTime?`, were non-nullable
+  `DateTime`) using the exact same `HasConversion` int/DateTime-as-string
+  pattern already proven for `DobViolation.Boro`/`IssueDate` — the C#
+  property types didn't need to change, only the value converter, which
+  meant **zero changes needed to the `/ecb-violations` Razor pages** despite
+  them binding `RadzenNumeric`/`RadzenDatePicker` directly to these
+  properties. Removed `[Required]` from every column that's actually
+  nullable in reality (nearly all of them) and fixed
+  `PenalityImposed`/`AmountPaid`/`BalanceDue` to `decimal(10,2)` (real
+  precision, vs. the default `decimal(18,2)`). This was worth doing (not just
+  logging) once schema-truth surfaced that `/ecb-violations` has real,
+  live CRUD pages (`EcbViolations.razor`, `AddEcbViolation.razor`,
+  `EditEcbViolation.razor`) — another feature missing from CLAUDE.md's page
+  map — so an unusable model here was a live gap, not a dormant one.
+
+**Verification note, stated plainly rather than glossed over**: build and
+`KonXProWebApp.Tests` both clean (156/0/4), and `has-pending-model-changes`
+correctly shows a pending change for `DOBJobFilings` only (expected,
+`EcbViolation` is excluded from migrations so its changes don't register the
+same way). **Not done**: full browser verification of the
+`/ecb-violations` add/edit pages against a live database. That would need
+wiring a running app instance to a real connection string, and right after
+today's near-miss this felt like the wrong moment to improvise a new way of
+doing that. Mitigating factors: the nullable-type change follows an
+already-proven pattern byte-for-byte, and this is a low-traffic internal
+admin page with no ingestion path writing to it today. Worth a real
+browser check next time someone's already got a safe local environment
+wired up for this table.
 - Minor, very low priority given `SavedLeads` has 0 rows currently: the real
   `FK_SavedLeads_DOBJobFilings` foreign key exists but is named differently
   from what `InitialCreate` expects (`FK_SavedLeads_DOBJobFilings_DobjobFilingId`)
-  and is `NO_ACTION` on delete rather than `CASCADE`.
+  and is `NO_ACTION` on delete rather than `CASCADE`. Still open, still not
+  fixed — didn't come up naturally while working on the two items above.
 
 **Final baseline script, ready to run** — combines the `InitialCreate`
 baseline with actually creating the two genuinely-missing tables, in one
