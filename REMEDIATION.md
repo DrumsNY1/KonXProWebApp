@@ -1,6 +1,6 @@
 # KonXProWebApp — remediation status and plan
 
-Living document. Last updated 2026-09-18.
+Living document. Last updated 2026-09-19.
 
 Phase 0 is complete. Phase 1 is complete. Items 2.0, 2.1, 2.2, and 3.1 are
 done in code (see "Rebuild plan" below) but **not yet applied to any real
@@ -220,6 +220,31 @@ as documented. Rebuilt and ran `KonXProWebApp.Tests` after deleting: build
 clean, 156 passed / 0 failed / 4 skipped (pre-existing E2E skips, no live
 host) — identical to the pre-deletion baseline plus the five fewer files.
 
+**4.3 — xunit version alignment.** Bumped `xunit` and `xunit.runner.visualstudio`
+from 2.5.3 to 2.8.0 in `Directory.Packages.props` — 2.8.0 specifically because
+it's the exact `xunit.extensibility.core` version `bunit` 1.36.0 and
+`Microsoft.Playwright.Xunit` 1.50.0 were already pulling in transitively, so
+this closes the gap rather than introducing a third version into the mix.
+`xunit` is centralized, so the change reaches all four test projects even
+though only `KonXProWebApp.Tests` references `bunit`/`Playwright.Xunit`
+directly — verified each one rather than trusting a solution-wide build alone,
+since silent test discovery failures were the specific risk this item called
+out:
+- `dotnet restore`/`build` on the whole solution: no NU1608 warning, 0 errors.
+- `KonXProWebApp.Tests`: 156 passed / 0 failed / 4 skipped — identical to the
+  pre-bump baseline.
+- `KonXProWebApp.Functions.Tests`: 64 tests discovered (not zero), 56 passed;
+  the 8 failures are `Docker is either not running or misconfigured`
+  (Testcontainers), pre-existing and unrelated — this machine has no Docker
+  Desktop running, same gap noted elsewhere in this document.
+- `KonXProWebApp.Integration.Tests`: 21 tests discovered, all 21 fail on the
+  same Docker/Testcontainers unavailability — expected, this project is
+  entirely Testcontainers-based and was already known to need a Docker-capable
+  environment (see 3.1).
+- `KonXProWebApp.E2E.Tests`: all 11 Playwright journeys discovered cleanly via
+  `--list-tests` (not executed — needs a live host, per this project's own
+  requirements, unrelated to this change).
+
 **2.1 — HpdViolations drift.** This item's premise was already stale by the
 time it was investigated: `HpdViolation` is present and correctly mapped in
 `db_9f8bee_konxdevContextModelSnapshot.cs`. Confirmed clean by regenerating
@@ -409,11 +434,6 @@ if the raw-DDL startup block is retired for good in 2.4.
 Extend the PR workflow to build the web app. Whether to automate the Plesk
 Web Deploy is a separate decision with a rollback question attached.
 
-### 4.3 — xunit version alignment
-
-`xunit` is pinned at 2.5.3 while `bunit` and `Microsoft.Playwright.Xunit` pull in
-`xunit.extensibility.core` 2.8.0 (NU1608 on every build). Moving all four test
-projects to xunit 2.8.x risks test discovery, so do it on its own.
 
 ### 4.4 — CLOSED, false alarm: `HPD_Violations` is fine
 
