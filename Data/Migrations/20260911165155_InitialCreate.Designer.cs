@@ -229,66 +229,6 @@ namespace KonXProWebApp.Data.Migrations
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
-            modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.BlogContent", b =>
-                {
-                    b.Property<int>("ContentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("ContentID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContentId"));
-
-                    b.Property<DateTime?>("CompletionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("SourceId")
-                        .HasColumnType("int")
-                        .HasColumnName("SourceID");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("ContentId");
-
-                    b.ToTable("BlogContent", "dbo", t =>
-                        {
-                            t.HasTrigger("BlogContent_Trigger");
-                        });
-
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
-                });
-
-            modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.BlogFeedSource", b =>
-                {
-                    b.Property<int>("FeedId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("FeedID");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeedId"));
-
-                    b.Property<string>("FeedCategory")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FeedName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("FeedUrl")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("FeedId");
-
-                    b.ToTable("BlogFeedSources", "dbo", t =>
-                        {
-                            t.HasTrigger("BlogFeedSources_Trigger");
-                        });
-
-                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
-                });
-
             modelBuilder.Entity("KonXProWebApp.Models.db_9f8bee_konxdev.DobViolation", b =>
                 {
                     b.Property<string>("Id")
