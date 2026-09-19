@@ -245,6 +245,19 @@ out:
   `--list-tests` (not executed — needs a live host, per this project's own
   requirements, unrelated to this change).
 
+**4.1 — CLOSED, false alarm: the web app already builds in CI.** This item's
+premise was stale, same class of issue as several others found this pass.
+[`build-and-test.yml:31`](.github/workflows/build-and-test.yml:31) runs
+`dotnet build KonXProWebApp.sln --configuration Release --no-restore` — the
+whole solution, including `KonXProWebApp.csproj` — so a web app compile
+failure already fails the PR check today. What's genuinely still true (from
+CLAUDE.md, unchanged): deployment is not automated, and CI never runs
+`dotnet publish`, which can fail in ways a plain build won't catch (web.config
+transforms, static asset bundling). Presented as an explicit choice rather
+than assumed: user chose to close this as already-satisfied rather than add a
+`publish` step or a build-artifact step. Revisit only if a `publish`-specific
+failure actually happens in production and a CI check would have caught it.
+
 **2.1 — HpdViolations drift.** This item's premise was already stale by the
 time it was investigated: `HpdViolation` is present and correctly mapped in
 `db_9f8bee_konxdevContextModelSnapshot.cs`. Confirmed clean by regenerating
@@ -428,11 +441,6 @@ as part of this pass — the views were instead excluded from migrations
 entirely (`ToView()`) and left as raw DDL in `Program.cs`, which was enough to
 fix the real bug (item 2.2) without also relocating working code. Revisit only
 if the raw-DDL startup block is retired for good in 2.4.
-
-### 4.1 — Build the web app in CI · decision needed
-
-Extend the PR workflow to build the web app. Whether to automate the Plesk
-Web Deploy is a separate decision with a rollback question attached.
 
 
 ### 4.4 — CLOSED, false alarm: `HPD_Violations` is fine
