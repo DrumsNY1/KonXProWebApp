@@ -53,6 +53,17 @@
     versions actually being restored. The csproj files previously asked for
     1.35.6 and 1.49.0, which NuGet was already rounding up because those exact
     versions are not available on the feed. These numbers reflect reality.
+
+    xunit / xunit.runner.visualstudio bumped from 2.5.3 to 2.8.0 (item 4.3):
+    xunit.core 2.5.3 requires xunit.extensibility.core (= 2.5.3) exactly, but
+    bunit 1.36.0 and Microsoft.Playwright.Xunit 1.50.0 both pull in
+    xunit.extensibility.core 2.8.0 transitively, which was a version conflict
+    (NU1608) on every restore. 2.8.0 was picked specifically because it's the
+    exact version already being resolved transitively - not a newer version,
+    just closing the gap between what was declared and what NuGet was already
+    using. Only KonXProWebApp.Tests references bunit/Playwright.Xunit, but
+    this version is centralized, so it affects all four test projects -
+    verify test discovery in each one, not just that the build succeeds.
   -->
   <ItemGroup>
     <PackageVersion Include="bunit" Version="1.36.0" />
@@ -64,8 +75,8 @@
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Testcontainers.MsSql" Version="3.10.0" />
-    <PackageVersion Include="xunit" Version="2.5.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <PackageVersion Include="xunit" Version="2.8.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.0" />
   </ItemGroup>
 
 </Project>

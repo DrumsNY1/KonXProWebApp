@@ -300,11 +300,6 @@ data changes go through the paths described in the Data section, reviewed by a h
 
 ## Known issues to be aware of
 
-- **`xunit` is behind its own transitive dependencies (NU1608).** `xunit` is pinned at
-  2.5.3, but `bunit` and `Microsoft.Playwright.Xunit` pull in
-  `xunit.extensibility.core` 2.8.0. The build warns on every restore. Fixing it means
-  moving all four test projects to xunit 2.8.x, which risks test discovery — do it as
-  its own change, not as a side effect.
 - **The solution is mixed-target.** Web app and all four test projects are net9.0;
   `KonXProWebApp.Functions` is net8.0. Any pipeline or tool that builds the whole
   solution needs both SDKs installed. The deploy workflow pins `DOTNET_VERSION: '8.0'`,
