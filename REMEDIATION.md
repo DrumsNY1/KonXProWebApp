@@ -855,11 +855,21 @@ unsafe, but that flip (the rest of item 2.4) is still its own separate,
 undone decision.
 
 **Still open:**
-- **Staging follow-up**, low urgency: a single-row version of the same
-  `AddBlogTables` insert (staging's `InitialCreate` is already for-real
-  applied from the 2026-09-12 rebuild, so only the new migration needs
-  baselining there — staging already has real `BlogContent`/`BlogFeedSources`
-  tables from that original rebuild).
+- **Staging follow-up: done 2026-09-19.** Verified first (staging's
+  `dbo.__EFMigrationsHistory` had exactly the expected 2 rows —
+  `CreateIdentitySchema`, `InitialCreate` — and `BlogContent`/
+  `BlogFeedSources` already existed there matching `AddBlogTables`'
+  definition exactly, since staging was built directly from the original
+  unsplit migration). Ran the single-row baseline insert for
+  `20260919124444_AddBlogTables`, confirmed 3 rows before committing.
+  Staging and production now agree on migration history for this context.
+  One harmless, noted-not-fixed aside: staging's `SavedLeads` FK is still
+  named `FK_SavedLeads_DOBJobFilings_DobjobFilingId` with `CASCADE` (the
+  original convention-based shape) — the *opposite* mismatch from
+  production, since the model was changed to match production's real
+  `FK_SavedLeads_DOBJobFilings`/`NO_ACTION` naming. `SavedLeads` has 0 rows
+  on both databases, and `Migrate()` doesn't care about constraint names, so
+  left alone.
 - **Item 2.4's `Migrate()` switch** (`Program.cs:105`,
   `permitDb.Database.EnsureCreated()` → `Migrate()`) — now technically
   unblocked (its precondition is met), but stays its own later decision with
@@ -901,6 +911,6 @@ command, every time — never assumed to carry over from an earlier one.
 2.0, 2.1, 2.2, 2.3, 3.1 — done
 2.4 -> 3.2 (optional) — worth reconsidering now that 3.1 has run green in real CI
 Staging rebuild — done AND verified healthy for real (2026-09-13): Subscriptions=4, all 5 views present, clean restart
-Production rebuild — DONE, run against production 2026-09-19 and confirmed: 8-row migration history, real BlogContent/BlogFeedSources tables now live. Staging follow-up (1-row insert) and item 2.4's Migrate() switch both still open, independently
+Production rebuild — DONE, run against both production and staging 2026-09-19: 8-row/3-row migration histories respectively, both now agree, real BlogContent/BlogFeedSources tables live everywhere. Only item 2.4's Migrate() switch remains, its own independent decision
 4.1, 4.2, 4.3, 4.4 (independent, untouched by this pass)
 ```
