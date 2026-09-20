@@ -61,7 +61,8 @@
     (NU1608) on every restore. 2.8.0 was picked specifically because it's the
     exact version already being resolved transitively - not a newer version,
     just closing the gap between what was declared and what NuGet was already
-    using. Only KonXProWebApp.Tests references bunit/Playwright.Xunit, but
+    using. KonXProWebApp.Tests references bunit and KonXProWebApp.E2E.Tests
+    references Playwright.Xunit, but
     this version is centralized, so it affects all four test projects -
     verify test discovery in each one, not just that the build succeeds.
   -->
@@ -71,7 +72,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.20" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.20" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.48.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.50.0" />
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Testcontainers.MsSql" Version="3.10.0" />
