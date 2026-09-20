@@ -15,6 +15,7 @@
     <Compile Remove="KonXProWebApp.Tests\**" />
     <Content Remove="KonXProWebApp.Tests\**" />
     <EmbeddedResource Remove="KonXProWebApp.Tests\**" />
+
     <None Remove="KonXProWebApp.Tests\**" />
     <Compile Remove="KonXProWebApp.Functions.Tests\**" />
     <Content Remove="KonXProWebApp.Functions.Tests\**" />
