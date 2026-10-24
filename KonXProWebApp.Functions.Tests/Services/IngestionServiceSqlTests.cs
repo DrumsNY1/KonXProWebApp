@@ -40,6 +40,11 @@ public class IngestionServiceSqlTests : IAsyncLifetime
         await using var schemaContext = new db_9f8bee_konxdevContext(dbOptions);
         await schemaContext.Database.EnsureCreatedAsync();
 
+        // HomeImprovementContractors is mapped with ExcludeFromMigrations() (it is a synonym in
+        // production), and EnsureCreated honours that, so the table is NOT created above.
+        // Create it explicitly, matching the HomeImprovementContractor entity's columns.
+        await CreateHomeImprovementContractorsTableAsync(_connectionString);
+
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -51,6 +56,45 @@ public class IngestionServiceSqlTests : IAsyncLifetime
     }
 
     public async Task DisposeAsync() => await _sql.DisposeAsync();
+
+    private static async Task CreateHomeImprovementContractorsTableAsync(string connectionString)
+    {
+        const string ddl = @"
+            IF OBJECT_ID(N'dbo.HomeImprovementContractors', N'U') IS NULL
+            CREATE TABLE dbo.HomeImprovementContractors (
+                Id int IDENTITY(1,1) NOT NULL CONSTRAINT PK_HomeImprovementContractors PRIMARY KEY,
+                LicenseNumber nvarchar(50) NULL,
+                BusinessName nvarchar(255) NULL,
+                DbaTradeName nvarchar(255) NULL,
+                BusinessUniqueId nvarchar(50) NULL,
+                LicenseStatus nvarchar(50) NULL,
+                LicenseIssueDate datetime2 NULL,
+                LicenseExpirationDate datetime2 NULL,
+                ContactPhoneNumber nvarchar(50) NULL,
+                AddressBuilding nvarchar(100) NULL,
+                AddressStreetName nvarchar(255) NULL,
+                AddressCity nvarchar(100) NULL,
+                AddressState nvarchar(50) NULL,
+                AddressZip nvarchar(20) NULL,
+                Borough nvarchar(100) NULL,
+                IngestedAt datetime2 NOT NULL,
+                EmailAddress nvarchar(255) NULL,
+                SalesStatus nvarchar(50) NULL,
+                SalesNotes nvarchar(1000) NULL,
+                PostcardSent bit NOT NULL DEFAULT 0,
+                EmailSent bit NOT NULL DEFAULT 0,
+                CampaignCohort nvarchar(10) NULL,
+                CampaignVisited bit NOT NULL DEFAULT 0,
+                CampaignVisitedAt datetime2 NULL,
+                CampaignConverted bit NOT NULL DEFAULT 0,
+                CampaignConvertedAt datetime2 NULL
+            );";
+
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        await using var command = new SqlCommand(ddl, connection);
+        await command.ExecuteNonQueryAsync();
+    }
 
     [Fact]
     public async Task UpsertPermits_NewRecord_InsertsCorrectly()
