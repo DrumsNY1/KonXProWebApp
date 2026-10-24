@@ -12,6 +12,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Authorization;
 
+[Trait("Category", "Unit")]
 public class SubscriptionRequirementTests
 {
     [Theory]

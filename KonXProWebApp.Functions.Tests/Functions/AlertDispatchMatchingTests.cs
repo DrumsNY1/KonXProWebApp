@@ -3,6 +3,7 @@ using Xunit;
 
 namespace KonXProWebApp.Functions.Tests.Functions;
 
+[Trait("Category", "Unit")]
 public class AlertDispatchMatchingTests
 {
     [Fact]

@@ -6,6 +6,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Services;
 
+[Trait("Category", "Unit")]
 public class SubscriptionTierServiceTests : IDisposable
 {
  private readonly db_9f8bee_konxdevContext _context;

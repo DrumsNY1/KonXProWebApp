@@ -4,6 +4,8 @@ using Xunit;
 namespace KonXProWebApp.E2E.Tests.Journeys;
 
 [Collection("E2E")]
+[Trait("Category", "E2E")]
+[Trait("E2E", "Anonymous")]
 public class AnonymousAccessJourneyTests
 {
     private readonly PlaywrightFixture _fixture;

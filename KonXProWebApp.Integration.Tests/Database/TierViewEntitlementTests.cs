@@ -17,6 +17,7 @@ namespace KonXProWebApp.Integration.Tests.Database;
 /// are excluded from migrations by design, see TierViewDefinitions) so this test creates the views
 /// itself, using the exact same SQL Program.cs runs at startup.
 /// </summary>
+[Trait("Category", "Integration")]
 public class TierViewEntitlementTests : IClassFixture<SqlWebApplicationFactory>, IAsyncLifetime
 {
     private readonly SqlWebApplicationFactory _factory;

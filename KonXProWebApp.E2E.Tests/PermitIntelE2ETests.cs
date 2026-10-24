@@ -7,6 +7,8 @@ namespace KonXProWebApp.Tests.E2E;
 /// <summary>
 /// Playwright End-to-End browser UI test suite for NYC Permit Intel features.
 /// </summary>
+[Trait("Category", "E2E")]
+[Trait("E2E", "Manual")]
 public class PermitIntelE2ETests : PageTest
 {
     private const string BaseUrl = "https://localhost:5001"; // Or local dev server port

@@ -205,6 +205,25 @@ at either signal above — if `modify_date`/`UpdatedAt` have moved past
 be checked at that point for "No migrations were applied" vs. "An exception
 occurred while migrating or seeding the database on startup."
 
+**Third attempt, also inconclusive, 2026-09-19**: Plesk support's own
+administrative recycle (a separate, earlier support request, unrelated to
+any code deploy) — same two signals still frozen at 2026-09-08, no
+different from the two self-service attempts above. Three independent
+recycle mechanisms now show the identical null result. Working theory, not
+confirmed: an IIS application-pool recycle restarts the `w3wp.exe` reverse
+proxy, but for `hostingModel="OutOfProcess"` (per `web.config`), ANCM's
+actual child process (`dotnet.exe`) can have a lifecycle separate from the
+pool — recycling the pool doesn't guarantee the child dies. This doesn't
+fully explain why the `web.config` touch (ANCM's own documented file-watch
+trigger for recycling that exact child) also showed no effect, so treat this
+as a plausible lead, not a confirmed root cause. Given three different
+recycle mechanisms have all failed to show progress, further attempts to
+force a "recycle" specifically are not worth pursuing — the next real test
+is the actual Web Deploy for item 2.4 (in progress), which uses
+`app_offline.htm` and doesn't rely on any recycle mechanism succeeding: it
+forces the process to stop outright before the next request can start a
+fresh one.
+
 **4.2 — removed the three excluded dead files.** `ClaudeDobFilings.razor`,
 `EditDobjobFiling.razor`, `HighTierDashboard.razor`, and the two matching
 `.razor.cs` code-behind files, all deleted, along with their now-pointless

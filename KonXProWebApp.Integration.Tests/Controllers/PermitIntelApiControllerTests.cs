@@ -15,6 +15,7 @@ namespace KonXProWebApp.Integration.Tests.Controllers;
 /// [Authorize(Policy = "RequiresAgency")] gate on the controller (backed by
 /// SubscriptionAuthorizationHandler + a real subscription row in the database).
 /// </summary>
+[Trait("Category", "Integration")]
 public class PermitIntelApiControllerTests : IClassFixture<SqlWebApplicationFactory>, IAsyncLifetime
 {
     private readonly SqlWebApplicationFactory _factory;

@@ -22,6 +22,7 @@ namespace KonXProWebApp.Tests.Components;
 /// ApplicationAuthenticationStateProvider), so authenticated-user scenarios set it via reflection —
 /// there's no supported constructor/test seam for it otherwise.
 /// </summary>
+[Trait("Category", "Component")]
 public class SubscribeComponentTests : TestContext
 {
     private readonly db_9f8bee_konxdevContext _context;

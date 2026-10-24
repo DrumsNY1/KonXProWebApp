@@ -31,8 +31,19 @@ public class PlaywrightFixture : IAsyncLifetime
         Playwright.Dispose();
     }
 
+    /// <summary>
+    /// Set E2E_VIDEO_DIR to record every context to disk — used by CI to capture what the browser
+    /// actually saw when a journey fails. Videos are flushed when the context closes, so this needs
+    /// no per-test start/stop. Unset (the default, including local runs) records nothing.
+    /// </summary>
+    private static readonly string? VideoDir = Environment.GetEnvironmentVariable("E2E_VIDEO_DIR");
+
     public Task<IBrowserContext> NewContextAsync() =>
-        Browser.NewContextAsync(new BrowserNewContextOptions { IgnoreHTTPSErrors = true });
+        Browser.NewContextAsync(new BrowserNewContextOptions
+        {
+            IgnoreHTTPSErrors = true,
+            RecordVideoDir = string.IsNullOrWhiteSpace(VideoDir) ? null : VideoDir,
+        });
 }
 
 [CollectionDefinition("E2E")]

@@ -13,6 +13,7 @@ namespace KonXProWebApp.Tests.Services;
 /// Covers gaps not exercised by the original StripeServiceTests: missing-metadata handling,
 /// the full Stripe→local status mapping matrix, and unknown-tier/unknown-subscription edge cases.
 /// </summary>
+[Trait("Category", "Unit")]
 public class StripeServiceGapTests : IDisposable
 {
     private readonly db_9f8bee_konxdevContext _context;

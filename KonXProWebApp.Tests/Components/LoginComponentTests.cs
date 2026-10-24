@@ -10,6 +10,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Components;
 
+[Trait("Category", "Component")]
 public class LoginComponentTests : TestContext
 {
     public LoginComponentTests()

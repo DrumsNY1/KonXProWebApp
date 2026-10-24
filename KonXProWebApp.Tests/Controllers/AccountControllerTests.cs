@@ -4,6 +4,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Controllers;
 
+[Trait("Category", "Unit")]
 public class AccountControllerTests
 {
     [Fact]

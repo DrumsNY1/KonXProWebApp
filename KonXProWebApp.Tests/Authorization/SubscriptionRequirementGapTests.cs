@@ -16,6 +16,7 @@ namespace KonXProWebApp.Tests.Authorization;
 /// Covers gaps not exercised by the original SubscriptionRequirementTests: PastDue subscriptions,
 /// the top-tier (Agency) user succeeding against every lower policy, and unauthenticated principals.
 /// </summary>
+[Trait("Category", "Unit")]
 public class SubscriptionRequirementGapTests
 {
     [Fact]

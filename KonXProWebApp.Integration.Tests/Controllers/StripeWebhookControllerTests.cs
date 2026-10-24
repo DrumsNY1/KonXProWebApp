@@ -9,6 +9,7 @@ namespace KonXProWebApp.Integration.Tests.Controllers;
 /// Covers the branch where Stripe:WebhookSecret IS configured, so the controller uses
 /// EventUtility.ConstructEvent (which verifies the Stripe-Signature header) rather than ParseEvent.
 /// </summary>
+[Trait("Category", "Integration")]
 public class StripeWebhookSignedTests : IClassFixture<SqlWebApplicationFactory>, IAsyncLifetime
 {
     private readonly SqlWebApplicationFactory _factory;
@@ -55,6 +56,7 @@ public class StripeWebhookSignedTests : IClassFixture<SqlWebApplicationFactory>,
 /// Covers the branch where Stripe:WebhookSecret is NOT configured, so the controller falls back to
 /// EventUtility.ParseEvent with no signature verification — the documented behavior for local/dev use.
 /// </summary>
+[Trait("Category", "Integration")]
 public class StripeWebhookUnsignedTests : IClassFixture<SqlWebApplicationFactory>, IAsyncLifetime
 {
     private readonly SqlWebApplicationFactory _factory;

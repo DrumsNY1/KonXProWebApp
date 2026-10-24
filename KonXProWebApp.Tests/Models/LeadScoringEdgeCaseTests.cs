@@ -4,6 +4,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Models;
 
+[Trait("Category", "Unit")]
 public class LeadScoringEdgeCaseTests
 {
     [Fact]
