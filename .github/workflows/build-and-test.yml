@@ -1,57 +1,357 @@
-name: Build and Test
+# Build and test gate for KonXProWebApp.
+#
+# This workflow does NOT deploy anything, by design. It has no Azure credentials,
+# no OIDC permissions and no publish step. Deployment of the Functions project
+# lives in master_konxprofunctionapp.yml and is deliberately left alone; keeping
+# deploy and verification separate is intentional (see CLAUDE.md, "CI").
+name: Build and test
 
 on:
   pull_request:
-    branches:
-      - master
+    branches: [ master ]
   push:
-    branches:
-      - master
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 jobs:
   build-and-test:
+    name: Build + unit tests
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup .NET 8
+      # The solution is mixed-target: the web app and all four test projects are
+      # net9.0, while KonXProWebApp.Functions is net8.0. Both SDKs are required
+      # or the solution build fails on the Functions project. There is no
+      # global.json in this repo, so the SDK is not pinned to an exact patch.
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-      - name: Setup .NET 9
-        uses: actions/setup-dotnet@v4
+      # Central package management (Directory.Packages.props) means every version
+      # is declared in one file, so it alone is a sound cache key alongside the
+      # project files. There are no packages.lock.json files in this repo, so
+      # setup-dotnet's built-in cache cannot be used.
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
         with:
-          dotnet-version: '9.0.x'
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Restore
         run: dotnet restore KonXProWebApp.sln
 
+      # Warnings are NOT treated as errors. This is a pre-existing codebase that
+      # has never been built under a warning gate, so turning one on here would
+      # very likely fail the first run for reasons unrelated to any given change.
+      # Tightening that is its own piece of work.
       - name: Build
         run: dotnet build KonXProWebApp.sln --configuration Release --no-restore
 
+      # Projects are still invoked one per step -- that keeps each suite's trx file
+      # separate and stops the E2E project being built here at all. What each step
+      # RUNS is now chosen by Category trait rather than by project membership, so
+      # renaming or moving a class cannot silently drop it from CI. The convention
+      # guard in each project fails the build if a class carries no Category.
       - name: Unit tests
-        run: dotnet test KonXProWebApp.Tests --configuration Release --no-build
+        run: >
+          dotnet test KonXProWebApp.Tests/KonXProWebApp.Tests.csproj
+          --configuration Release --no-build
+          --filter "Category=Unit|Category=Component"
+          --logger "trx;LogFileName=unit.trx"
+          --results-directory ${{ github.workspace }}/TestResults
 
+      # Category=Integration is included here on purpose: IngestionServiceSqlTests
+      # lives in this project but spins up Testcontainers.MsSql. Running it here
+      # preserves exactly what this job ran before the traits were added; moving it
+      # to the advisory job would quietly weaken the gate.
       - name: Functions tests
-        run: dotnet test KonXProWebApp.Functions.Tests --configuration Release --no-build
+        run: >
+          dotnet test KonXProWebApp.Functions.Tests/KonXProWebApp.Functions.Tests.csproj
+          --configuration Release --no-build
+          --filter "Category=Unit|Category=Integration"
+          --logger "trx;LogFileName=functions.trx"
+          --results-directory ${{ github.workspace }}/TestResults
 
+      - name: Summarize test results
+        if: always()
+        run: python3 .github/workflows/scripts/trx-summary.py TestResults >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: TestResults/*.trx
+          if-no-files-found: warn
+
+  # Integration tests boot the real host against a throwaway SQL Server container
+  # (Testcontainers.MsSql -- confirmed in Infrastructure/SqlWebApplicationFactory.cs).
+  # They are ADVISORY for now: continue-on-error means a failure is reported but
+  # does not block the merge, because this job has no track record in CI and a
+  # container pull or timing problem should not stop work on day one.
+  #
+  # Remove continue-on-error once it has proven stable -- see REMEDIATION.md item
+  # 0.3. That matters before the Program.cs startup DDL block is touched
+  # (REMEDIATION item 2.4), because this is the only job that exercises
+  # application startup.
   integration-tests:
+    name: Integration tests (advisory)
     runs-on: ubuntu-latest
-    # Advisory, not a gate, until this has proven stable — see REMEDIATION.md item 0.3.
-    # It is the only job that exercises application startup, so it should become a real
-    # gate before the Program.cs startup DDL block is touched (REMEDIATION item 2.4).
     continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Setup .NET 9
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: |
+            8.0.x
+            9.0.x
 
-      - name: Restore
-        run: dotnet restore KonXProWebApp.Integration.Tests/KonXProWebApp.Integration.Tests.csproj
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
       - name: Integration tests
-        run: dotnet test KonXProWebApp.Integration.Tests --configuration Release
+        run: >
+          dotnet test KonXProWebApp.Integration.Tests/KonXProWebApp.Integration.Tests.csproj
+          --configuration Release
+          --filter "Category=Integration"
+          --logger "trx;LogFileName=integration.trx"
+          --results-directory ${{ github.workspace }}/TestResults
+
+      - name: Summarize test results
+        if: always()
+        run: python3 .github/workflows/scripts/trx-summary.py TestResults >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-results
+          path: TestResults/*.trx
+          if-no-files-found: warn
+
+  # KonXProWebApp.E2E.Tests drives a real Chromium against a real instance of the
+  # web app. That instance is started ON THIS RUNNER as a background process against
+  # a throwaway SQL Server service container -- it does NOT need a staging slot and
+  # does not wait on one. (An earlier revision of this file said it did; that was
+  # wrong and is superseded.) Nothing here deploys: no Azure login, no OIDC, no
+  # publish, no live Stripe key.
+  e2e-tests:
+    name: E2E browser tests (advisory)
+
+    # TODO(2026-10-05): flip this job to blocking. Remove the continue-on-error line
+    # below on 2026-10-05, provided the suite has had a clean stretch by then. Grep
+    # for TODO(2026-10-05) to find this.
+    continue-on-error: true
+
+    runs-on: ubuntu-latest
+
+    services:
+      # Throwaway SQL Server for this job only. The password is a literal because a
+      # service container needs it at job-definition time; it is not a secret -- the
+      # container is created and destroyed inside this run and is not reachable from
+      # outside it. Never point this job at a real database.
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: 'Y'
+          MSSQL_SA_PASSWORD: 'Local_CI_Only_9f8bee!'
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Local_CI_Only_9f8bee!' -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      E2E_PORT: '5080'
+      E2E_BASE_URL: 'http://127.0.0.1:5080'
+      # PlaywrightFixture reads E2E_VIDEO_DIR and records every browser context, so a
+      # failed journey leaves behind footage of what the browser actually saw.
+      E2E_VIDEO_DIR: ${{ github.workspace }}/TestResults/videos
+      # Program.cs reads this connection string; the app creates its own schema at
+      # startup (identityDb.Database.Migrate() + permitDb.Database.Migrate()) and
+      # seeds the tier test users, so an empty database is the expected input.
+      ConnectionStrings__db_9f8bee_konxdevConnection: 'Server=127.0.0.1,1433;Database=konx_e2e;User Id=sa;Password=Local_CI_Only_9f8bee!;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=True'
+      # Test-mode placeholders only, mirroring SqlWebApplicationFactory.ExtraConfig.
+      # A live Stripe key must never appear here.
+      Stripe__SecretKey: 'sk_test_fake'
+      Stripe__WebhookSecret: ''
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            9.0.x
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('Directory.Packages.props', '**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Build web app
+        run: dotnet build KonXProWebApp.csproj --configuration Release
+
+      - name: Build E2E test project
+        run: dotnet build KonXProWebApp.E2E.Tests/KonXProWebApp.E2E.Tests.csproj --configuration Release
+
+      # The E2E project references Microsoft.Playwright, which drops playwright.ps1
+      # into the build output. pwsh is preinstalled on ubuntu-latest. Chromium only:
+      # PlaywrightFixture launches Chromium and nothing else.
+      - name: Install Playwright Chromium
+        run: pwsh KonXProWebApp.E2E.Tests/bin/Release/net9.0/playwright.ps1 install chromium --with-deps
+
+      # Bound to plain HTTP on a known port. The app calls UseHttpsRedirection(), but
+      # with no HTTPS port configured it logs a warning and forwards the request
+      # instead of redirecting, which is what lets an http:// base URL work here.
+      - name: Start web app
+        run: |
+          mkdir -p "${{ github.workspace }}/TestResults"
+          ASPNETCORE_ENVIRONMENT=Development \
+          ASPNETCORE_URLS="http://127.0.0.1:${E2E_PORT}" \
+          nohup dotnet run --project KonXProWebApp.csproj --configuration Release --no-build \
+            > "${{ github.workspace }}/TestResults/webapp.log" 2>&1 &
+          echo "APP_PID=$!" >> "$GITHUB_ENV"
+
+      # Poll until the app actually answers. No blind sleep: the startup path runs
+      # EF migrations and seeding against a cold SQL container, which is slow and
+      # highly variable.
+      - name: Wait for web app to answer
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "${E2E_BASE_URL}/permit-intel/subscribe" || true)
+            if [ "$code" != "000" ] && [ "$code" -lt 500 ]; then
+              echo "Web app answered with HTTP $code after $((i*3))s."
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "::error::Web app did not answer on ${E2E_BASE_URL} within 180s (last HTTP code: ${code:-none})."
+          echo "----- last 200 lines of webapp.log -----"
+          tail -n 200 "${{ github.workspace }}/TestResults/webapp.log" || true
+          exit 1
+
+      # Exclusion-based on purpose: this runs everything in the E2E project EXCEPT
+      # the scopes this runner cannot satisfy. A new E2E class therefore runs by
+      # default and fails loudly if it needs something we don't provide, rather than
+      # silently never running -- which is what an allowlist of class names would do.
+      # See the note at the foot of this file for what each scope means.
+      - name: E2E tests (scopes this runner can satisfy)
+        run: >
+          dotnet test KonXProWebApp.E2E.Tests/KonXProWebApp.E2E.Tests.csproj
+          --configuration Release --no-build
+          --filter "E2E!=SeededUser&E2E!=ExternalCredentials&E2E!=Manual"
+          --logger "trx;LogFileName=e2e.trx"
+          --results-directory ${{ github.workspace }}/TestResults
+
+      - name: Stop web app
+        if: always()
+        run: |
+          if [ -n "${APP_PID:-}" ]; then
+            kill "$APP_PID" 2>/dev/null || true
+            for i in $(seq 1 10); do
+              kill -0 "$APP_PID" 2>/dev/null || break
+              sleep 1
+            done
+            kill -9 "$APP_PID" 2>/dev/null || true
+          fi
+          pkill -f "KonXProWebApp.dll" 2>/dev/null || true
+          echo "----- webapp.log (tail) -----"
+          tail -n 100 "${{ github.workspace }}/TestResults/webapp.log" || true
+
+      - name: Summarize test results
+        if: always()
+        run: python3 .github/workflows/scripts/trx-summary.py TestResults >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload E2E results, videos and app log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: |
+            TestResults/*.trx
+            TestResults/videos/**
+            TestResults/webapp.log
+          if-no-files-found: warn
+
+# ---------------------------------------------------------------------------
+# How tests are selected, and what the E2E scopes mean.
+#
+# Every test class in every test project carries exactly one
+# [Trait("Category", ...)] from: Unit, Component, Integration, E2E. A convention
+# guard (Conventions/TestCategoryConventionTests.cs, one copy per test project)
+# fails the build if a class is missing a Category, carries more than one, uses an
+# unknown value, or drives Playwright without being Category=E2E with a scope. It
+# also fails if it finds no test classes at all, so it cannot pass vacuously.
+# Selection below is therefore by intent, not by class name or file location.
+#
+# Category -- what the test needs to run:
+#   Unit         in-process, mocks / EF InMemory, no external anything
+#   Component    bUnit render tests (derive from TestContext)
+#   Integration  needs a real SQL Server (Testcontainers or the service container)
+#   E2E          drives a real browser against a running host
+#
+# E2E scope -- which environment an E2E class needs. Only classes that actually
+# drive Playwright carry one:
+#   Anonymous            no login, no seeded data. Runs here today.
+#   SeededUser           needs the tier accounts Program.cs seeds at startup
+#                        (starter_test@ / pro_test@ / business_test@ /
+#                        agency_test@konxpro.com). TierJourneyTests. Not yet run:
+#                        no Free-tier account is seeded at all, and the denied-tier
+#                        assertions expect a redirect to /Unauthorized or
+#                        /AccessDenied, which is unconfirmed against a real run.
+#                        TODO: set E2E_STARTER_USER / E2E_PRO_USER /
+#                        E2E_BUSINESS_USER (+ _PASSWORD) and drop SeededUser from
+#                        the exclusion filter once that redirect is confirmed.
+#   ExternalCredentials  needs accounts nothing in this repo creates, supplied via
+#                        env vars. AuthenticatedJourneyTests. Most of its cases
+#                        no-op when the vars are unset, but CapturePermitSearchPreview
+#                        does not: it hard-codes an admin/admin login no seeder
+#                        creates and screenshots to a hard-coded Windows path under
+#                        C:\Users\Reggie\. It would fail on any runner.
+#                        TODO: that one is a local scratch capture, not a journey --
+#                        delete it or gate it, then revisit this scope.
+#                        Its Stripe case also navigates to real stripe.com; do not
+#                        enable without test-mode Stripe config.
+#   Manual               needs a host started by hand. PermitIntelE2ETests, whose
+#                        four cases are all [Fact(Skip = ...)] anyway.
+#
+# PermitIntelE2ETests still lives in KonXProWebApp.Tests despite being a Playwright
+# suite. It is labelled Category=E2E, so the Unit tests step's
+# "Category=Unit|Category=Component" filter skips it and it does not run there.
+# Relocating it into KonXProWebApp.E2E.Tests is a pending follow-up; the labelling
+# means CI behaves correctly either way.
+# ---------------------------------------------------------------------------

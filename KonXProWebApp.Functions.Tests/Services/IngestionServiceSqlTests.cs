@@ -17,6 +17,7 @@ namespace KonXProWebApp.Functions.Tests.Services;
 /// Requires Docker to be available to run (skipped collection lets these run isolated from other SQL tests).
 /// </summary>
 [Collection("SQL")]
+[Trait("Category", "Integration")]
 public class IngestionServiceSqlTests : IAsyncLifetime
 {
     private MsSqlContainer _sql = null!;

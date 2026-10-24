@@ -19,6 +19,7 @@ namespace KonXProWebApp.Tests.Components;
 /// SecurityService.User has a private setter, so it's populated via reflection here — see
 /// SubscribeComponentTests for the same pattern and rationale.
 /// </summary>
+[Trait("Category", "Component")]
 public class MyLeadsComponentTests : TestContext
 {
     private const string UserId = "leads_user_1";

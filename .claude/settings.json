@@ -1,0 +1,32 @@
+﻿{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet ef migrations list:*)",
+      "Bash(dotnet ef migrations has-pending-model-changes:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git checkout -b:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh run:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet ef migrations remove:*)",
+      "Bash(dotnet ef database update:*)"
+    ],
+    "deny": [
+      "Bash(dotnet ef database drop:*)",
+      "Bash(dotnet publish:*)",
+      "Bash(sqlcmd:*)",
+      "Read(./appsettings.*.json)",
+      "Read(./**/*.pubxml)"
+    ]
+  }
+}

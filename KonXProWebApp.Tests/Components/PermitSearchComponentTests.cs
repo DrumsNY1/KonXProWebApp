@@ -18,6 +18,7 @@ namespace KonXProWebApp.Tests.Components;
 /// Uses a real PermitIntelService backed by EF InMemory rather than mocking it, since the service
 /// is a concrete class with non-virtual members that Moq can't usefully override.
 /// </summary>
+[Trait("Category", "Component")]
 public class PermitSearchComponentTests : TestContext
 {
     private readonly db_9f8bee_konxdevContext _context;

@@ -15,6 +15,8 @@ namespace KonXProWebApp.E2E.Tests.Journeys;
 /// and runs cleanly with no environment configured.
 /// </summary>
 [Collection("E2E")]
+[Trait("Category", "E2E")]
+[Trait("E2E", "ExternalCredentials")]
 public class AuthenticatedJourneyTests
 {
     private readonly PlaywrightFixture _fixture;

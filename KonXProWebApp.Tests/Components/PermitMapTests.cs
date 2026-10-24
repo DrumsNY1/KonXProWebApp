@@ -14,6 +14,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Components;
 
+[Trait("Category", "Component")]
 public class PermitMapTests : TestContext
 {
     private const string UserId = "map_user_1";

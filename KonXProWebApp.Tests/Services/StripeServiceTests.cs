@@ -6,6 +6,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Services;
 
+[Trait("Category", "Unit")]
 public class StripeServiceTests : IDisposable
 {
     private readonly db_9f8bee_konxdevContext _context;

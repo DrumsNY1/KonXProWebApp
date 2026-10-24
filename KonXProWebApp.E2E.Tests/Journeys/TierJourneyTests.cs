@@ -11,6 +11,8 @@ namespace KonXProWebApp.E2E.Tests.Journeys;
 /// - Business: Can access FreeTier, BasicTier, MidTier, and HighTier dashboards.
 /// </summary>
 [Collection("E2E")]
+[Trait("Category", "E2E")]
+[Trait("E2E", "SeededUser")]
 public class TierJourneyTests
 {
     private readonly PlaywrightFixture _fixture;

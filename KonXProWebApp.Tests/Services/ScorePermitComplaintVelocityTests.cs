@@ -4,6 +4,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Services;
 
+[Trait("Category", "Unit")]
 public class ScorePermitComplaintVelocityTests
 {
     [Fact]

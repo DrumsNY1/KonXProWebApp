@@ -384,3 +384,5 @@ logs/
 # Never commit; each developer creates their own.
 **/local.settings.json
 appsettings.Development.json
+
+_tools/secrets-backup/

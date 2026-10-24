@@ -8,6 +8,7 @@ using Xunit;
 
 namespace KonXProWebApp.Functions.Tests.Services;
 
+[Trait("Category", "Unit")]
 public class SocrataClientTests
 {
     private static SocrataClient CreateClient(HttpMessageHandler handler)

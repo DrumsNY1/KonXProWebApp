@@ -13,6 +13,7 @@ using Xunit;
 
 namespace KonXProWebApp.Tests.Components
 {
+    [Trait("Category", "Component")]
     public class HomeImprovementContractorsComponentTests : TestContext
     {
         private readonly db_9f8bee_konxdevContext _context;
