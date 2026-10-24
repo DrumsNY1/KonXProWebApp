@@ -1,4 +1,4 @@
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using KonXProWebApp.Integration.Tests.Infrastructure;
 using Xunit;
@@ -54,7 +54,7 @@ public class StripeWebhookSignedTests : IClassFixture<SqlWebApplicationFactory>,
 
 /// <summary>
 /// Covers the branch where Stripe:WebhookSecret is NOT configured, so the controller falls back to
-/// EventUtility.ParseEvent with no signature verification — the documented behavior for local/dev use.
+/// EventUtility.ParseEvent with no signature verification â€” the documented behavior for local/dev use.
 /// </summary>
 [Trait("Category", "Integration")]
 public class StripeWebhookUnsignedTests : IClassFixture<SqlWebApplicationFactory>, IAsyncLifetime
@@ -99,10 +99,11 @@ public class StripeWebhookUnsignedTests : IClassFixture<SqlWebApplicationFactory
     public async Task PostWebhook_InvoicePaymentFailed_Returns200()
     {
         var client = _factory.CreateClient();
-        var payload = """
+        var payload = $$"""
         {
           "id": "evt_test_invoice_failed",
           "object": "event",
+          "api_version": "{{Stripe.StripeConfiguration.ApiVersion}}",
           "type": "invoice.payment_failed",
           "data": {
             "object": {
@@ -123,6 +124,7 @@ public class StripeWebhookUnsignedTests : IClassFixture<SqlWebApplicationFactory
     {
       "id": "{{eventId}}",
       "object": "event",
+      "api_version": "{{Stripe.StripeConfiguration.ApiVersion}}",
       "type": "checkout.session.completed",
       "data": {
         "object": {
@@ -139,10 +141,11 @@ public class StripeWebhookUnsignedTests : IClassFixture<SqlWebApplicationFactory
     }
     """;
 
-    private static string BuildUnhandledEventPayload() => """
+    private static string BuildUnhandledEventPayload() => $$"""
     {
       "id": "evt_test_unhandled",
       "object": "event",
+      "api_version": "{{Stripe.StripeConfiguration.ApiVersion}}",
       "type": "payment_intent.created",
       "data": {
         "object": {

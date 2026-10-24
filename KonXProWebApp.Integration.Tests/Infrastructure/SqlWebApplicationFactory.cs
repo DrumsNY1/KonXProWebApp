@@ -49,6 +49,18 @@ public class SqlWebApplicationFactory : WebApplicationFactory<Program>
         {
             services.AddAuthentication(TestAuthHandler.SchemeName)
                 .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.SchemeName, _ => { });
+
+            // The app calls AddIdentity(), which sets DefaultAuthenticateScheme and
+            // DefaultChallengeScheme to Identity.Application. Those specific defaults beat the
+            // DefaultScheme set above, so without this override every request is handled by the
+            // cookie scheme and redirected (302) to /Account/Login instead of reaching the
+            // Test handler (401 for anonymous, 403 for a forbidden tier).
+            services.Configure<AuthenticationOptions>(options =>
+            {
+                options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
+                options.DefaultChallengeScheme = TestAuthHandler.SchemeName;
+                options.DefaultForbidScheme = TestAuthHandler.SchemeName;
+            });
         });
     }
 
