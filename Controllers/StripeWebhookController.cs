@@ -32,6 +32,15 @@ public class StripeWebhookController : ControllerBase
         var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
         var webhookSecret = _configuration["Stripe:WebhookSecret"] ?? "";
 
+        // Stripe.net's ConstructEvent dereferences the signature header and throws a
+        // NullReferenceException (not a StripeException) when it is absent, so reject the
+        // request here instead of letting it surface as a 500.
+        if (!string.IsNullOrEmpty(webhookSecret) && string.IsNullOrEmpty(Request.Headers["Stripe-Signature"]))
+        {
+            _logger.LogWarning("Stripe webhook rejected: missing Stripe-Signature header");
+            return BadRequest("Webhook signature verification failed");
+        }
+
         try
         {
             var stripeEvent = string.IsNullOrEmpty(webhookSecret)
