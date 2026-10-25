@@ -16,23 +16,23 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
-  <!-- Web app (KonXProWebApp, net9.0) -->
+  <!-- Web app (KonXProWebApp, net10.0) -->
   <ItemGroup>
     <PackageVersion Include="DocumentFormat.OpenXml" Version="2.20.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.HeaderPropagation" Version="9.0.20" />
-    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.AspNetCore.HeaderPropagation" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.13" />
     <PackageVersion Include="Microsoft.AspNetCore.OData" Version="9.5.0" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.20" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.20" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.13" />
     <PackageVersion Include="Radzen.Blazor" Version="11.3.2" />
     <PackageVersion Include="Stripe.net" Version="52.1.0" />
   </ItemGroup>
 
   <!--
-    Azure Functions (KonXProWebApp.Functions, net8.0)
+    Azure Functions (KonXProWebApp.Functions, net10.0)
 
-    NOTE: Microsoft.Data.SqlClient below is 6.1.6, which is what the Functions
+    NOTE: Microsoft.Data.SqlClient below is 6.1.7, which is what the Functions
     project resolves. KonXProWebApp.Functions.Tests was resolving 6.0.1 — it
     carries a VersionOverride to preserve that exactly. See the note in that
     csproj; the override should be removed once you decide which version wins.
@@ -42,8 +42,8 @@
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.1.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Http" Version="3.3.0" />
     <PackageVersion Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.3.1" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.1.6" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.1.7" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="10.0.13" />
   </ItemGroup>
 
   <!--
@@ -69,8 +69,8 @@
   <ItemGroup>
     <PackageVersion Include="bunit" Version="1.36.0" />
     <PackageVersion Include="coverlet.collector" Version="6.0.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.20" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.20" />
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.13" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.13" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.50.0" />
     <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />

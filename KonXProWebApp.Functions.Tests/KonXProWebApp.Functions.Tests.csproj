@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
@@ -20,7 +20,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" />
 
     <!--
-      Microsoft.Data.SqlClient takes the central 6.1.6, matching what
+      Microsoft.Data.SqlClient takes the central 6.1.7, matching what
       KonXProWebApp.Functions resolves. This project previously asked for 6.0.1,
       which is a downgrade of the library the code under test depends on
       (NU1605). It only ever restored because the two projects were last
