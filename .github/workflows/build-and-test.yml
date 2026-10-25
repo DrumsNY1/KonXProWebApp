@@ -242,7 +242,7 @@ jobs:
           mkdir -p "${{ github.workspace }}/TestResults"
           ASPNETCORE_ENVIRONMENT=Development \
           ASPNETCORE_URLS="http://127.0.0.1:${E2E_PORT}" \
-          nohup dotnet run --project KonXProWebApp.csproj --configuration Release --no-build \
+          nohup dotnet run --project KonXProWebApp.csproj --configuration Release --no-build --no-launch-profile \
             > "${{ github.workspace }}/TestResults/webapp.log" 2>&1 &
           echo "APP_PID=$!" >> "$GITHUB_ENV"
 
