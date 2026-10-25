@@ -30,16 +30,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # The solution is mixed-target: the web app and all four test projects are
-      # net9.0, while KonXProWebApp.Functions is net8.0. Both SDKs are required
-      # or the solution build fails on the Functions project. There is no
-      # global.json in this repo, so the SDK is not pinned to an exact patch.
+      # The whole solution (web app, Functions project and all four test projects)
+      # targets net10.0, so a single SDK is enough. There is no global.json in this
+      # repo, so the SDK is not pinned to an exact patch.
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
+          dotnet-version: 10.0.x
 
       # Central package management (Directory.Packages.props) means every version
       # is declared in one file, so it alone is a sound cache key alongside the
@@ -122,9 +119,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
+          dotnet-version: 10.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -210,9 +205,7 @@ jobs:
       - name: Set up .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: |
-            8.0.x
-            9.0.x
+          dotnet-version: 10.0.x
 
       - name: Cache NuGet packages
         uses: actions/cache@v4
@@ -232,7 +225,7 @@ jobs:
       # into the build output. pwsh is preinstalled on ubuntu-latest. Chromium only:
       # PlaywrightFixture launches Chromium and nothing else.
       - name: Install Playwright Chromium
-        run: pwsh KonXProWebApp.E2E.Tests/bin/Release/net9.0/playwright.ps1 install chromium --with-deps
+        run: pwsh KonXProWebApp.E2E.Tests/bin/Release/net10.0/playwright.ps1 install chromium --with-deps
 
       # Bound to plain HTTP on a known port. The app calls UseHttpsRedirection(), but
       # with no HTTPS port configured it logs a warning and forwards the request
