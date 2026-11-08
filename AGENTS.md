@@ -29,22 +29,22 @@ stack-agnostic and defer here, so do not infer the stack from anything else.
 
 | Layer | Actual technology |
 |-------|------------------|
-| Web app | ASP.NET Core, `Microsoft.NET.Sdk.Web`, **net9.0** |
+| Web app | ASP.NET Core, `Microsoft.NET.Sdk.Web`, **net10.0** |
 | UI | **Blazor Server** — Razor Components with `InteractiveServerRenderMode` |
 | Component library | **Radzen.Blazor** 11.3.2 |
-| ORM | EF Core 9 with **`UseSqlServer`** |
+| ORM | EF Core 10 with **`UseSqlServer`** |
 | Database | **Microsoft SQL Server**, hosted on Plesk (`plesk9100.is.cc`) |
 | Identity | ASP.NET Core Identity, multi-tenant |
 | Query API | `Microsoft.AspNetCore.OData` at route `odata/Identity` |
-| Background jobs | **Azure Functions v4, isolated worker**, `KonXProWebApp.Functions`, **net8.0** |
+| Background jobs | **Azure Functions v4, isolated worker**, `KonXProWebApp.Functions`, **net10.0** |
 | Payments | Stripe.net 52.1.0 |
-| Web app deploy | **Web Deploy** from a `.pubxml` publish profile, run by a human |
+| Web app deploy | **Staging:** GitHub Actions `deploy-staging.yml` (Web Deploy to Plesk). **Production:** Web Deploy from a `.pubxml` publish profile, run by a human |
 | Functions deploy | GitHub Actions → Azure Function App `KonXProFunctionApp` |
 | Default branch | **`master`** |
 
-**Target frameworks, explicitly:** the web app and all four test projects are
-**net9.0**; `KonXProWebApp.Functions` alone is **net8.0**. Any tool that builds the
-whole solution needs both SDKs.
+**Target frameworks, explicitly:** all six projects — the web app, `KonXProWebApp.Functions`
+and the four test projects — are **net10.0** (upgraded in PR #65). One SDK builds the
+whole solution.
 
 There is **no Blazor WebAssembly** in this solution — it is Blazor **Server**, and
 an earlier version of this file wrongly claimed WebAssembly. There is also **no
@@ -233,7 +233,15 @@ build failure rather than a test that silently stops running**.
   `master` via OIDC. Runs no tests. Keeping deploy and verification separate is
   deliberate; do not fold the test gate into it.
 
-The web app itself is not deployed by any pipeline.
+- **`deploy-staging.yml`** — deploys the web app to staging (Plesk, Web Deploy) from a
+  `windows-latest` runner: publish, set `web.config`'s environment and connection
+  string from the `staging` GitHub environment's secrets
+  (`.github/workflows/scripts/set-webconfig-env.ps1`), sync with `AppOffline` and
+  `DoNotDeleteRule`, then smoke-check `/` and `/login`. Runs on manual dispatch, and
+  automatically after a green "Build and test" on `master` **only** when the repo
+  variable `STAGING_AUTO_DEPLOY` is `true`. Runbook: `docs/repo-reference.md`.
+
+Production is not deployed by any pipeline.
 
 ---
 
@@ -293,9 +301,15 @@ it does not soften it.
 
 - **Functions:** deployed by `master_konxprofunctionapp.yml` on push to `master`.
   To ship a change, merge it to `master`.
-- **Web app:** no pipeline exists. It goes out by Web Deploy from a publish profile,
-  by hand, by a human. **That missing pipeline is a gap to report, not one to work
-  around** — do not substitute a manual publish for it.
+- **Web app — staging:** deployed by `deploy-staging.yml` (see CI). To ship to staging,
+  merge to `master` (when `STAGING_AUTO_DEPLOY` is on) or have a human press
+  **Run workflow**. An agent writes and fixes the workflow; it does **not** dispatch it,
+  set its secrets, or flip `STAGING_AUTO_DEPLOY`. The pipeline owns staging's
+  `web.config` environment name and connection string — do not tell anyone to
+  hand-edit it on the server; the next deploy replaces it.
+- **Web app — production:** no pipeline exists yet. It goes out by Web Deploy from a
+  publish profile, by hand, by a human. **That missing pipeline is a gap to report,
+  not one to work around** — do not substitute a manual publish for it.
 - **Never run** `func azure functionapp publish`, `dotnet publish` to a live target,
   `sqlcmd`, or anything else against production or staging. Schema and data changes
   go through the paths in the Data section, reviewed by a human.
@@ -344,7 +358,10 @@ These are **not** loaded automatically. Open them when the work touches their ar
 
 ## Known traps
 
-- **Mixed-target solution.** Both .NET 8 and .NET 9 SDKs are required to build it.
+- **Publish profiles pin a target framework.** The local, gitignored `.pubxml` files
+  carried `net9.0` after the solution moved to `net10.0`, which fails publishing with
+  "Assets file … doesn't have a target for 'net9.0'". The staging pipeline publishes
+  without a profile, so it takes the framework from the `.csproj`.
 - **Integration tests build their schema from the EF model, not production's.**
   `SqlWebApplicationFactory` sets the environment to `Testing` (skipping all startup
   migration, seeding and view DDL) and calls `EnsureCreatedAsync()`. Those tests run
@@ -357,7 +374,7 @@ These are **not** loaded automatically. Open them when the work touches their ar
 
 ## Working agreement
 
-1. Read the `.csproj` before using a language or framework feature — this is net9.0.
+1. Read the `.csproj` before using a language or framework feature — this is net10.0.
 2. Run `dotnet build` after writing code. If it fails, analyze and fix it.
 3. Run the relevant test project before saying you're done. CI won't catch it for you.
 4. Branch off `master`; don't commit directly to it.
