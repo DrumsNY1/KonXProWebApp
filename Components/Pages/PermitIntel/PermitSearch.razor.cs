@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
 using Radzen;
@@ -36,6 +37,17 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         [Inject]
         public KonXProWebApp.Services.PermitIntelService PermitIntelService { get; set; }
+
+        [Inject]
+        protected ILogger<PermitSearch> Logger { get; set; }
+
+        // PermitIntelService shares one scoped DbContext per Blazor circuit, and EF Core does not allow
+        // overlapping operations on a context. The initial load, the grid's first-render LoadData, the
+        // header stats and save-lead all touch it, so every DB call on this page runs through this gate.
+        private readonly SemaphoreSlim dbGate = new(1, 1);
+
+        protected const string LoadErrorMessage = "We couldn't load permits right now. Please try again.";
+        protected string loadError;
 
         // Data
         protected IEnumerable<DobjobFiling> permits;
@@ -103,14 +115,27 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
 
         private async Task LoadHeaderStats()
         {
-            var summary = await PermitIntelService.GetAnalyticsSummary();
-            activePermitsCount = summary.TotalFilingsCount;
-            totalJobValue = summary.TotalJobCost;
+            await dbGate.WaitAsync();
+            try
+            {
+                var summary = await PermitIntelService.GetAnalyticsSummary();
+                activePermitsCount = summary.TotalFilingsCount;
+                totalJobValue = summary.TotalJobCost;
 
-            var userId = Security.User?.Id;
-            savedLeadCount = !string.IsNullOrEmpty(userId)
-                ? await PermitIntelService.GetSavedLeadCount(userId)
-                : 0;
+                var userId = Security.User?.Id;
+                savedLeadCount = !string.IsNullOrEmpty(userId)
+                    ? await PermitIntelService.GetSavedLeadCount(userId)
+                    : 0;
+            }
+            catch (Exception ex)
+            {
+                // Header stats are secondary; a failure here must not take down the feed.
+                Logger.LogError(ex, "Failed to load permit feed header stats");
+            }
+            finally
+            {
+                dbGate.Release();
+            }
         }
 
         public List<string> GetEffectiveBoroughs()
@@ -170,9 +195,27 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 OrderBy = !string.IsNullOrWhiteSpace(orderBy) ? orderBy : "LatestActionDate desc"
             };
 
-            var (results, count) = await PermitIntelService.SearchPermits(query);
-            permits = results;
-            totalCount = count;
+            await dbGate.WaitAsync();
+            try
+            {
+                var (results, count) = await PermitIntelService.SearchPermits(query);
+                permits = results;
+                totalCount = count;
+                loadError = null;
+            }
+            catch (Exception ex)
+            {
+                // An unhandled exception here ends the Blazor circuit and leaves the page frozen on its
+                // first render ("0 permits"). Log the real cause, show a generic message.
+                Logger.LogError(ex, "Failed to load permit feed (skip={Skip}, take={Take}, orderBy={OrderBy})", skip, take, orderBy);
+                permits = Enumerable.Empty<DobjobFiling>();
+                totalCount = 0;
+                loadError = LoadErrorMessage;
+            }
+            finally
+            {
+                dbGate.Release();
+            }
         }
 
         protected void ViewDetail(DobjobFiling filing)
@@ -261,9 +304,17 @@ namespace KonXProWebApp.Components.Pages.PermitIntel
                 }
 
                 var userId = Security.User.Id;
-                await PermitIntelService.SaveLead(userId, filing.Id);
-                savedFilingIds.Add(filing.Id);
-                savedLeadCount = await PermitIntelService.GetSavedLeadCount(userId);
+                await dbGate.WaitAsync();
+                try
+                {
+                    await PermitIntelService.SaveLead(userId, filing.Id);
+                    savedFilingIds.Add(filing.Id);
+                    savedLeadCount = await PermitIntelService.GetSavedLeadCount(userId);
+                }
+                finally
+                {
+                    dbGate.Release();
+                }
                 NotificationService.Notify(NotificationSeverity.Success, "Lead Saved", $"{filing.HouseNum} {filing.StreetName} added to your leads.");
             }
             catch (Exception ex)
