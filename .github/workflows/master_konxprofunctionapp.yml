@@ -22,10 +22,10 @@ jobs:
 
     steps:
       - name: 'Checkout GitHub Action'
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup DotNet ${{ env.DOTNET_VERSION }} Environment
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
@@ -37,7 +37,7 @@ jobs:
           popd
       
       - name: Login to Azure
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F681904E2C7A40D4A629F3A728AAEB37 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A9391FD2983343EE8840C9CD7210A655 }}

@@ -67,12 +67,12 @@ jobs:
       # workflow_run: deploy exactly the commit that passed "Build and test".
       # workflow_dispatch: deploy the branch picked in the Run workflow dialog.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
