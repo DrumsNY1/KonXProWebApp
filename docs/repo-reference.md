@@ -99,6 +99,13 @@ and stdout logging. It then syncs to the Plesk site over Web Deploy (port 8172) 
 smoke-checks `/` and `/login`. Production is **not** covered: it is still a manual
 Web Deploy by a human.
 
+The Web Deploy endpoint is `https://plesk9100.is.cc:8172/msdeploy.axd?site=staging.konxpro.com`.
+Note that it uses the server's hostname, not the site's. Port 8172 serves a single
+certificate for the whole server (CN `plesk9100.is.cc`), so connecting as
+`staging.konxpro.com` fails with `ERROR_CERTIFICATE_VALIDATION_FAILED`. Do not work
+around that with `-allowUntrusted`, which would send the deploy password to any server
+that answers. Visual Studio profiles usually hide this with `AllowUntrustedCertificate`.
+
 **One-time setup (a human does this, never an agent):**
 
 1. On the Plesk server, check that the **.NET 10 Hosting Bundle** is installed and
