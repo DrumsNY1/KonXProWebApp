@@ -33,7 +33,12 @@ concurrency:
 env:
   DOTNET_VERSION: '10.0.x'
   SITE_NAME: 'staging.konxpro.com'
-  MSDEPLOY_URL: 'https://staging.konxpro.com:8172/msdeploy.axd?site=staging.konxpro.com'
+  # Connect by the Plesk server's hostname, not the site's. The Web Management Service on :8172 serves
+  # one certificate for the whole server (CN=plesk9100.is.cc, Let's Encrypt), so connecting as
+  # staging.konxpro.com fails with ERROR_CERTIFICATE_VALIDATION_FAILED. ?site= still selects the site.
+  # Do not "fix" a certificate error with -allowUntrusted: it would send the Basic-auth password to any
+  # server that answers.
+  MSDEPLOY_URL: 'https://plesk9100.is.cc:8172/msdeploy.axd?site=staging.konxpro.com'
   SITE_URL: 'https://staging.konxpro.com'
 
 jobs:
