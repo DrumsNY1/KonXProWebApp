@@ -89,6 +89,49 @@ default schema is its own name and EF would otherwise put the history table in
 `REMEDIATION.md` is the live record of what is fixed, what is open, and the schema
 findings behind it. It supersedes anything here on status.
 
+## Staging deployment runbook
+
+Staging is deployed by `.github/workflows/deploy-staging.yml`. It publishes
+`KonXProWebApp.csproj` (Release, net10.0) on a Windows runner and runs
+`.github/workflows/scripts/set-webconfig-env.ps1` to stamp the published
+`web.config` with `ASPNETCORE_ENVIRONMENT=Staging`, the staging connection string
+and stdout logging. It then syncs to the Plesk site over Web Deploy (port 8172) and
+smoke-checks `/` and `/login`. Production is **not** covered: it is still a manual
+Web Deploy by a human.
+
+**One-time setup (a human does this, never an agent):**
+
+1. On the Plesk server, check that the **.NET 10 Hosting Bundle** is installed and
+   that Web Deploy on port 8172 accepts connections from outside (GitHub-hosted
+   runners use changing Azure IPs).
+2. Create a dedicated Plesk Web Deploy user scoped to `staging.konxpro.com`.
+3. Create the GitHub environment `staging` with these secrets:
+   - `STAGING_WEBDEPLOY_USERNAME`
+   - `STAGING_WEBDEPLOY_PASSWORD`
+   - `STAGING_DB_CONNECTION_STRING` (the full ADO.NET string for `priority_ks`)
+4. Back up the current server `web.config` before the first run. The deploy
+   replaces it, and the hand-added connection string moves into the secret.
+
+**Deploying:**
+
+- Manual: Actions → *Deploy to staging* → Run workflow (choose a branch or ref).
+- Automatic: set the repository variable `STAGING_AUTO_DEPLOY=true`. Then every
+  successful *Build and test* run on `master` deploys that exact commit.
+- Rollback: re-run the workflow on an older commit, or dispatch it on a tag.
+
+**Diagnosing:**
+
+- `AppOffline` is used, so the site shows the offline page during sync.
+- The ASP.NET Core module writes stdout to `logs\stdout*` under the site root.
+  `Program.cs` swallows migration and seeding errors, so a green smoke check does
+  **not** prove migrations ran. Check the log.
+- `DoNotDeleteRule` is on, so files removed from the app stay on the server until
+  someone deletes them by hand.
+
+Local `Properties/PublishProfiles/*.pubxml` files are gitignored and may still pin
+`net9.0`. Delete the staging profiles once the pipeline is trusted. Keep or
+update the production profile until production gets its own pipeline.
+
 ## Secrets — history and the `dotnet ef` trap
 
 `appsettings.json`, `appsettings.Staging.json`, `appsettings.Development.json` and

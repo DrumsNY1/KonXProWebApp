@@ -1,0 +1,136 @@
+# Deploys the web app to staging (Plesk, Web Deploy). Replaces the manual Visual Studio publish.
+#
+# Triggers:
+#   - automatically, after "Build and test" passes on master, ONLY when the repository variable
+#     STAGING_AUTO_DEPLOY is 'true' (off until the first manual run has succeeded)
+#   - manually, from Actions > "Deploy to staging" > Run workflow (deploys the chosen branch)
+#
+# Required on the GitHub environment "staging" (Settings > Environments > staging):
+#   secrets:  STAGING_WEBDEPLOY_USERNAME, STAGING_WEBDEPLOY_PASSWORD, STAGING_DB_CONNECTION_STRING
+#
+# The pipeline owns web.config's environment name and connection string (see
+# scripts/set-webconfig-env.ps1). Do not hand-edit web.config on the server; the next deploy replaces it.
+#
+# Every deploy restarts staging, which re-runs Program.cs's startup migrations, seeding and tier-view DDL
+# against the staging database.
+
+name: Deploy to staging
+
+on:
+  workflow_run:
+    workflows: ["Build and test"]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  SITE_NAME: 'staging.konxpro.com'
+  MSDEPLOY_URL: 'https://staging.konxpro.com:8172/msdeploy.axd?site=staging.konxpro.com'
+  SITE_URL: 'https://staging.konxpro.com'
+
+jobs:
+  deploy:
+    name: Publish and deploy to staging
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' && vars.STAGING_AUTO_DEPLOY == 'true')
+    runs-on: windows-latest
+    timeout-minutes: 25
+    environment:
+      name: staging
+      url: https://staging.konxpro.com
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+      - name: Check required secrets
+        env:
+          WD_USER: ${{ secrets.STAGING_WEBDEPLOY_USERNAME }}
+          WD_PASS: ${{ secrets.STAGING_WEBDEPLOY_PASSWORD }}
+          DB_CONN: ${{ secrets.STAGING_DB_CONNECTION_STRING }}
+        run: |
+          $missing = @()
+          if (-not $env:WD_USER) { $missing += 'STAGING_WEBDEPLOY_USERNAME' }
+          if (-not $env:WD_PASS) { $missing += 'STAGING_WEBDEPLOY_PASSWORD' }
+          if (-not $env:DB_CONN) { $missing += 'STAGING_DB_CONNECTION_STRING' }
+          if ($missing) { throw "Missing secrets on the 'staging' environment: $($missing -join ', ')" }
+
+      # workflow_run: deploy exactly the commit that passed "Build and test".
+      # workflow_dispatch: deploy the branch picked in the Run workflow dialog.
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish
+        run: dotnet publish KonXProWebApp.csproj --configuration Release --output "$env:RUNNER_TEMP\publish"
+
+      - name: Configure web.config for staging
+        env:
+          KONX_DB_CONNECTION: ${{ secrets.STAGING_DB_CONNECTION_STRING }}
+        run: ./.github/workflows/scripts/set-webconfig-env.ps1 -WebConfigPath "$env:RUNNER_TEMP\publish\web.config" -EnvironmentName Staging
+
+      - name: Ensure Web Deploy is installed
+        run: |
+          $msdeploy = 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe'
+          if (-not (Test-Path $msdeploy)) {
+            choco install webdeploy -y --no-progress
+            if ($LASTEXITCODE -ne 0) { throw "Web Deploy install failed ($LASTEXITCODE)" }
+          }
+          if (-not (Test-Path $msdeploy)) { throw "msdeploy.exe not found at $msdeploy" }
+          "MSDEPLOY=$msdeploy" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
+
+      # AppOffline: drops app_offline.htm so the running app releases its files during the copy.
+      # DoNotDeleteRule: leaves files that are on the server but not in the package (logs\, uploads).
+      - name: Deploy with Web Deploy
+        env:
+          WD_USER: ${{ secrets.STAGING_WEBDEPLOY_USERNAME }}
+          WD_PASS: ${{ secrets.STAGING_WEBDEPLOY_PASSWORD }}
+        run: |
+          $source = "$env:RUNNER_TEMP\publish"
+          $msdeployArgs = @(
+            '-verb:sync',
+            "-source:iisApp=$source",
+            "-dest:iisApp=$env:SITE_NAME,computerName=$env:MSDEPLOY_URL,userName=$env:WD_USER,password=$env:WD_PASS,authType=Basic",
+            '-enableRule:AppOffline',
+            '-enableRule:DoNotDeleteRule',
+            '-retryAttempts:3',
+            '-retryInterval:5000'
+          )
+          & $env:MSDEPLOY @msdeployArgs
+          if ($LASTEXITCODE -ne 0) { throw "Web Deploy failed with exit code $LASTEXITCODE" }
+
+      # Does not prove migrations succeeded: Program.cs logs and swallows startup migration errors.
+      # Check logs\stdout_*.log on the server after a deploy that changes the schema.
+      - name: Smoke check
+        run: |
+          $paths = @('/', '/login')
+          foreach ($path in $paths) {
+            $url = "$env:SITE_URL$path"
+            $ok = $false
+            for ($i = 1; $i -le 10; $i++) {
+              try {
+                $response = Invoke-WebRequest -Uri $url -MaximumRedirection 5 -SkipHttpErrorCheck -TimeoutSec 60
+                Write-Host "$url -> $($response.StatusCode) (attempt $i)"
+                if ($response.StatusCode -eq 200) { $ok = $true; break }
+              } catch {
+                Write-Host "$url -> $($_.Exception.Message) (attempt $i)"
+              }
+              Start-Sleep -Seconds 15
+            }
+            if (-not $ok) { throw "Smoke check failed: $url did not return 200" }
+          }
