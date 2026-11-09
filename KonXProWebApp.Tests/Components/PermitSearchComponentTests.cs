@@ -329,4 +329,26 @@ public class PermitSearchComponentTests : TestContext
         Assert.Contains("Job Value", cut.Markup);
         Assert.Contains("Pipeline", cut.Markup);
     }
+
+    [Fact]
+    public void PermitSearch_WhenLoadFails_ShowsErrorMessageInsteadOfThrowing()
+    {
+        // A disposed context makes every query throw, standing in for any load failure
+        // (the staging bug was an unhandled exception here ending the Blazor circuit).
+        _context.Dispose();
+
+        var cut = RenderComponent<PermitSearch>();
+
+        var error = cut.Find("#permit-load-error");
+        Assert.Contains("couldn't load permits", error.TextContent);
+        Assert.Contains("Live Permit Feed", cut.Markup);
+    }
+
+    [Fact]
+    public void PermitSearch_WhenLoadSucceeds_ShowsNoErrorMessage()
+    {
+        var cut = RenderComponent<PermitSearch>();
+
+        Assert.Empty(cut.FindAll("#permit-load-error"));
+    }
 }

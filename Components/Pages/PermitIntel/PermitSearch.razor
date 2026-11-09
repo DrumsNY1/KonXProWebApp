@@ -158,6 +158,13 @@
         </div>
     }
 
+    @if (!string.IsNullOrEmpty(loadError))
+    {
+        <div id="permit-load-error" role="alert">
+            <RadzenAlert Shade="Radzen.Shade.Lighter" Variant="Radzen.Variant.Flat" Size="Radzen.AlertSize.Small" AlertStyle="Radzen.AlertStyle.Danger" class="mb-3">@loadError</RadzenAlert>
+        </div>
+    }
+
     @* ── Desktop: Data Grid (hidden below 768px) ── *@
     <div class="desktop-grid">
         <RadzenDataGrid @ref="grid0" Data="@permits" Count="@totalCount" LoadData="@OnLoadData" TItem="DobjobFiling"
