@@ -49,14 +49,19 @@
   <!--
     Test projects
 
-    bunit and Microsoft.Playwright.Xunit are pinned to 1.36.0 and 1.50.0 — the
-    versions actually being restored. The csproj files previously asked for
-    1.35.6 and 1.49.0, which NuGet was already rounding up because those exact
-    versions are not available on the feed. These numbers reflect reality.
+    bunit is pinned to 1.36.0 - the version actually being restored. The csproj
+    files previously asked for 1.35.6, which NuGet was already rounding up
+    because that exact version is not available on the feed.
+
+    Microsoft.Playwright / Microsoft.Playwright.Xunit: 1.64.1 (was 1.50.0).
+    GitHub's ubuntu-latest runners moved to Ubuntu 26.04, and Playwright before
+    1.61.0 refuses to install Chromium there ("Playwright does not support
+    chromium on ubuntu26.04-x64"). 1.64.1 still depends on
+    xunit.extensibility.core 2.8.0, so the xunit pin below is unaffected.
 
     xunit / xunit.runner.visualstudio bumped from 2.5.3 to 2.8.0 (item 4.3):
     xunit.core 2.5.3 requires xunit.extensibility.core (= 2.5.3) exactly, but
-    bunit 1.36.0 and Microsoft.Playwright.Xunit 1.50.0 both pull in
+    bunit 1.36.0 and Microsoft.Playwright.Xunit (1.50.0 then, 1.64.1 now) both pull in
     xunit.extensibility.core 2.8.0 transitively, which was a version conflict
     (NU1608) on every restore. 2.8.0 was picked specifically because it's the
     exact version already being resolved transitively - not a newer version,
@@ -72,8 +77,8 @@
     <PackageVersion Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.13" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.13" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageVersion Include="Microsoft.Playwright" Version="1.50.0" />
-    <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.50.0" />
+    <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
+    <PackageVersion Include="Microsoft.Playwright.Xunit" Version="1.64.1" />
     <PackageVersion Include="Moq" Version="4.20.72" />
     <PackageVersion Include="Testcontainers.MsSql" Version="3.10.0" />
     <PackageVersion Include="xunit" Version="2.8.0" />

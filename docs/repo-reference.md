@@ -165,12 +165,18 @@ parentheses, e.g. `(localdb)`.
 
 ## Package version rationale
 
-- `bunit` and `Microsoft.Playwright.Xunit` are pinned at 1.36.0 and 1.50.0 — the
-  versions actually being restored. The csproj files previously asked for 1.35.6 and
-  1.49.0, which do not exist on the feed, so NuGet was silently rounding up.
+- `bunit` is pinned at 1.36.0 — the version actually being restored. The csproj files
+  previously asked for 1.35.6, which does not exist on the feed, so NuGet was
+  silently rounding up. (Playwright had the same history: 1.49.0 requested, 1.50.0
+  restored.)
+- `Microsoft.Playwright` / `Microsoft.Playwright.Xunit` are pinned at **1.64.1**
+  (bumped from 1.50.0 on 2026-11-11). GitHub's `ubuntu-latest` runners moved to
+  Ubuntu 26.04, and Playwright before 1.61.0 refuses to install Chromium there
+  (`Playwright does not support chromium on ubuntu26.04-x64`), which broke the E2E
+  job at its browser-install step.
 - `xunit` / `xunit.runner.visualstudio` were bumped 2.5.3 → 2.8.0: xunit.core 2.5.3
   requires xunit.extensibility.core exactly 2.5.3, but bunit 1.36.0 and
-  Playwright.Xunit 1.50.0 both pull in 2.8.0 transitively, which was an NU1608
-  conflict on every restore. 2.8.0 is the version NuGet was already resolving.
+  Playwright.Xunit (1.50.0 and still 1.64.1) pull in 2.8.0 transitively, which was an
+  NU1608 conflict on every restore. 2.8.0 is the version NuGet was already resolving.
 - Versions are centralized, so a change affects all four test projects — verify test
   discovery in each, not just that the build succeeds.

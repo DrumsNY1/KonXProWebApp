@@ -254,10 +254,12 @@ attribute — do not add one back.**
 - `Microsoft.Data.SqlClient` must stay identical in `KonXProWebApp.Functions` and
   `KonXProWebApp.Functions.Tests`. A test project referencing an older version than
   the project under test is a NuGet downgrade error (NU1605).
-- `bunit` and `Microsoft.Playwright.Xunit` are pinned at 1.36.0 and 1.50.0, and
-  `xunit` at 2.8.0. Earlier csproj files asked for 1.35.6 / 1.49.0, versions that
-  **do not exist on the feed**, so NuGet was silently rounding up. Pin to versions
-  that exist. Rationale: `docs/repo-reference.md`.
+- `bunit` is pinned at 1.36.0, `Microsoft.Playwright` / `Microsoft.Playwright.Xunit`
+  at 1.64.1, and `xunit` at 2.8.0. Earlier csproj files asked for bunit 1.35.6 /
+  Playwright 1.49.0, versions that **do not exist on the feed**, so NuGet was
+  silently rounding up. Pin to versions that exist. Playwright must stay **≥ 1.61.0**:
+  older versions cannot install Chromium on the Ubuntu 26.04 `ubuntu-latest` runners.
+  Rationale: `docs/repo-reference.md`.
 
 ---
 
