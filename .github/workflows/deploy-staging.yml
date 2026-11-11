@@ -69,6 +69,20 @@ jobs:
           if (-not $env:DB_CONN) { $missing += 'STAGING_DB_CONNECTION_STRING' }
           if ($missing) { throw "Missing secrets on the 'staging' environment: $($missing -join ', ')" }
 
+          # msdeploy parses -dest as comma-separated key=value pairs, so a comma or double quote in
+          # either credential truncates it and the server answers 401 ERROR_USER_UNAUTHORIZED.
+          # Stray whitespace from copy-paste does the same. Values are never printed.
+          $problems = @()
+          foreach ($c in @(@{ Name = 'STAGING_WEBDEPLOY_USERNAME'; Value = $env:WD_USER },
+                           @{ Name = 'STAGING_WEBDEPLOY_PASSWORD'; Value = $env:WD_PASS })) {
+            if ($c.Value -ne $c.Value.Trim()) { $problems += "$($c.Name) has leading or trailing whitespace" }
+            if ($c.Value -match '[,"]')       { $problems += "$($c.Name) contains a comma or double quote, which msdeploy cannot pass" }
+          }
+          if ($env:DB_CONN -ne $env:DB_CONN.Trim()) { $problems += 'STAGING_DB_CONNECTION_STRING has leading or trailing whitespace' }
+          if ($env:DB_CONN -match 'PLACEHOLDER')     { $problems += 'STAGING_DB_CONNECTION_STRING still contains PLACEHOLDER' }
+          if ($problems) { throw "Fix the 'staging' environment secrets: $($problems -join '; ')" }
+          Write-Host 'Secrets present and well-formed.'
+
       # workflow_run: deploy exactly the commit that passed "Build and test".
       # workflow_dispatch: deploy the branch picked in the Run workflow dialog.
       - name: Checkout
