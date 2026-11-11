@@ -254,10 +254,12 @@ attribute — do not add one back.**
 - `Microsoft.Data.SqlClient` must stay identical in `KonXProWebApp.Functions` and
   `KonXProWebApp.Functions.Tests`. A test project referencing an older version than
   the project under test is a NuGet downgrade error (NU1605).
-- `bunit` and `Microsoft.Playwright.Xunit` are pinned at 1.36.0 and 1.50.0, and
-  `xunit` at 2.8.0. Earlier csproj files asked for 1.35.6 / 1.49.0, versions that
-  **do not exist on the feed**, so NuGet was silently rounding up. Pin to versions
-  that exist. Rationale: `docs/repo-reference.md`.
+- `bunit` is pinned at 1.36.0, `Microsoft.Playwright` / `Microsoft.Playwright.Xunit`
+  at 1.64.1, and `xunit` at 2.8.0. Earlier csproj files asked for bunit 1.35.6 /
+  Playwright 1.49.0, versions that **do not exist on the feed**, so NuGet was
+  silently rounding up. Pin to versions that exist. Playwright must stay **≥ 1.61.0**:
+  older versions cannot install Chromium on the Ubuntu 26.04 `ubuntu-latest` runners.
+  Rationale: `docs/repo-reference.md`.
 
 ---
 
@@ -301,6 +303,10 @@ it does not soften it.
 
 - **Functions:** deployed by `master_konxprofunctionapp.yml` on push to `master`.
   To ship a change, merge it to `master`.
+- **Docs-only pushes don't deploy.** The push triggers of `build-and-test.yml` and
+  `master_konxprofunctionapp.yml` carry `paths-ignore` for `docs/**` and `**/*.md`,
+  so a push to `master` that touches only those skips CI, the Functions deploy and
+  (via `workflow_run`) the staging deploy. Pull-request checks are not filtered.
 - **Web app — staging:** deployed by `deploy-staging.yml` (see CI). To ship to staging,
   merge to `master` (when `STAGING_AUTO_DEPLOY` is on) or have a human press
   **Run workflow**. An agent writes and fixes the workflow; it does **not** dispatch it,
@@ -353,6 +359,10 @@ These are **not** loaded automatically. Open them when the work touches their ar
   dependency order, and the schema findings behind it. **Read before starting
   anything to do with migrations, CI, packaging or the tier views.**
 - **`REGRESSION_TEST_SUITE.md`** — 59 KB. Open only when working on test coverage.
+- **`docs/proposals/`** — dated proposals (`YYYY-MM-DD-topic.md`), each headed by a
+  `Status:` line (Proposed / Accepted / Rejected / Superseded). **Not
+  authoritative** — they describe ideas, not the system. Never cite a proposal as
+  fact about the code; this file and the code win.
 
 ---
 

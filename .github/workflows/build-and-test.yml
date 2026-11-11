@@ -11,6 +11,12 @@ on:
     branches: [ master ]
   push:
     branches: [ master ]
+    # Docs-only pushes skip CI (and therefore the workflow_run staging deploy).
+    # Deliberately NOT applied to pull_request: a filtered PR check would never
+    # report, which blocks merges if the check is required.
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
 
 permissions:
