@@ -301,6 +301,10 @@ it does not soften it.
 
 - **Functions:** deployed by `master_konxprofunctionapp.yml` on push to `master`.
   To ship a change, merge it to `master`.
+- **Docs-only pushes don't deploy.** The push triggers of `build-and-test.yml` and
+  `master_konxprofunctionapp.yml` carry `paths-ignore` for `docs/**` and `**/*.md`,
+  so a push to `master` that touches only those skips CI, the Functions deploy and
+  (via `workflow_run`) the staging deploy. Pull-request checks are not filtered.
 - **Web app — staging:** deployed by `deploy-staging.yml` (see CI). To ship to staging,
   merge to `master` (when `STAGING_AUTO_DEPLOY` is on) or have a human press
   **Run workflow**. An agent writes and fixes the workflow; it does **not** dispatch it,
@@ -353,6 +357,10 @@ These are **not** loaded automatically. Open them when the work touches their ar
   dependency order, and the schema findings behind it. **Read before starting
   anything to do with migrations, CI, packaging or the tier views.**
 - **`REGRESSION_TEST_SUITE.md`** — 59 KB. Open only when working on test coverage.
+- **`docs/proposals/`** — dated proposals (`YYYY-MM-DD-topic.md`), each headed by a
+  `Status:` line (Proposed / Accepted / Rejected / Superseded). **Not
+  authoritative** — they describe ideas, not the system. Never cite a proposal as
+  fact about the code; this file and the code win.
 
 ---
 
