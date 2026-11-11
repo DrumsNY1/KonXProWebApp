@@ -7,6 +7,10 @@ on:
   push:
     branches:
       - master
+    # A docs-only push must not redeploy the live Function App.
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
   workflow_dispatch:
 
 env:
