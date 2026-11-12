@@ -1,0 +1,29 @@
+# Graphify trial (docs/proposals/2026-11-11-graphify-trial.md).
+# graphify also honours .gitignore; these entries are explicit so the scan
+# stays clean even with --no-gitignore.
+
+# Build output and noise (AGENTS.md "Known traps")
+bin/
+obj/
+publish/
+publish.zip
+logs/
+scratch/
+.vs/
+
+# Local tooling: diagnostic output can contain live schema detail and customer
+# identifiers, and _tools/secrets-backup/ must never be read by anything.
+_tools/
+
+# Schema snapshots and binary docs: not code, and out of scope for a code-only trial
+_schema-truth/
+*.docx
+
+# Agent/editor configuration
+.claude/
+.gemini/
+.agents/
+.config/
+
+# Graphify's own output
+graphify-out/

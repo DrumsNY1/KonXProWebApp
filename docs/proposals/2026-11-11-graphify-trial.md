@@ -2,6 +2,8 @@
 > of how the system works. `AGENTS.md` and the code win over anything here.
 >
 > Date: 2026-11-11 · Author: coding agent, for Reggie · Decision: pending
+> Trial: **in progress**, started 2026-11-11 on `chore/graphify-trial`. See
+> [Trial log](#trial-log) at the end.
 
 # Proposal: trial Graphify in KonXProWebApp
 
@@ -127,3 +129,85 @@ if 1 or 2 fail.
 2. Code-only, or include a doc semantic pass? If docs, which backend?
 3. If adopted, should graph output stay local or be committed? Recommendation:
    keep it local.
+
+---
+
+## Trial log
+
+### Day 1 — 2026-11-11
+
+**Setup (as recommended):** everything lives under the gitignored, build-excluded
+`_tools\`:
+- portable `uv` 0.13.7;
+- a uv-managed CPython 3.13.18;
+- a venv with `graphifyy==0.9.106` and 31 dependencies.
+
+Nothing went onto PATH, into Program Files or into the registry. (The `py`
+launcher's Python 3.14 entry pointed at a deleted `C:\Python314`, hence uv.) The
+graph was built with `graphify update .`, `GRAPHIFY_BACKEND=none` and
+`GRAPHIFY_QUERY_LOG_DISABLE=1`: fully offline, inside the sandbox.
+
+**Build:** 288 files in 30 s. 4,136 nodes, 8,523 edges (7,905 `EXTRACTED`,
+618 `INFERRED`), 211 communities. Five files yielded no symbols: two near-empty
+`.razor` files, `KonXProWebApp.Functions/Program.cs` (top-level statements) and
+two JS files.
+
+#### Criterion 3, build hygiene: **PASS**
+
+- `graphify-out/` is ignored by git.
+- The web project's `ResolvedFileToPublish` list (203 files) contains nothing from
+  `graphify-out`.
+- Solution build: 0 errors.
+- Unit and Component tests: `KonXProWebApp.Tests` 161/161, `Functions.Tests`
+  59/59.
+
+#### Criterion 1, Razor fidelity: **PARTIAL**
+
+Five pages, ground truth taken from source:
+
+| Page | Injected types linked | Own-code service calls linked |
+|---|---|---|
+| `PermitIntel/RequireTier.razor` | 3/3 | **0/2** |
+| `Campaigns/LandingA.razor` | 3/3 | n/a (framework calls only) |
+| `Profile.razor` | 9/9 | 5/5 |
+| `FreeTier.razor` | 8/8 | 1/1 (two more "missing" calls are commented out, so correctly absent) |
+| `DobjobFilings.razor` | 8/8 | 6/6 |
+| **Total** | **31/31** | **12/14** |
+
+- Calls into framework types (`NavigationManager`, `IJSRuntime`, `DialogService`,
+  `NotificationService`, EF `SaveChangesAsync`) have no target node, which is
+  expected: that code isn't in the repo.
+- **Code-behind (`.razor.cs`) works well.** Every miss was inside a `.razor`
+  `@code { }` block. Ten `.razor` files have such blocks, including the tier gate
+  `RequireTier.razor`.
+
+#### Criterion 2, answer quality vs. grep: **PARTIAL (about 3 of 5)**
+
+| Question | Graphify | Missed (root cause) |
+|---|---|---|
+| Callers of `StripeService.GetTierInfo()` | 2 of 3 | `Subscribe.razor.cs:41`: fully qualified static call in a field initializer |
+| Callers of `PermitIntelService.GetActiveSubscription()` | 6 of 7 | **`Authorization/SubscriptionRequirement.cs:61`**: service resolved with `GetRequiredService<>()` inside the auth handler |
+| What uses `SubscriptionAuthorizationHandler` | 6 of 9 | **`Program.cs:28`** DI registration (generic type argument) and two `new SubscriptionAuthorizationHandler(...)` constructions in tests |
+| Callers of `SubscriptionTierService.GetUserActiveTier()` | 5 of 6 | **`RequireTier.razor:40`**: `@code` block |
+| "What reads or writes the Subscriptions table" (free-text `query`) | Poor | Found the `DbSet` declaration only. Drifted into `design-language.md` ("Tables") and OpenXML; none of the 12 production usages |
+
+**What it did better than grep:**
+- Output is structured per method (`Profile.OnInitializedAsync() → …`), not per
+  line.
+- Each edge carries `EXTRACTED`/`INFERRED`.
+- No false positives from comments or similarly named identifiers.
+- `explain` is fast once you know the node name.
+
+**Day-1 reading:** the predicted blind spots are real, and they cluster exactly on
+the entitlement path: the `RequireTier` gate, the auth handler's
+service-locator call, and the DI registration. Graphify answers "who calls this
+method?" well for code-behind and services. It is not trustworthy for "is this
+complete?" questions about subscription or tier enforcement, which are the ones
+this repo most needs answered. Free-text `query` is not useful on this codebase
+without the LLM semantic pass.
+
+**Not yet tested:**
+- Criterion 4 (noise) beyond the above.
+- `path` queries.
+- Whether `GRAPH_REPORT.md` communities are a useful architecture view.
+- Agent integration (week 2, optional).
