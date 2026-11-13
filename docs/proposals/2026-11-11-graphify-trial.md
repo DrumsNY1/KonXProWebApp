@@ -1,9 +1,10 @@
-> **Status: Proposed — not authoritative.** This is a proposal, not a description
+> **Status: Rejected — not authoritative.** This is a proposal, not a description
 > of how the system works. `AGENTS.md` and the code win over anything here.
 >
-> Date: 2026-11-11 · Author: coding agent, for Reggie · Decision: pending
-> Trial: **in progress**, started 2026-11-11 on `chore/graphify-trial`. See
-> [Trial log](#trial-log) at the end.
+> Date: 2026-11-11 · Author: coding agent, for Reggie · **Decision: rejected
+> 2026-11-12** by Reggie, after day 2 of the trial. Graphify cannot see six of the
+> seven links that enforce subscription tiers. See [Decision](#decision-2026-11-12)
+> at the end.
 
 # Proposal: trial Graphify in KonXProWebApp
 
@@ -206,8 +207,56 @@ complete?" questions about subscription or tier enforcement, which are the ones
 this repo most needs answered. Free-text `query` is not useful on this codebase
 without the LLM semantic pass.
 
-**Not yet tested:**
+**Not tested** (the trial stopped on day 2; see below):
 - Criterion 4 (noise) beyond the above.
 - `path` queries.
 - Whether `GRAPH_REPORT.md` communities are a useful architecture view.
 - Agent integration (week 2, optional).
+
+### Day 2 — 2026-11-12: the entitlement path
+
+Every link that decides what a subscriber can see or call, checked against the
+graph. Ground truth comes from source; graph truth from `graph.json`.
+
+| # | Link | Where | In the graph? |
+|---|---|---|---|
+| 1 | Pages and API carry a tier policy | `BasicTier`/`MidTier`/`HighTier.razor` line 2, `PermitIntelApiController.cs:15` | **No.** None of the four policy names appear |
+| 2 | Policy name → `SubscriptionRequirement` | `Program.cs:42–45` (`AddPolicy`) | **No.** Joined by a string |
+| 3 | Requirement → handler | `Program.cs:28` (DI registration) | **No.** Generic type argument |
+| 4 | Handler → subscription lookup | `Authorization/SubscriptionRequirement.cs:61` | **No.** Service resolved with `GetRequiredService<>()` |
+| 5 | Lookup → `Subscriptions` table | `Services/PermitIntelService.cs:487–506` | Partial. Method present; free-text `query` found none of 12 production usages |
+| 6 | Component gate → tier service | `Components/Pages/PermitIntel/RequireTier.razor:40–41` | **No.** Calls are inside a `@code` block |
+| 7 | Tier views → visible columns | `Data/TierViewDefinitions.cs` | **No.** SQL inside C# strings |
+
+What the graph does get right are the ordinary callers of the tier and
+subscription services from `.razor.cs` pages, services and tests.
+
+**Side finding (not a Graphify issue):** nothing references
+`RequireTier.razor`: no page, component or test. Tiers are enforced only by the
+four `[Authorize(Policy = ...)]` attributes in link 1, although `AGENTS.md`
+describes `RequireTier` as "the component-level gate". Tracked separately.
+
+## Decision (2026-11-12)
+
+**Rejected.** The gaps follow from how this repo is built, not from sampling:
+- string policy names;
+- DI and service-locator resolution;
+- `.razor` `@code` blocks;
+- SQL held in strings.
+
+More trial days would not change the result. A tool that silently omits six of
+the seven links enforcing entitlements would make "is this complete?" answers
+look authoritative when they are not. That is worse than grep plus `AGENTS.md`,
+which at least do not imply completeness.
+
+**What stays:** the `.gitignore` entries, the four `graphify-out\**` `Remove`
+items in `KonXProWebApp.csproj` and `.graphifyignore` (all from #73). They are
+inert, and they stop a stray local graph from ever reaching publish output.
+
+**What goes:** the local install (portable `uv`, the uv-managed Python, the
+`graphify-venv`) and `graphify-out/`. All of it is gitignored, so removing it
+changes nothing in the repo.
+
+**When to revisit:** only if Graphify gains Razor `@code` extraction and
+DI/string-key resolution, or if the question changes to plain code navigation
+rather than entitlement completeness.
