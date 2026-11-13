@@ -362,7 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-<<<<<<< HEAD
 # Deployment archives
 publish.zip
 
@@ -386,3 +385,15 @@ logs/
 appsettings.Development.json
 
 _tools/secrets-backup/
+
+# ---------------------------------------------------------------------------
+# Graphify trial (docs/proposals/2026-11-11-graphify-trial.md)
+#
+# graphify-out/  generated knowledge graph and its SHA cache. Regenerable and
+#                local-only. Also excluded from the build in KonXProWebApp.csproj:
+#                the Web SDK's default Content glob includes **\*.json, which would
+#                otherwise copy graph.json and the cache into publish output.
+# .graphify_*    graphify's sidecar state files (labels, root marker).
+# ---------------------------------------------------------------------------
+graphify-out/
+.graphify_*

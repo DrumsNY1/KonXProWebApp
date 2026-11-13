@@ -46,6 +46,15 @@
     <Content Remove="logs\**" />
     <EmbeddedResource Remove="logs\**" />
     <None Remove="logs\**" />
+    <!--
+      Graphify trial output (docs/proposals/2026-11-11-graphify-trial.md). The Web
+      SDK's default Content glob includes **\*.json, so without these lines
+      graphify-out\graph.json and its cache would be copied into publish output.
+    -->
+    <Compile Remove="graphify-out\**" />
+    <Content Remove="graphify-out\**" />
+    <EmbeddedResource Remove="graphify-out\**" />
+    <None Remove="graphify-out\**" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="KonXProWebApp.Integration.Tests" />
